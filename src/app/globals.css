@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .text-gradient-stakelab {
+    background: linear-gradient(135deg, #ff0044 0%, #fe780b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .btn-stakelab {
+    background: linear-gradient(135deg, #ff0044 0%, #fe780b 100%);
+    color: #ffffff;
+    transition: all 0.2s ease-in-out;
+  }
+  .btn-stakelab:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+  }
+}
+
+/* Chrome autofill background override for dark input boxes */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #0c1424 inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
