@@ -18,12 +18,14 @@ export default function AdminLoginPage() {
   const [keepMeLoggedIn, setKeepMeLoggedIn] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [captchaToken, setCaptchaToken] = useState('');
+  const [errors, setErrors] = useState({});
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({});
 
     if (!captchaToken) {
-      toast.error('Please verify the reCAPTCHA checkbox before proceeding.');
+      setErrors({ captcha: 'Please verify the reCAPTCHA checkbox before proceeding.' });
       return;
     }
 
@@ -32,12 +34,12 @@ export default function AdminLoginPage() {
     try {
       const res = await login(email, password);
       if (res && !res.success) {
-        toast.error(res.message || 'Invalid admin credentials');
+        setErrors({ form: res.message || 'Invalid admin credentials' });
       } else {
         toast.success('Admin login successful!');
       }
     } catch (err) {
-      toast.error(err.message || 'Admin login failed. Please try again.');
+      setErrors({ form: err.message || 'Admin login failed. Please try again.' });
     } finally {
       setSubmitting(false);
     }
@@ -60,6 +62,11 @@ export default function AdminLoginPage() {
               </p>
             </div>
 
+            {/* General Form Error */}
+            {errors.form && (
+              <p className="mb-4 text-red-400 text-xs font-medium">{errors.form}</p>
+            )}
+
             {/* Login Form */}
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Username / Email Field */}
@@ -71,7 +78,10 @@ export default function AdminLoginPage() {
                   type="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (errors.form) setErrors({});
+                  }}
                   placeholder="admin@stakelab.io"
                   className="w-full h-12 bg-[#0c1424] border-0 outline-none focus:outline-none rounded-md px-4 text-white placeholder-slate-500 font-sans text-sm focus:ring-1 focus:ring-[#ff0044] transition-all shadow-inner"
                 />
@@ -87,7 +97,10 @@ export default function AdminLoginPage() {
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (errors.form) setErrors({});
+                    }}
                     placeholder="Enter admin password"
                     className="w-full h-12 bg-[#0c1424] border-0 outline-none focus:outline-none rounded-md px-4 pr-12 text-white placeholder-slate-500 font-sans text-sm focus:ring-1 focus:ring-[#ff0044] transition-all shadow-inner"
                   />
@@ -108,16 +121,14 @@ export default function AdminLoginPage() {
                     type="checkbox"
                     checked={keepMeLoggedIn}
                     onChange={(e) => setKeepMeLoggedIn(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-700 bg-[#0c1424] text-[#ff0044] focus:ring-0 focus:ring-offset-0 transition-colors cursor-pointer"
+                    className="w-4 h-4 rounded border-[#1c2844] bg-[#0c1424] text-[#ff0044] focus:ring-0 accent-[#ff0044] cursor-pointer"
                   />
-                  <span className="text-xs text-slate-300 group-hover:text-white font-medium transition-colors">
-                    Keep me logged in
-                  </span>
+                  <span className="text-xs text-slate-300 group-hover:text-white transition-colors">Keep me logged in</span>
                 </label>
 
                 <Link
                   href="/admin/forgot-password"
-                  className="text-xs text-[#ff0044] hover:underline font-semibold transition-colors"
+                  className="text-xs text-[#ff0044] hover:underline font-bold"
                 >
                   Forgot Password?
                 </Link>
@@ -125,7 +136,15 @@ export default function AdminLoginPage() {
 
               {/* Official Google reCAPTCHA v2 Component */}
               <div className="pt-1">
-                <GoogleReCaptcha onVerify={setCaptchaToken} />
+                <GoogleReCaptcha
+                  onVerify={(token) => {
+                    setCaptchaToken(token);
+                    if (errors.captcha) setErrors((prev) => ({ ...prev, captcha: '' }));
+                  }}
+                />
+                {errors.captcha && (
+                  <p className="text-red-400 text-xs mt-1.5 font-medium">{errors.captcha}</p>
+                )}
               </div>
 
               {/* Submit Button */}
