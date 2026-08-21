@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { Eye, EyeOff } from 'lucide-react';
+import { toast } from 'sonner';
 import GoogleReCaptcha from '../../../components/GoogleReCaptcha';
 
 export default function AdminLoginPage() {
@@ -16,15 +17,13 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [keepMeLoggedIn, setKeepMeLoggedIn] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
   const [captchaToken, setCaptchaToken] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage('');
 
     if (!captchaToken) {
-      setErrorMessage('Please verify the reCAPTCHA checkbox before proceeding.');
+      toast.error('Please verify the reCAPTCHA checkbox before proceeding.');
       return;
     }
 
@@ -33,10 +32,12 @@ export default function AdminLoginPage() {
     try {
       const res = await login(email, password);
       if (res && !res.success) {
-        setErrorMessage(res.message || 'Invalid admin credentials');
+        toast.error(res.message || 'Invalid admin credentials');
+      } else {
+        toast.success('Admin login successful!');
       }
     } catch (err) {
-      setErrorMessage(err.message || 'Admin login failed. Please try again.');
+      toast.error(err.message || 'Admin login failed. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -58,13 +59,6 @@ export default function AdminLoginPage() {
                 Welcome back! Please enter your admin credentials.
               </p>
             </div>
-
-            {/* Error Message Notice */}
-            {errorMessage && (
-              <div className="mb-6 p-3.5 rounded-md bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold">
-                {errorMessage}
-              </div>
-            )}
 
             {/* Login Form */}
             <form onSubmit={handleSubmit} className="space-y-5">

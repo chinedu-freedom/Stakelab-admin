@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
+import { toast } from 'sonner';
 import GoogleReCaptcha from '../../../components/GoogleReCaptcha';
 
 export default function AdminForgotPasswordPage() {
@@ -11,17 +12,13 @@ export default function AdminForgotPasswordPage() {
   const { requestPasswordReset } = useAdminAuth();
   const [email, setEmail] = useState('admin@stakelab.io');
   const [submitting, setSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
   const [captchaToken, setCaptchaToken] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage('');
-    setSuccessMessage('');
 
     if (!captchaToken) {
-      setErrorMessage('Please verify the reCAPTCHA checkbox before proceeding.');
+      toast.error('Please verify the reCAPTCHA checkbox before proceeding.');
       return;
     }
 
@@ -30,15 +27,15 @@ export default function AdminForgotPasswordPage() {
     try {
       const res = await requestPasswordReset(email);
       if (res && res.success) {
-        setSuccessMessage('Password reset OTP has been sent to admin email.');
+        toast.success('Password reset OTP has been sent to admin email.');
         setTimeout(() => {
           router.push(`/admin/verify-otp?email=${encodeURIComponent(email)}`);
         }, 1000);
       } else {
-        setErrorMessage(res?.message || 'Something went wrong. Please try again.');
+        toast.error(res?.message || 'Something went wrong. Please try again.');
       }
     } catch (err) {
-      setErrorMessage(err.message || 'Something went wrong. Please try again.');
+      toast.error(err.message || 'Something went wrong. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -60,20 +57,6 @@ export default function AdminForgotPasswordPage() {
                 Enter your admin email to receive a 4-digit verification code.
               </p>
             </div>
-
-            {/* Success Message Notice */}
-            {successMessage && (
-              <div className="mb-6 p-3.5 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
-                {successMessage}
-              </div>
-            )}
-
-            {/* Error Message Notice */}
-            {errorMessage && (
-              <div className="mb-6 p-3.5 rounded-md bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold">
-                {errorMessage}
-              </div>
-            )}
 
             {/* Forgot Password Form */}
             <form onSubmit={handleSubmit} className="space-y-5">

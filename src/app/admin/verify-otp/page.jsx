@@ -4,6 +4,7 @@ import { useState, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
+import { toast } from 'sonner';
 import GoogleReCaptcha from '../../../components/GoogleReCaptcha';
 
 function AdminVerifyOtpContent() {
@@ -15,8 +16,6 @@ function AdminVerifyOtpContent() {
   const [email] = useState(emailParam);
   const [otp, setOtp] = useState(['', '', '', '']);
   const [submitting, setSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
   const [captchaToken, setCaptchaToken] = useState('');
   const inputRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
 
@@ -41,16 +40,15 @@ function AdminVerifyOtpContent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage('');
 
     if (!captchaToken) {
-      setErrorMessage('Please verify the reCAPTCHA checkbox before proceeding.');
+      toast.error('Please verify the reCAPTCHA checkbox before proceeding.');
       return;
     }
     const fullOtp = otp.join('');
 
     if (fullOtp.length < 4) {
-      setErrorMessage('Please enter the complete 4-digit code.');
+      toast.error('Please enter the complete 4-digit code.');
       return;
     }
 
@@ -58,26 +56,24 @@ function AdminVerifyOtpContent() {
     try {
       const res = await verifyOtp(email, fullOtp);
       if (res && res.success) {
-        setSuccessMessage('OTP verified successfully!');
+        toast.success('OTP verified successfully!');
         setTimeout(() => {
           router.push(`/admin/reset-password?email=${encodeURIComponent(email)}&otp=${encodeURIComponent(fullOtp)}`);
         }, 1000);
       } else {
-        setErrorMessage(res?.message || 'Invalid or expired OTP code.');
+        toast.error(res?.message || 'Invalid or expired OTP code.');
       }
     } catch (err) {
-      setErrorMessage(err.message || 'Invalid code. Please try again.');
+      toast.error(err.message || 'Invalid code. Please try again.');
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleResend = async () => {
-    setSuccessMessage('');
-    setErrorMessage('');
     const res = await requestPasswordReset(email);
     if (res && res.success) {
-      setSuccessMessage('A new 4-digit verification code has been sent to admin email.');
+      toast.success('A new 4-digit verification code has been sent to admin email.');
     }
   };
 
@@ -97,20 +93,6 @@ function AdminVerifyOtpContent() {
                 Enter the 4-digit code sent to your admin email.
               </p>
             </div>
-
-            {/* Success Message Notice */}
-            {successMessage && (
-              <div className="mb-6 p-3.5 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
-                {successMessage}
-              </div>
-            )}
-
-            {/* Error Message Notice */}
-            {errorMessage && (
-              <div className="mb-6 p-3.5 rounded-md bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold">
-                {errorMessage}
-              </div>
-            )}
 
             {/* OTP Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
