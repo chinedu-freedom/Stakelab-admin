@@ -126,188 +126,188 @@ export default function AdminSidebarLayout({ children }) {
   ];
 
   return (
-    <div className="h-screen overflow-hidden bg-[#f3f5f9] text-slate-800 font-sans flex flex-col">
-      {/* Top Header Navbar */}
-      <header className="h-16 bg-[#091630] text-white shrink-0 z-40 px-4 sm:px-6 flex items-center justify-between shadow-md">
-        {/* Left Side: Mobile Menu Button & Search Bar */}
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden p-2 text-slate-300 hover:text-white rounded-md focus:outline-none"
-          >
-            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-
-          {/* Search Box */}
-          <div className="relative hidden sm:block w-64">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search here.."
-              className="w-full bg-[#122347] border border-[#1e3463] rounded-md pl-9 pr-4 py-1.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
-            />
+    <div className="h-screen overflow-hidden bg-[#f3f5f9] text-slate-800 font-sans flex">
+      {/* Left Sidebar Drawer (Full Height Top-to-Bottom) */}
+      <aside
+        className={`fixed lg:static inset-y-0 left-0 z-30 w-64 bg-[#091630] border-r border-[#142343] text-slate-300 transform transition-transform duration-300 ease-in-out flex flex-col justify-between h-full overflow-y-auto no-scrollbar shrink-0 ${
+          mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}
+      >
+        <div>
+          {/* Top Sidebar Brand Logo */}
+          <div className="h-16 px-6 flex items-center border-b border-[#142343]">
+            <Link href="/admin/dashboard" className="flex items-center space-x-2">
+              <div className="w-8 h-8 rounded bg-gradient-to-r from-[#ff0044] to-[#fe780b] flex items-center justify-center font-righteous text-white font-bold text-lg shadow-md">
+                S
+              </div>
+              <span className="text-xl font-extrabold text-white font-righteous tracking-wide">
+                Stake<span className="text-gradient-stakelab">Lab</span>
+              </span>
+            </Link>
           </div>
-        </div>
 
-        {/* Right Side: Header Quick Icons & Admin User Profile */}
-        <div className="flex items-center space-x-4">
-          {/* Header Action Icons */}
-          <button className="text-slate-300 hover:text-white transition-colors" title="Language / Globe">
-            <Globe className="w-4 h-4" />
-          </button>
+          {/* Sidebar Navigation Items */}
+          <nav className="p-3 space-y-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.path;
+              const hasSubmenu = Boolean(item.submenu);
+              const isSubOpen = openSubmenu === item.label;
 
-          <button className="relative text-slate-300 hover:text-white transition-colors" title="Notifications">
-            <Bell className="w-4 h-4" />
-            <span className="absolute -top-1.5 -right-1.5 bg-[#ff0044] text-white text-[9px] font-bold px-1 py-0.2 rounded-full">
-              9+
-            </span>
-          </button>
-
-          <button className="text-slate-300 hover:text-white transition-colors" title="Tools">
-            <Wrench className="w-4 h-4" />
-          </button>
-
-          {/* Admin Profile Pill Dropdown */}
-          <div
-            onClick={logout}
-            className="flex items-center space-x-2 bg-[#122347] hover:bg-[#1a305e] px-3 py-1.5 rounded-full border border-[#1e3463] cursor-pointer transition-all"
-            title="Click to Log Out"
-          >
-            <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs">
-              <UserCheck className="w-3.5 h-3.5" />
-            </div>
-            <span className="text-xs font-bold text-white">admin</span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-          </div>
-        </div>
-      </header>
-
-      {/* Main Split Layout: Left Sidebar & Content Canvas */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Sidebar Drawer */}
-        <aside
-          className={`fixed lg:static inset-y-0 left-0 z-30 w-64 bg-[#091630] border-r border-[#142343] text-slate-300 transform transition-transform duration-300 ease-in-out flex flex-col justify-between h-full overflow-y-auto no-scrollbar shrink-0 ${
-            mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-          }`}
-        >
-          <div>
-            {/* Top Sidebar Brand Logo */}
-            <div className="h-16 px-6 flex items-center border-b border-[#142343]">
-              <Link href="/admin/dashboard" className="flex items-center space-x-2">
-                <div className="w-8 h-8 rounded bg-gradient-to-r from-[#ff0044] to-[#fe780b] flex items-center justify-center font-righteous text-white font-bold text-lg shadow-md">
-                  S
-                </div>
-                <span className="text-xl font-extrabold text-white font-righteous tracking-wide">
-                  Stake<span className="text-gradient-stakelab">Lab</span>
-                </span>
-              </Link>
-            </div>
-
-            {/* Sidebar Navigation Items */}
-            <nav className="p-3 space-y-1">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = pathname === item.path;
-                const hasSubmenu = Boolean(item.submenu);
-                const isSubOpen = openSubmenu === item.label;
-
-                if (hasSubmenu) {
-                  return (
-                    <div key={item.label} className="space-y-1">
-                      <button
-                        onClick={() => toggleSubmenu(item.label)}
-                        className={`w-full px-3.5 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between transition-all ${
-                          pathname.startsWith(item.path || '')
-                            ? 'text-white bg-[#122347]'
-                            : 'text-slate-300 hover:text-white hover:bg-[#122347]'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <Icon className="w-4 h-4 text-slate-400" />
-                          <span>{item.label}</span>
-                          {item.badge && (
-                            <span className="w-5 h-5 rounded-md bg-[#ffaa00] text-slate-900 font-black text-[11px] flex items-center justify-center shadow-sm ml-auto">
-                              {item.badge}
-                            </span>
-                          )}
-                        </div>
-                        <ChevronDown
-                          className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ml-2 ${
-                            isSubOpen ? 'rotate-180' : ''
-                          }`}
-                        />
-                      </button>
-
-                      {/* Submenu Dropdown Items */}
-                      {isSubOpen && (
-                        <div className="pl-6 pr-2 space-y-1 py-1">
-                          {item.submenu.map((sub) => {
-                            const isSubActive = pathname === sub.path;
-                            return (
-                              <Link
-                                key={sub.path}
-                                href={sub.path}
-                                onClick={() => setMobileOpen(false)}
-                                className={`flex items-center justify-between py-2 px-3.5 rounded-lg text-xs font-medium transition-all ${
-                                  isSubActive
-                                    ? 'bg-[#5b5bf5] text-white font-bold shadow-md'
-                                    : 'text-slate-400 hover:text-white hover:bg-[#122347]'
-                                }`}
-                              >
-                                <div className="flex items-center gap-2.5">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
-                                  <span>{sub.label}</span>
-                                </div>
-                                {sub.countBadge && (
-                                  <span className="bg-[#38bdf8] text-white text-[11px] font-extrabold px-2 py-0.5 rounded shadow-sm">
-                                    {sub.countBadge}
-                                  </span>
-                                )}
-                              </Link>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-
+              if (hasSubmenu) {
                 return (
-                  <Link
-                    key={item.label}
-                    href={item.path}
-                    onClick={() => setMobileOpen(false)}
-                    className={`px-3.5 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-3 transition-all ${
-                      isActive
-                        ? 'bg-[#5b5bf5] text-white shadow-md font-bold'
-                        : 'text-slate-300 hover:text-white hover:bg-[#122347]'
-                    }`}
-                  >
-                    <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                    <span>{item.label}</span>
-                  </Link>
+                  <div key={item.label} className="space-y-1">
+                    <button
+                      onClick={() => toggleSubmenu(item.label)}
+                      className={`w-full px-3.5 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between transition-all ${
+                        pathname.startsWith(item.path || '')
+                          ? 'text-white bg-[#122347]'
+                          : 'text-slate-300 hover:text-white hover:bg-[#122347]'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon className="w-4 h-4 text-slate-400" />
+                        <span>{item.label}</span>
+                        {item.badge && (
+                          <span className="w-5 h-5 rounded-md bg-[#ffaa00] text-slate-900 font-black text-[11px] flex items-center justify-center shadow-sm ml-auto">
+                            {item.badge}
+                          </span>
+                        )}
+                      </div>
+                      <ChevronDown
+                        className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ml-2 ${
+                          isSubOpen ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </button>
+
+                    {/* Submenu Dropdown Items */}
+                    {isSubOpen && (
+                      <div className="pl-6 pr-2 space-y-1 py-1">
+                        {item.submenu.map((sub) => {
+                          const isSubActive = pathname === sub.path;
+                          return (
+                            <Link
+                              key={sub.path}
+                              href={sub.path}
+                              onClick={() => setMobileOpen(false)}
+                              className={`flex items-center justify-between py-2 px-3.5 rounded-lg text-xs font-medium transition-all ${
+                                isSubActive
+                                  ? 'bg-[#5b5bf5] text-white font-bold shadow-md'
+                                  : 'text-slate-400 hover:text-white hover:bg-[#122347]'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
+                                <span>{sub.label}</span>
+                              </div>
+                              {sub.countBadge && (
+                                <span className="bg-[#38bdf8] text-white text-[11px] font-extrabold px-2 py-0.5 rounded shadow-sm">
+                                  {sub.countBadge}
+                                </span>
+                              )}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 );
-              })}
-            </nav>
+              }
+
+              return (
+                <Link
+                  key={item.label}
+                  href={item.path}
+                  onClick={() => setMobileOpen(false)}
+                  className={`px-3.5 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-3 transition-all ${
+                    isActive
+                      ? 'bg-[#5b5bf5] text-white shadow-md font-bold'
+                      : 'text-slate-300 hover:text-white hover:bg-[#122347]'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Bottom Footer Label */}
+        <div className="p-4 border-t border-[#142343] text-center">
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+            STAKELAB V1.0.0
+          </span>
+        </div>
+      </aside>
+
+      {/* Backdrop overlay for mobile drawer */}
+      {mobileOpen && (
+        <div
+          onClick={() => setMobileOpen(false)}
+          className="fixed inset-0 bg-black/60 z-20 lg:hidden"
+        />
+      )}
+
+      {/* Right Main Column (Header + Canvas) */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
+        {/* Top Header Navbar (Joins Sidebar from the Right) */}
+        <header className="h-16 bg-[#091630] text-white border-b border-[#142343] shrink-0 z-20 px-4 sm:px-6 flex items-center justify-between shadow-md">
+          {/* Left Side: Mobile Menu Button & Search Bar */}
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="lg:hidden p-2 text-slate-300 hover:text-white rounded-md focus:outline-none"
+            >
+              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+
+            {/* Search Box */}
+            <div className="relative hidden sm:block w-64">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search here.."
+                className="w-full bg-[#122347] border border-[#1e3463] rounded-md pl-9 pr-4 py-1.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
+              />
+            </div>
           </div>
 
-          {/* Bottom Footer Label */}
-          <div className="p-4 border-t border-[#142343] text-center">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-              STAKELAB V2.0.1
-            </span>
+          {/* Right Side: Header Quick Icons & Admin User Profile */}
+          <div className="flex items-center space-x-4">
+            {/* Header Action Icons */}
+            <button className="text-slate-300 hover:text-white transition-colors" title="Language / Globe">
+              <Globe className="w-4 h-4" />
+            </button>
+
+            <button className="relative text-slate-300 hover:text-white transition-colors" title="Notifications">
+              <Bell className="w-4 h-4" />
+              <span className="absolute -top-1.5 -right-1.5 bg-[#ff0044] text-white text-[9px] font-bold px-1 py-0.2 rounded-full">
+                9+
+              </span>
+            </button>
+
+            <button className="text-slate-300 hover:text-white transition-colors" title="Tools">
+              <Wrench className="w-4 h-4" />
+            </button>
+
+            {/* Admin Profile Pill Dropdown */}
+            <div
+              onClick={logout}
+              className="flex items-center space-x-2 bg-[#122347] hover:bg-[#1a305e] px-3 py-1.5 rounded-full border border-[#1e3463] cursor-pointer transition-all"
+              title="Click to Log Out"
+            >
+              <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs">
+                <UserCheck className="w-3.5 h-3.5" />
+              </div>
+              <span className="text-xs font-bold text-white">admin</span>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            </div>
           </div>
-        </aside>
+        </header>
 
-        {/* Backdrop overlay for mobile drawer */}
-        {mobileOpen && (
-          <div
-            onClick={() => setMobileOpen(false)}
-            className="fixed inset-0 bg-black/60 z-20 lg:hidden"
-          />
-        )}
-
-        {/* Main Content Area */}
+        {/* Main Content Area (White Canvas Scrolls Independently with Hidden Scrollbar) */}
         <main className="flex-1 bg-[#f3f5f9] p-4 sm:p-6 lg:p-8 h-full overflow-y-auto no-scrollbar text-slate-800">
           {children}
         </main>
