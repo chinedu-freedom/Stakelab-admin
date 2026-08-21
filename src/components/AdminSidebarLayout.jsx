@@ -126,9 +126,9 @@ export default function AdminSidebarLayout({ children }) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f3f5f9] text-slate-800 font-sans flex flex-col">
+    <div className="h-screen overflow-hidden bg-[#f3f5f9] text-slate-800 font-sans flex flex-col">
       {/* Top Header Navbar */}
-      <header className="h-16 bg-[#091630] text-white sticky top-0 z-40 px-4 sm:px-6 flex items-center justify-between shadow-md">
+      <header className="h-16 bg-[#091630] text-white shrink-0 z-40 px-4 sm:px-6 flex items-center justify-between shadow-md">
         {/* Left Side: Mobile Menu Button & Search Bar */}
         <div className="flex items-center space-x-4">
           <button
@@ -186,7 +186,7 @@ export default function AdminSidebarLayout({ children }) {
       <div className="flex-1 flex overflow-hidden">
         {/* Left Sidebar Drawer */}
         <aside
-          className={`fixed lg:static inset-y-0 left-0 z-30 w-64 bg-[#091630] border-r border-[#142343] text-slate-300 transform transition-transform duration-300 ease-in-out flex flex-col justify-between overflow-y-auto no-scrollbar ${
+          className={`fixed lg:static inset-y-0 left-0 z-30 w-64 bg-[#091630] border-r border-[#142343] text-slate-300 transform transition-transform duration-300 ease-in-out flex flex-col justify-between h-full overflow-y-auto no-scrollbar shrink-0 ${
             mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
           }`}
         >
@@ -308,7 +308,7 @@ export default function AdminSidebarLayout({ children }) {
         )}
 
         {/* Main Content Area */}
-        <main className="flex-1 bg-[#f3f5f9] p-4 sm:p-6 lg:p-8 overflow-y-auto no-scrollbar text-slate-800">
+        <main className="flex-1 bg-[#f3f5f9] p-4 sm:p-6 lg:p-8 h-full overflow-y-auto no-scrollbar text-slate-800">
           {children}
         </main>
       </div>
