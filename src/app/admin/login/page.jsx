@@ -17,10 +17,17 @@ export default function AdminLoginPage() {
   const [keepMeLoggedIn, setKeepMeLoggedIn] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [captchaToken, setCaptchaToken] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
+
+    if (!captchaToken) {
+      setErrorMessage('Please verify the reCAPTCHA checkbox before proceeding.');
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -124,7 +131,7 @@ export default function AdminLoginPage() {
 
               {/* Official Google reCAPTCHA v2 Component */}
               <div className="pt-1">
-                <GoogleReCaptcha />
+                <GoogleReCaptcha onVerify={setCaptchaToken} />
               </div>
 
               {/* Submit Button */}
