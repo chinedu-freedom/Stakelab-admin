@@ -123,7 +123,7 @@ export default function AdminWhyChooseUsPage() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-xl font-bold text-slate-800 font-sans tracking-wide">
-              Why Choose StakeLab Management
+              Why Choose EverStake Management
             </h1>
             <p className="text-xs text-slate-500 font-sans mt-0.5">
               Customize feature cards, titles, descriptions, and icons shown on the homepage.

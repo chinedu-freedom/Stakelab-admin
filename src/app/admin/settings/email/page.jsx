@@ -12,8 +12,8 @@ export default function AdminEmailSettingsPage() {
     smtp_port: 587,
     smtp_user: '',
     smtp_pass: '',
-    from_email: 'noreply@stakelab.io',
-    from_name: 'Stakelab Protocol',
+    from_email: 'noreply@everstake.cx',
+    from_name: 'EverStake Protocol',
   });
   const [saving, setSaving] = useState(false);
 

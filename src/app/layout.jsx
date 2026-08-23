@@ -22,8 +22,8 @@ const righteous = Righteous({
 });
 
 export const metadata = {
-  title: 'Stakelab Control Portal - Admin Panel',
-  description: 'Manage users, staking pools, deposits, withdrawals, and email settings for Stakelab.',
+  title: 'EverStake Admin Control Portal',
+  description: 'Manage users, staking pools, deposits, withdrawals, and system settings for EverStake (everstake.cx).',
 };
 
 export default function RootLayout({ children }) {
