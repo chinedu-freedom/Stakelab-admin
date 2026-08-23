@@ -1,28 +1,59 @@
 'use client';
 
-import { useState, use } from 'react';
+import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AdminSidebarLayout from '../../../../../components/AdminSidebarLayout';
-import { Undo2, Plus, X } from 'lucide-react';
+import { Undo2, Plus, X, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import api from '../../../../../lib/api';
 
 export default function AdminEditPlanPage({ params }) {
-  const resolvedParams = use(params);
+  const resolvedParams = typeof params?.then === 'function' ? use(params) : (params || {});
   const router = useRouter();
-  const planId = resolvedParams?.id || '1';
+  const planId = resolvedParams?.id;
 
-  const [name, setName] = useState('Silver');
+  const [name, setName] = useState('');
   const [duration, setDuration] = useState('30');
   const [segments, setSegments] = useState([
-    { id: '1', minAmount: '10', maxAmount: '100', interest: '15' },
-    { id: '2', minAmount: '101', maxAmount: '250', interest: '30' },
-    { id: '3', minAmount: '251', maxAmount: '500', interest: '50' },
+    { id: '1', minAmount: '10', maxAmount: '100', interest: '1.5' },
   ]);
   const [isFixedDeposit, setIsFixedDeposit] = useState(true);
   const [capitalReturn, setCapitalReturn] = useState(true);
   const [isCompounding, setIsCompounding] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPlanData = async () => {
+      if (!planId) return;
+      try {
+        setLoading(true);
+        const res = await api.get('/staking/plans');
+        if (res.data?.success && Array.isArray(res.data.plans)) {
+          const target = res.data.plans.find((p) => p.id === planId);
+          if (target) {
+            setName(target.title || '');
+            setDuration(target.duration_days?.toString() || '30');
+            setCapitalReturn(target.capital_return !== false);
+            setSegments([
+              {
+                id: '1',
+                minAmount: target.min_amount?.toString() || '10',
+                maxAmount: target.max_amount?.toString() || '5000',
+                interest: target.daily_return_percent?.toString() || '1.5',
+              },
+            ]);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch plan details:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPlanData();
+  }, [planId]);
 
   const handleAddSegment = () => {
     setSegments([
@@ -52,12 +83,27 @@ export default function AdminEditPlanPage({ params }) {
       return;
     }
 
+    const minAmt = parseFloat(segments[0]?.minAmount || 10);
+    const maxAmt = parseFloat(segments[segments.length - 1]?.maxAmount || 5000);
+    const dailyReturn = parseFloat(segments[0]?.interest || 1.5);
+
     setSubmitting(true);
-    setTimeout(() => {
+    try {
+      await api.put(`/admin/staking-plans/${planId}`, {
+        title: name,
+        min_amount: minAmt,
+        max_amount: maxAmt,
+        daily_return_percent: dailyReturn,
+        duration_days: parseInt(duration),
+        capital_return: capitalReturn,
+      });
       toast.success(`Plan "${name}" updated successfully!`);
-      setSubmitting(false);
       router.push('/admin/staking-plans');
-    }, 800);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update Staking Plan');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -284,7 +330,13 @@ export default function AdminEditPlanPage({ params }) {
                 disabled={submitting}
                 className="w-full bg-[#5b5bf5] hover:bg-indigo-600 text-white font-bold py-3.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-md shadow-indigo-500/20 disabled:opacity-50"
               >
-                {submitting ? 'Submitting...' : 'Submit'}
+                {submitting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Submitting
+                  </span>
+                ) : (
+                  'Submit'
+                )}
               </button>
             </div>
           </form>

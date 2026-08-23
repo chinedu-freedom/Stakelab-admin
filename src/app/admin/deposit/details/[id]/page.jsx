@@ -7,7 +7,7 @@ import { Check, X, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminDepositDetailsPage({ params }) {
-  const resolvedParams = use(params);
+  const resolvedParams = typeof params?.then === 'function' ? use(params) : (params || {});
   const depositId = resolvedParams?.id || '48';
 
   const [depositData, setDepositData] = useState({

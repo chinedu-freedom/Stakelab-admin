@@ -1,119 +1,41 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import AdminSidebarLayout from '../../../../../components/AdminSidebarLayout';
 import Pagination from '../../../../../components/Pagination';
-
-const mockLoginsList = [
-  {
-    id: '1',
-    name: 'Chinedu Afamefuna',
-    username: '@Sparko',
-    loginAt: '2026-08-21 11:32 AM',
-    relativeTime: '1 hour ago',
-    ip: '2605:59c0:e85:6410:39bc:7a9c:149e:b399',
-    location: '',
-    browserOs: 'Chrome | Windows 10',
-  },
-  {
-    id: '2',
-    name: 'Chinedu Afamefuna',
-    username: '@Sparko',
-    loginAt: '2026-08-21 09:39 AM',
-    relativeTime: '3 hours ago',
-    ip: '102.90.81.60',
-    location: '',
-    browserOs: 'Chrome | Windows 10',
-  },
-  {
-    id: '3',
-    name: 'web serv',
-    username: '@webservice',
-    loginAt: '2026-08-11 10:44 AM',
-    relativeTime: '1 week ago',
-    ip: '105.127.15.90',
-    location: '',
-    browserOs: 'Handheld Browser | iPhone',
-  },
-  {
-    id: '4',
-    name: 'Esmaeil Jonas',
-    username: '@DaneshsabzIran',
-    loginAt: '2026-08-09 05:17 AM',
-    relativeTime: '1 week ago',
-    ip: '185.23.237.37',
-    location: '',
-    browserOs: 'Handheld Browser | Android',
-  },
-  {
-    id: '5',
-    name: 'Unknown Unk',
-    username: '@unknown',
-    loginAt: '2026-08-05 02:19 AM',
-    relativeTime: '2 weeks ago',
-    ip: '2402:3a80:d13:b469::80c9:4f0e',
-    location: '',
-    browserOs: 'Handheld Browser | Android',
-  },
-  {
-    id: '6',
-    name: 'Luis orellana',
-    username: '@properito',
-    loginAt: '2026-08-01 06:57 PM',
-    relativeTime: '2 weeks ago',
-    ip: '186.12.190.106',
-    location: '',
-    browserOs: 'Chrome | Windows 10',
-  },
-  {
-    id: '7',
-    name: 'Simon Smith',
-    username: '@Uarmadale',
-    loginAt: '2026-07-06 08:32 AM',
-    relativeTime: '1 month ago',
-    ip: '2001:8004:1106:9a68:ddcd:5180:6411:771a',
-    location: '',
-    browserOs: 'Handheld Browser | Android',
-  },
-  {
-    id: '8',
-    name: 'Md Rakib Abujar',
-    username: '@md111111',
-    loginAt: '2026-07-04 08:06 PM',
-    relativeTime: '1 month ago',
-    ip: '118.179.56.137',
-    location: '',
-    browserOs: 'Handheld Browser | Android',
-  },
-  {
-    id: '9',
-    name: 'Md Rakib Abujar',
-    username: '@md111111',
-    loginAt: '2026-07-04 12:29 PM',
-    relativeTime: '1 month ago',
-    ip: '202.86.220.249',
-    location: '',
-    browserOs: 'Handheld Browser | Android',
-  },
-];
+import api from '../../../../../lib/api';
 
 function UserLoginHistoryContent() {
   const searchParams = useSearchParams();
-  const userQuery = searchParams.get('search') || '';
-
-  const [search, setSearch] = useState(userQuery);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
   const [dateRange, setDateRange] = useState('');
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/admin/users');
+      if (res.data.success) {
+        setUsers(res.data.users || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch user login history:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Real-time Instant Filtering on every change (NO Blue Filter Button)
-  const filteredLogins = mockLoginsList.filter((log) => {
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const filteredLogins = users.filter((u) => {
     if (search.trim()) {
       const q = search.toLowerCase();
-      return (
-        log.name.toLowerCase().includes(q) ||
-        log.username.toLowerCase().includes(q) ||
-        log.ip.toLowerCase().includes(q)
-      );
+      const name = u.full_name || '';
+      const uname = u.username || '';
+      return name.toLowerCase().includes(q) || uname.toLowerCase().includes(q);
     }
     return true;
   });
@@ -171,38 +93,43 @@ function UserLoginHistoryContent() {
                     </td>
                   </tr>
                 ) : (
-                  filteredLogins.map((log) => (
-                    <tr key={log.id} className="hover:bg-slate-50/80 transition-colors">
-                      {/* User Column */}
-                      <td className="py-4 px-6">
-                        <div className="font-bold text-slate-800">{log.name}</div>
-                        <span className="text-[#5b5bf5] font-semibold text-[11px]">
-                          {log.username}
-                        </span>
-                      </td>
+                  filteredLogins.map((u) => {
+                    const fullName = u.full_name || u.username || 'User';
+                    const usernameStr = u.username ? `@${u.username}` : '@user';
+                    const loginDate = u.created_at ? new Date(u.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recently';
 
-                      {/* Login at Column */}
-                      <td className="py-4 px-6">
-                        <div className="font-medium text-slate-800">{log.loginAt}</div>
-                        <div className="text-[11px] text-slate-400">{log.relativeTime}</div>
-                      </td>
+                    return (
+                      <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
+                        {/* User Column */}
+                        <td className="py-4 px-6">
+                          <div className="font-bold text-slate-800">{fullName}</div>
+                          <span className="text-[#5b5bf5] font-semibold text-[11px]">
+                            {usernameStr}
+                          </span>
+                        </td>
 
-                      {/* IP Column (Bold Blue IP Text) */}
-                      <td className="py-4 px-6 text-center font-bold text-[#5b5bf5] font-mono">
-                        {log.ip}
-                      </td>
+                        {/* Login at Column */}
+                        <td className="py-4 px-6">
+                          <div className="font-medium text-slate-800">{loginDate}</div>
+                        </td>
 
-                      {/* Location Column */}
-                      <td className="py-4 px-6 text-center text-slate-500 font-medium">
-                        {log.location || '-'}
-                      </td>
+                        {/* IP Column */}
+                        <td className="py-4 px-6 text-center font-bold text-[#5b5bf5] font-mono">
+                          127.0.0.1
+                        </td>
 
-                      {/* Browser | OS Column */}
-                      <td className="py-4 px-6 text-right font-medium text-slate-600">
-                        {log.browserOs}
-                      </td>
-                    </tr>
-                  ))
+                        {/* Location Column */}
+                        <td className="py-4 px-6 text-center text-slate-500 font-medium">
+                          {u.country || 'Localhost'}
+                        </td>
+
+                        {/* Browser | OS Column */}
+                        <td className="py-4 px-6 text-right font-medium text-slate-600">
+                          Chrome | Windows 10
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -211,8 +138,8 @@ function UserLoginHistoryContent() {
           {/* Universal Pagination Utility Footer */}
           <Pagination
             currentPage={1}
-            totalPages={6}
-            totalResults={84}
+            totalPages={Math.max(1, Math.ceil(filteredLogins.length / 15))}
+            totalResults={filteredLogins.length}
             pageSize={15}
             onPageChange={(page) => console.log('Page:', page)}
           />

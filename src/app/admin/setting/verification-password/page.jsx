@@ -2,19 +2,21 @@
 
 import { useState } from 'react';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
-import { Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { Eye, EyeOff, ShieldCheck, Loader2, Save } from 'lucide-react';
 import { toast } from 'sonner';
+import api from '../../../../lib/api';
 
 export default function AdminVerificationPasswordPage() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!currentPassword) {
@@ -30,15 +32,25 @@ export default function AdminVerificationPasswordPage() {
       return;
     }
 
-    toast.success('Verification security password updated successfully!');
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
+    try {
+      setSubmitting(true);
+      const res = await api.post('/admin/verification-password', { currentPassword, newPassword });
+      if (res.data && res.data.success) {
+        toast.success(res.data.message || 'Verification security password updated successfully!');
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update verification password');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <AdminSidebarLayout>
-      <div className="space-y-6 max-w-4xl mx-auto">
+      <div className="space-y-6 max-w-4xl mx-auto font-sans">
         {/* Page Header Title */}
         <h1 className="text-xl font-bold text-slate-800 font-sans tracking-wide flex items-center gap-2">
           <ShieldCheck className="w-5 h-5 text-[#5b5bf5]" /> Verification Password
@@ -127,9 +139,10 @@ export default function AdminVerificationPasswordPage() {
             <div className="pt-2">
               <button
                 type="submit"
-                className="w-full bg-[#5b5bf5] hover:bg-indigo-600 text-white font-bold py-3.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-md shadow-indigo-500/20 cursor-pointer"
+                disabled={submitting}
+                className="w-full bg-[#5b5bf5] hover:bg-indigo-600 text-white font-bold py-3.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-md shadow-indigo-500/20 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                Submit
+                {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Submit
               </button>
             </div>
           </form>

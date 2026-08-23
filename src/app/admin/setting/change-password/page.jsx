@@ -2,19 +2,21 @@
 
 import { useState } from 'react';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
-import { Lock, Eye, EyeOff } from 'lucide-react';
+import { Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import api from '../../../../lib/api';
 
 export default function AdminChangePasswordPage() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!currentPassword) {
@@ -30,10 +32,20 @@ export default function AdminChangePasswordPage() {
       return;
     }
 
-    toast.success('Admin password updated successfully!');
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
+    try {
+      setSubmitting(true);
+      const res = await api.post('/admin/password', { currentPassword, newPassword });
+      if (res.data && res.data.success) {
+        toast.success(res.data.message || 'Admin password updated successfully!');
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update admin password');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (

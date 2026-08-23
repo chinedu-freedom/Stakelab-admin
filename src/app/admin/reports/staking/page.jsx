@@ -1,107 +1,56 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
 import Pagination from '../../../../components/Pagination';
 import { ChevronDown } from 'lucide-react';
-
-const mockStakingLogsList = [
-  {
-    id: '1',
-    user: 'baba Name',
-    username: '@username',
-    plan: 'Silver',
-    amount: '1,000.00 USDT',
-    interest: '15.00 %',
-    totalReturn: '1,150.00 USDT',
-    startDate: '31 March, 2026',
-    startRelative: '4 months ago',
-    matureDate: '30 April, 2026',
-    status: 'Mature',
-  },
-  {
-    id: '2',
-    user: 'Test test',
-    username: '@testingmailinator',
-    plan: 'Silver',
-    amount: '500.00 USDT',
-    interest: '30.00 %',
-    totalReturn: '650.00 USDT',
-    startDate: '29 January, 2026',
-    startRelative: '6 months ago',
-    matureDate: '28 February, 2026',
-    status: 'Mature',
-  },
-  {
-    id: '3',
-    user: 'JADIEL DE SOUZA',
-    username: '@master',
-    plan: 'Silver',
-    amount: '500.00 USDT',
-    interest: '15.00 %',
-    totalReturn: '575.00 USDT',
-    startDate: '15 December, 2025',
-    startRelative: '8 months ago',
-    matureDate: '14 January, 2026',
-    status: 'Mature',
-  },
-  {
-    id: '4',
-    user: 'baba Name',
-    username: '@username',
-    plan: 'Silver',
-    amount: '1,000.00 USDT',
-    interest: '30.00 %',
-    totalReturn: '1,300.00 USDT',
-    startDate: '19 October, 2025',
-    startRelative: '10 months ago',
-    matureDate: '18 November, 2025',
-    status: 'Mature',
-  },
-  {
-    id: '5',
-    user: 'JADIEL DE SOUZA',
-    username: '@master',
-    plan: 'Silver',
-    amount: '100.00 USDT',
-    interest: '15.00 %',
-    totalReturn: '115.00 USDT',
-    startDate: '25 July, 2025',
-    startRelative: '1 year ago',
-    matureDate: '24 August, 2025',
-    status: 'Mature',
-  },
-  {
-    id: '6',
-    user: 'baba Name',
-    username: '@username',
-    plan: 'Golden',
-    amount: '2,000.00 USDT',
-    interest: '20.00 %',
-    totalReturn: '2,400.00 USDT',
-    startDate: '28 June, 2025',
-    startRelative: '1 year ago',
-    matureDate: '26 September, 2025',
-    status: 'Mature',
-  },
-];
+import api from '../../../../lib/api';
 
 export default function AdminStakingHistoryPage() {
+  const [stakes, setStakes] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState('');
   const [selectedPlan, setSelectedPlan] = useState('Any');
   const [selectedStatus, setSelectedStatus] = useState('All');
 
-  // Real-time Instant Filtering (NO Blue Filter Button)
-  const filteredLogs = mockStakingLogsList.filter((log) => {
+  const fetchStakes = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/admin/staking-history');
+      if (res.data && res.data.success) {
+        setStakes(res.data.stakes || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch admin staking history:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStakes();
+  }, []);
+
+  // Real-time Instant Filtering
+  const filteredStakes = stakes.filter((s) => {
     if (username.trim()) {
       const q = username.toLowerCase();
-      if (!log.user.toLowerCase().includes(q) && !log.username.toLowerCase().includes(q)) {
+      const uName = s.user?.full_name || '';
+      const uHandle = s.user?.username || '';
+      if (!uName.toLowerCase().includes(q) && !uHandle.toLowerCase().includes(q)) {
         return false;
       }
     }
 
-    if (selectedPlan !== 'Any' && log.plan !== selectedPlan) return false;
-    if (selectedStatus !== 'All' && log.status !== selectedStatus) return false;
+    if (selectedPlan !== 'Any') {
+      const planName = s.plan?.name || '';
+      if (planName.toLowerCase() !== selectedPlan.toLowerCase()) return false;
+    }
+
+    if (selectedStatus !== 'All') {
+      const statusText = s.status || '';
+      if (statusText.toLowerCase() !== selectedStatus.toLowerCase()) return false;
+    }
 
     return true;
   });
@@ -202,64 +151,80 @@ export default function AdminStakingHistoryPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs text-slate-700 font-sans">
-                {filteredLogs.length === 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan={7} className="py-12 text-center text-slate-400 font-semibold">
+                      Loading staking records...
+                    </td>
+                  </tr>
+                ) : filteredStakes.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="py-12 text-center text-slate-400 font-semibold">
                       No staking records found
                     </td>
                   </tr>
                 ) : (
-                  filteredLogs.map((log) => (
-                    <tr key={log.id} className="hover:bg-slate-50/80 transition-colors">
-                      {/* User Column */}
-                      <td className="py-4 px-6">
-                        <div className="font-bold text-slate-800">{log.user}</div>
-                        <span className="text-[#5b5bf5] font-semibold text-[11px]">
-                          {log.username}
-                        </span>
-                      </td>
+                  filteredStakes.map((log) => {
+                    const uName = log.user?.full_name || log.user?.username || 'User';
+                    const uHandle = log.user?.username ? `@${log.user.username}` : '';
+                    const planName = log.plan?.name || 'Staking Plan';
+                    const amt = parseFloat(log.amount || 0);
+                    const intRate = parseFloat(log.interest_rate || 0);
+                    const totalRet = parseFloat(log.total_return || amt * (1 + intRate / 100));
+                    const startDateStr = log.created_at ? new Date(log.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recently';
+                    const endDateStr = log.end_date ? new Date(log.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Pending';
 
-                      {/* Plan Column */}
-                      <td className="py-4 px-6 font-bold text-slate-800">{log.plan}</td>
+                    return (
+                      <tr key={log.id} className="hover:bg-slate-50/80 transition-colors">
+                        {/* User Column */}
+                        <td className="py-4 px-6">
+                          <div className="font-bold text-slate-800">{uName}</div>
+                          <span className="text-[#5b5bf5] font-semibold text-[11px]">
+                            {uHandle}
+                          </span>
+                        </td>
 
-                      {/* Interest Column */}
-                      <td className="py-4 px-6">
-                        <div className="font-mono text-slate-800">{log.amount}</div>
-                        <div className="font-bold text-emerald-600 text-[11px]">{log.interest}</div>
-                      </td>
+                        {/* Plan Column */}
+                        <td className="py-4 px-6 font-bold text-slate-800">{planName}</td>
 
-                      {/* Total Return Column */}
-                      <td className="py-4 px-6 font-bold text-slate-900 font-righteous">
-                        {log.totalReturn}
-                      </td>
+                        {/* Interest Column */}
+                        <td className="py-4 px-6">
+                          <div className="font-mono text-slate-800">${amt.toFixed(2)} USDT</div>
+                          <div className="font-bold text-emerald-600 text-[11px]">{intRate.toFixed(2)}%</div>
+                        </td>
 
-                      {/* Start Date Column */}
-                      <td className="py-4 px-6">
-                        <div className="font-medium text-slate-800">{log.startDate}</div>
-                        <div className="text-[11px] text-slate-400">{log.startRelative}</div>
-                      </td>
+                        {/* Total Return Column */}
+                        <td className="py-4 px-6 font-bold text-slate-900 font-righteous">
+                          ${totalRet.toFixed(2)} USDT
+                        </td>
 
-                      {/* Mature Date Column */}
-                      <td className="py-4 px-6 font-medium text-slate-800">
-                        {log.matureDate}
-                      </td>
+                        {/* Start Date Column */}
+                        <td className="py-4 px-6">
+                          <div className="font-medium text-slate-800">{startDateStr}</div>
+                        </td>
 
-                      {/* Status Column */}
-                      <td className="py-4 px-6 text-center">
-                        <span
-                          className={`px-3.5 py-1 rounded-full text-[11px] font-bold border inline-block ${
-                            log.status === 'Mature'
-                              ? 'bg-emerald-50 text-emerald-600 border-emerald-300'
-                              : log.status === 'Running'
-                              ? 'bg-amber-50 text-amber-500 border-amber-300'
-                              : 'bg-indigo-50 text-indigo-600 border-indigo-300'
-                          }`}
-                        >
-                          {log.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
+                        {/* Mature Date Column */}
+                        <td className="py-4 px-6 font-medium text-slate-800">
+                          {endDateStr}
+                        </td>
+
+                        {/* Status Column */}
+                        <td className="py-4 px-6 text-center">
+                          <span
+                            className={`px-3.5 py-1 rounded-full text-[11px] font-bold border inline-block ${
+                              log.status === 'COMPLETED' || log.status === 'Mature'
+                                ? 'bg-emerald-50 text-emerald-600 border-emerald-300'
+                                : log.status === 'ACTIVE' || log.status === 'Running'
+                                ? 'bg-amber-50 text-amber-500 border-amber-300'
+                                : 'bg-indigo-50 text-indigo-600 border-indigo-300'
+                            }`}
+                          >
+                            {log.status}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -268,8 +233,8 @@ export default function AdminStakingHistoryPage() {
           {/* Universal Pagination Utility Footer */}
           <Pagination
             currentPage={1}
-            totalPages={3}
-            totalResults={42}
+            totalPages={Math.max(1, Math.ceil(filteredStakes.length / 15))}
+            totalResults={filteredStakes.length}
             pageSize={15}
             onPageChange={(page) => console.log('Page:', page)}
           />

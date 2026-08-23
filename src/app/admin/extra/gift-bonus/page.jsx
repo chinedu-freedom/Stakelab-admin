@@ -10,7 +10,7 @@ const mockGiftCodes = [
   {
     id: '1',
     code: 'STAKE2026BONUS',
-    amount: '₮25.00 USDT',
+    amount: '$25.00 USDT',
     maxClaims: 50,
     claimed: 34,
     status: 'Active',
@@ -19,7 +19,7 @@ const mockGiftCodes = [
   {
     id: '2',
     code: 'WELCOME50USDT',
-    amount: '₮50.00 USDT',
+    amount: '$50.00 USDT',
     maxClaims: 100,
     claimed: 100,
     status: 'Exhausted',
@@ -28,7 +28,7 @@ const mockGiftCodes = [
   {
     id: '3',
     code: 'VIPGIFT100',
-    amount: '₮100.00 USDT',
+    amount: '$100.00 USDT',
     maxClaims: 10,
     claimed: 4,
     status: 'Active',
@@ -57,7 +57,7 @@ export default function AdminGiftBonusPage() {
     const newGift = {
       id: String(Date.now()),
       code: code.toUpperCase(),
-      amount: `₮${parseFloat(amount).toFixed(2)} USDT`,
+      amount: `$${parseFloat(amount).toFixed(2)} USDT`,
       maxClaims: parseInt(maxClaims) || 1,
       claimed: 0,
       status: 'Active',
@@ -170,10 +170,16 @@ export default function AdminGiftBonusPage() {
           />
         </div>
 
-        {/* Generate Gift Code Modal */}
+        {/* Generate Gift Code Modal (Full Height & Click Outside to Close) */}
         {modalOpen && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl max-w-md w-full p-6 space-y-4 shadow-2xl relative animate-in fade-in zoom-in duration-200">
+          <div
+            onClick={() => setModalOpen(false)}
+            className="fixed inset-0 min-h-screen w-full bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-xl max-w-md w-full p-6 space-y-4 shadow-2xl relative animate-in fade-in zoom-in duration-200 my-auto"
+            >
               <div className="flex justify-between items-center pb-2 border-b border-slate-100">
                 <h3 className="text-base font-bold text-slate-800 font-sans">
                   Generate Gift Code Voucher

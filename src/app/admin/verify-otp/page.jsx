@@ -64,7 +64,7 @@ function AdminVerifyOtpContent() {
     try {
       const res = await verifyOtp(email, fullOtp);
       if (res && res.success) {
-        toast.success('OTP verified successfully!');
+        // toast.success('OTP verified successfully!'); // Handled in AdminAuthContext hook
         setTimeout(() => {
           router.push(`/admin/reset-password?email=${encodeURIComponent(email)}&otp=${encodeURIComponent(fullOtp)}`);
         }, 1000);
@@ -79,10 +79,8 @@ function AdminVerifyOtpContent() {
   };
 
   const handleResend = async () => {
-    const res = await requestPasswordReset(email);
-    if (res && res.success) {
-      toast.success('A new 4-digit verification code has been sent to admin email.');
-    }
+    await requestPasswordReset(email);
+    // toast.success(...) handled in AdminAuthContext hook
   };
 
   return (

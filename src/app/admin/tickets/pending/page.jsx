@@ -1,171 +1,46 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
 import Pagination from '../../../../components/Pagination';
 import { Search, Monitor } from 'lucide-react';
-
-const mockTicketsList = [
-  {
-    id: '847725',
-    subject: '[Ticket#847725] Hi',
-    submittedBy: 'Chinedu Afamefuna',
-    status: 'Customer Reply',
-    priority: 'High',
-    lastReply: '1 hour ago',
-  },
-  {
-    id: '93143917',
-    subject: '[Ticket#93143917] Stakelab',
-    submittedBy: 'DEEPAK KHAJURIA',
-    status: 'Open',
-    priority: 'Medium',
-    lastReply: '6 months ago',
-  },
-  {
-    id: '22559244',
-    subject: '[Ticket#22559244] I want to see staking opportun...',
-    submittedBy: 'mobarok Sojib',
-    status: 'Customer Reply',
-    priority: 'Medium',
-    lastReply: '11 months ago',
-  },
-  {
-    id: '809549',
-    subject: '[Ticket#809549] Deposit test',
-    submittedBy: 'Lily Zhou',
-    status: 'Open',
-    priority: 'High',
-    lastReply: '1 year ago',
-  },
-  {
-    id: '650851',
-    subject: '[Ticket#650851] scammer!',
-    submittedBy: 'hossein rastegar',
-    status: 'Open',
-    priority: 'High',
-    lastReply: '1 year ago',
-  },
-  {
-    id: '580357',
-    subject: '[Ticket#580357] dfgncgh',
-    submittedBy: 'lion heatrs',
-    status: 'Open',
-    priority: 'High',
-    lastReply: '1 year ago',
-  },
-  {
-    id: '11349643',
-    subject: '[Ticket#11349643] Blanditiis reprehend',
-    submittedBy: 'Rinah Sims',
-    status: 'Open',
-    priority: 'Medium',
-    lastReply: '1 year ago',
-  },
-  {
-    id: '42338465',
-    subject: '[Ticket#42338465] demo@site.com',
-    submittedBy: 'demo',
-    status: 'Customer Reply',
-    priority: 'Medium',
-    lastReply: '1 year ago',
-  },
-  {
-    id: '05342920',
-    subject: '[Ticket#05342920] 4',
-    submittedBy: 'Meherab',
-    status: 'Open',
-    priority: 'Medium',
-    lastReply: '1 year ago',
-  },
-  {
-    id: '438007',
-    subject: '[Ticket#438007] asdasd',
-    submittedBy: 'asd dsa',
-    status: 'Open',
-    priority: 'High',
-    lastReply: '2 years ago',
-  },
-  {
-    id: '86013201',
-    subject: '[Ticket#86013201] Payment gateway of the script',
-    submittedBy: 'EVANS OWUSU',
-    status: 'Open',
-    priority: 'High',
-    lastReply: '2 years ago',
-  },
-  {
-    id: '978833',
-    subject: '[Ticket#978833] Testing ticketd',
-    submittedBy: 'rolax cheruiyot',
-    status: 'Closed',
-    priority: 'High',
-    lastReply: '2 years ago',
-  },
-  {
-    id: '488503',
-    subject: "[Ticket#488503] Can't find the way to haven",
-    submittedBy: 'as as',
-    status: 'Closed',
-    priority: 'High',
-    lastReply: '2 years ago',
-  },
-  {
-    id: '50925798',
-    subject: '[Ticket#50925798] gffd',
-    submittedBy: 'Adam Smith',
-    status: 'Closed',
-    priority: 'Medium',
-    lastReply: '2 years ago',
-  },
-  {
-    id: '89120439',
-    subject: '[Ticket#89120439] gg',
-    submittedBy: 'Adam Smith',
-    status: 'Closed',
-    priority: 'Medium',
-    lastReply: '2 years ago',
-  },
-  {
-    id: '856650',
-    subject: '[Ticket#856650] asdd',
-    submittedBy: 'Bill Gates',
-    status: 'Answered',
-    priority: 'Medium',
-    lastReply: '2 years ago',
-  },
-  {
-    id: '14493426',
-    subject: '[Ticket#14493426] fkgjmf',
-    submittedBy: 'gagfd',
-    status: 'Answered',
-    priority: 'Medium',
-    lastReply: '2 years ago',
-  },
-  {
-    id: '59186909',
-    subject: '[Ticket#59186909] test',
-    submittedBy: 'ash',
-    status: 'Answered',
-    priority: 'Medium',
-    lastReply: '2 years ago',
-  },
-];
+import api from '../../../../lib/api';
 
 export default function AdminTicketsFilteredPage({
   title = 'Pending Tickets',
   statusFilter = 'Pending',
 }) {
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
-  const filteredTickets = mockTicketsList.filter((t) => {
-    if (statusFilter === 'Closed' && t.status !== 'Closed') return false;
-    if (statusFilter === 'Answered' && t.status !== 'Answered') return false;
-    if (statusFilter === 'Pending' && t.status === 'Closed') return false;
+  const fetchTickets = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/admin/tickets');
+      if (res.data.success) {
+        setTickets(res.data.tickets || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch admin tickets:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTickets();
+  }, []);
+
+  const filteredTickets = tickets.filter((t) => {
+    if (statusFilter === 'Closed' && t.status !== 'CLOSED') return false;
+    if (statusFilter === 'Answered' && t.status !== 'REPLIED') return false;
+    if (statusFilter === 'Pending' && t.status === 'CLOSED') return false;
     if (search.trim()) {
       const q = search.toLowerCase();
-      return t.subject.toLowerCase().includes(q) || t.submittedBy.toLowerCase().includes(q);
+      const userName = t.user?.full_name || t.user?.username || '';
+      return t.subject.toLowerCase().includes(q) || userName.toLowerCase().includes(q) || t.ticket_id.toLowerCase().includes(q);
     }
     return true;
   });
@@ -217,66 +92,70 @@ export default function AdminTicketsFilteredPage({
                     </td>
                   </tr>
                 ) : (
-                  filteredTickets.map((t) => (
-                    <tr key={t.id} className="hover:bg-slate-50/80 transition-colors">
-                      {/* Subject Column */}
-                      <td className="py-4 px-6 font-bold text-[#5b5bf5]">
-                        <Link href={`/admin/ticket/view/${t.id}`} className="hover:underline">
-                          {t.subject}
-                        </Link>
-                      </td>
+                  filteredTickets.map((t) => {
+                    const ticketIdClean = t.ticket_id.replace('#', '');
+                    const userName = t.user?.full_name || t.user?.username || 'User';
+                    const lastReplyDate = t.updated_at ? new Date(t.updated_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recently';
 
-                      {/* Submitted By Column */}
-                      <td className="py-4 px-6 text-center font-bold text-[#5b5bf5]">
-                        {t.submittedBy}
-                      </td>
+                    return (
+                      <tr key={t.id} className="hover:bg-slate-50/80 transition-colors">
+                        {/* Subject Column */}
+                        <td className="py-4 px-6 font-bold text-[#5b5bf5]">
+                          <Link href={`/admin/ticket/view/${ticketIdClean}`} className="hover:underline">
+                            [{t.ticket_id}] {t.subject}
+                          </Link>
+                        </td>
 
-                      {/* Status Column (Customer Reply / Open / Answered / Closed) */}
-                      <td className="py-4 px-6 text-center">
-                        <span
-                          className={`px-3 py-0.5 rounded-full text-[11px] font-bold border inline-block ${
-                            t.status === 'Customer Reply'
-                              ? 'bg-amber-50 text-amber-500 border-amber-300'
-                              : t.status === 'Open'
-                              ? 'bg-emerald-50 text-emerald-500 border-emerald-300'
-                              : t.status === 'Answered'
-                              ? 'bg-indigo-50 text-indigo-500 border-indigo-300'
-                              : 'bg-red-50 text-red-500 border-red-300'
-                          }`}
-                        >
-                          {t.status}
-                        </span>
-                      </td>
+                        {/* Submitted By Column */}
+                        <td className="py-4 px-6 text-center font-bold text-[#5b5bf5]">
+                          {userName}
+                        </td>
 
-                      {/* Priority Column (High / Medium / Low) */}
-                      <td className="py-4 px-6 text-center">
-                        <span
-                          className={`px-3 py-0.5 rounded-full text-[11px] font-bold border inline-block ${
-                            t.priority === 'High'
-                              ? 'text-red-500 border-red-300 bg-red-50/40'
-                              : t.priority === 'Medium'
-                              ? 'text-amber-500 border-amber-300 bg-amber-50/40'
-                              : 'text-emerald-500 border-emerald-300 bg-emerald-50/40'
-                          }`}
-                        >
-                          {t.priority}
-                        </span>
-                      </td>
+                        {/* Status Column */}
+                        <td className="py-4 px-6 text-center">
+                          <span
+                            className={`px-3 py-0.5 rounded-full text-[11px] font-bold border inline-block ${
+                              t.status === 'OPEN'
+                                ? 'bg-emerald-50 text-emerald-500 border-emerald-300'
+                                : t.status === 'REPLIED'
+                                ? 'bg-indigo-50 text-indigo-500 border-indigo-300'
+                                : 'bg-red-50 text-red-500 border-red-300'
+                            }`}
+                          >
+                            {t.status}
+                          </span>
+                        </td>
 
-                      {/* Last Reply Column */}
-                      <td className="py-4 px-6 text-slate-500 font-medium">{t.lastReply}</td>
+                        {/* Priority Column */}
+                        <td className="py-4 px-6 text-center">
+                          <span
+                            className={`px-3 py-0.5 rounded-full text-[11px] font-bold border inline-block ${
+                              t.priority === 'High'
+                                ? 'text-red-500 border-red-300 bg-red-50/40'
+                                : t.priority === 'Medium'
+                                ? 'text-amber-500 border-amber-300 bg-amber-50/40'
+                                : 'text-emerald-500 border-emerald-300 bg-emerald-50/40'
+                            }`}
+                          >
+                            {t.priority}
+                          </span>
+                        </td>
 
-                      {/* Action Column */}
-                      <td className="py-4 px-6 text-right">
-                        <Link
-                          href={`/admin/ticket/view/${t.id}`}
-                          className="border border-indigo-500 text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded text-xs font-bold inline-flex items-center gap-1.5 transition-all shadow-sm"
-                        >
-                          <Monitor className="w-3.5 h-3.5" /> Details
-                        </Link>
-                      </td>
-                    </tr>
-                  ))
+                        {/* Last Reply Column */}
+                        <td className="py-4 px-6 text-slate-500 font-medium">{lastReplyDate}</td>
+
+                        {/* Action Column */}
+                        <td className="py-4 px-6 text-right">
+                          <Link
+                            href={`/admin/ticket/view/${ticketIdClean}`}
+                            className="border border-indigo-500 text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded text-xs font-bold inline-flex items-center gap-1.5 transition-all shadow-sm"
+                          >
+                            <Monitor className="w-3.5 h-3.5" /> Details
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -285,8 +164,8 @@ export default function AdminTicketsFilteredPage({
           {/* Pagination Utility Footer */}
           <Pagination
             currentPage={1}
-            totalPages={2}
-            totalResults={23}
+            totalPages={Math.max(1, Math.ceil(filteredTickets.length / 15))}
+            totalResults={filteredTickets.length}
             pageSize={15}
             onPageChange={(page) => console.log('Page:', page)}
           />

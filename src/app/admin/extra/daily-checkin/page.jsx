@@ -12,7 +12,7 @@ const mockCheckinLogs = [
     user: 'Simon Smith',
     username: '@Uarmadale',
     day: 'Day 1',
-    reward: '₮1.00 USDT',
+    reward: '$1.00 USDT',
     checkinTime: '2026-08-21 08:30 AM',
   },
   {
@@ -20,7 +20,7 @@ const mockCheckinLogs = [
     user: 'Daniel Swags',
     username: '@furqanmehar',
     day: 'Day 3',
-    reward: '₮3.00 USDT',
+    reward: '$3.00 USDT',
     checkinTime: '2026-08-21 07:15 AM',
   },
   {
@@ -28,7 +28,7 @@ const mockCheckinLogs = [
     user: 'Chinedu Afamefuna',
     username: '@Sparko',
     day: 'Day 7',
-    reward: '₮10.00 USDT',
+    reward: '$10.00 USDT',
     checkinTime: '2026-08-20 09:40 PM',
   },
 ];

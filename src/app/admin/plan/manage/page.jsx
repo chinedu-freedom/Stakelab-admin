@@ -4,8 +4,9 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
-import { Undo2, Plus, X } from 'lucide-react';
+import { Undo2, Plus, X, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import api from '../../../../lib/api';
 
 export default function AdminCreatePlanPage() {
   const router = useRouter();
@@ -47,12 +48,28 @@ export default function AdminCreatePlanPage() {
       return;
     }
 
+    const minAmt = parseFloat(segments[0]?.minAmount || 10);
+    const maxAmt = parseFloat(segments[segments.length - 1]?.maxAmount || 5000);
+    const dailyReturn = parseFloat(segments[0]?.interest || 0.1);
+
     setSubmitting(true);
-    setTimeout(() => {
+    try {
+      await api.post('/admin/staking-plans', {
+        title: name,
+        badge: 'ACTIVE',
+        min_amount: minAmt,
+        max_amount: maxAmt,
+        daily_return_percent: dailyReturn,
+        duration_days: parseInt(duration),
+        capital_return: capitalReturn,
+      });
       toast.success('Staking Plan created successfully!');
-      setSubmitting(false);
       router.push('/admin/staking-plans');
-    }, 800);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to create Staking Plan');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -279,7 +296,13 @@ export default function AdminCreatePlanPage() {
                 disabled={submitting}
                 className="w-full bg-[#5b5bf5] hover:bg-indigo-600 text-white font-bold py-3.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-md shadow-indigo-500/20 disabled:opacity-50"
               >
-                {submitting ? 'Submitting...' : 'Submit'}
+                {submitting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Submitting
+                  </span>
+                ) : (
+                  'Submit'
+                )}
               </button>
             </div>
           </form>

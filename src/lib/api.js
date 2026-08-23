@@ -13,7 +13,13 @@ export const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('stakelab_admin_token');
+      let token = localStorage.getItem('stakelab_admin_token');
+      if (!token && document.cookie) {
+        const match = document.cookie.split('; ').find(row => row.startsWith('stakelab_admin_token=') || row.startsWith('sec-admin-token='));
+        if (match) {
+          token = match.split('=')[1];
+        }
+      }
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }

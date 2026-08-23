@@ -36,7 +36,7 @@ export default function AdminLoginPage() {
       if (res && !res.success) {
         setErrors({ form: res.message || 'Invalid admin credentials' });
       } else {
-        toast.success('Admin login successful!');
+        // toast.success('Admin login successful!'); // Handled in AdminAuthContext hook
       }
     } catch (err) {
       setErrors({ form: err.message || 'Admin login failed. Please try again.' });

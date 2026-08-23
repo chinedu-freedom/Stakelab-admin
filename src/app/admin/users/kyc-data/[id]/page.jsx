@@ -7,7 +7,7 @@ import { FileText, Ban, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminKycDataPage({ params }) {
-  const resolvedParams = use(params);
+  const resolvedParams = typeof params?.then === 'function' ? use(params) : (params || {});
   const [kycStatus, setKycStatus] = useState('pending');
 
   const handleApprove = () => {

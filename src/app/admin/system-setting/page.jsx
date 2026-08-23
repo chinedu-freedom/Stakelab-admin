@@ -64,6 +64,12 @@ const systemSettingCards = [
     link: '/admin/setting/verification-password',
   },
   {
+    title: 'System Feature Modules',
+    description: 'Enable or disable Gamification features (Tasks, Spin Wheel, Daily Check-In, Gift Bonus).',
+    icon: Sliders,
+    link: '/admin/setting/system-features',
+  },
+  {
     title: 'Contact & Support Links',
     description: 'Configure official Telegram, WhatsApp, and community support links.',
     icon: Share2,

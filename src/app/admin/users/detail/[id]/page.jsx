@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, use } from 'react';
+import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import AdminSidebarLayout from '../../../../../components/AdminSidebarLayout';
+import api from '../../../../../lib/api';
 import {
   Wallet,
   Landmark,
@@ -17,30 +18,35 @@ import {
   ChevronDown,
   ChevronUp,
   X,
+  Loader2,
+  Eye,
+  EyeOff,
+  Key,
+  Lock,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { countries } from '../../../../../lib/countries';
 
 export default function AdminUserDetailPage({ params }) {
-  const resolvedParams = use(params);
-  const userId = resolvedParams?.id || '1460';
+  const resolvedParams = typeof params?.then === 'function' ? use(params) : (params || {});
+  const userId = resolvedParams?.id;
 
   const [userData, setUserData] = useState({
-    firstName: 'Chinedu',
-    lastName: 'Afamefuna',
-    username: 'Sparko',
-    email: '[Email is protected for the demo]',
-    dialCode: '+93',
-    mobile: '8158051119',
-    address: 'Edem Nru',
-    city: 'Enugu',
-    state: 'Enugu State',
-    zipCode: '410002',
-    country: 'Afghanistan',
-    mainBalance: '₮0.00',
-    walletBalanceUsdt: '₮0.00',
-    deposits: '₮0.00',
-    withdrawals: '₮0.00',
+    firstName: 'User',
+    lastName: '',
+    username: 'user',
+    email: '',
+    dialCode: '+1',
+    mobile: '',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: 'United States',
+    mainBalance: '$0.00',
+    walletBalanceUsdt: '$0.00',
+    deposits: '$0.00',
+    withdrawals: '$0.00',
     transactions: '0',
     stakings: '0',
     emailVerified: true,
@@ -49,6 +55,56 @@ export default function AdminUserDetailPage({ params }) {
     kycVerified: true,
     banned: false,
   });
+
+  const [loading, setLoading] = useState(true);
+
+  const fetchUserDetail = async () => {
+    if (!userId) return;
+    try {
+      setLoading(true);
+      const res = await api.get(`/admin/users/${userId}`);
+      if (res.data.success && res.data.user) {
+        const u = res.data.user;
+        const nameParts = (u.full_name || '').split(' ');
+        const fName = nameParts[0] || 'User';
+        const lName = nameParts.slice(1).join(' ') || '';
+
+        setUserData({
+          id: u.id,
+          firstName: fName,
+          lastName: lName,
+          username: u.username || 'user',
+          email: u.email || '',
+          dialCode: '+1',
+          mobile: u.mobile || '',
+          address: u.address || '',
+          city: u.city || '',
+          state: u.state || '',
+          zipCode: u.zip_code || '',
+          country: u.country || 'United States',
+          mainBalance: `$${parseFloat(u.balance || 0).toFixed(2)}`,
+          walletBalanceUsdt: `$${parseFloat(u.staked_balance || 0).toFixed(2)}`,
+          deposits: `$${(u.deposits || []).reduce((acc, d) => acc + parseFloat(d.amount || 0), 0).toFixed(2)}`,
+          withdrawals: `$${(u.withdrawals || []).reduce((acc, w) => acc + parseFloat(w.amount || 0), 0).toFixed(2)}`,
+          transactions: String((u.transactions || []).length),
+          stakings: String((u.stakes || []).length),
+          emailVerified: u.email_verified,
+          mobileVerified: true,
+          twoFaEnabled: false,
+          kycVerified: u.profile_complete,
+          banned: !u.is_active,
+        });
+      }
+    } catch (err) {
+      console.error('Fetch user detail error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserDetail();
+  }, [userId]);
 
   const [balanceModalOpen, setBalanceModalOpen] = useState(false);
   const [balanceAction, setBalanceAction] = useState('add'); // 'add' | 'subtract'
@@ -70,11 +126,25 @@ export default function AdminUserDetailPage({ params }) {
   const [resetWithdrawalModalOpen, setResetWithdrawalModalOpen] = useState(false);
   const [newWithdrawalPass, setNewWithdrawalPass] = useState('');
   const [confirmWithdrawalPass, setConfirmWithdrawalPass] = useState('');
+  const [showWithdrawalPass, setShowWithdrawalPass] = useState(false);
+  const [showAdminPass, setShowAdminPass] = useState(false);
 
   // KYC Modal State
   const [kycModalOpen, setKycModalOpen] = useState(false);
 
-  const handleResetLoginPasswordSubmit = (e) => {
+  const handleLoginAsUser = async () => {
+    try {
+      const res = await api.post(`/admin/users/${userId}/impersonate`);
+      if (res.data && res.data.success && res.data.token) {
+        localStorage.setItem('stakelab_token', res.data.token);
+        window.open('http://localhost:3000/dashboard', '_blank');
+      }
+    } catch (err) {
+      // Only keep actual system failure errors if needed, or swallow quietly
+    }
+  };
+
+  const handleResetLoginPasswordSubmit = async (e) => {
     e.preventDefault();
     if (!newLoginPass || newLoginPass.length < 6) {
       toast.error('New login password must be at least 6 characters.');
@@ -84,13 +154,20 @@ export default function AdminUserDetailPage({ params }) {
       toast.error('Passwords do not match.');
       return;
     }
-    toast.success(`Login password for @${userData.username} has been reset successfully!`);
-    setResetLoginModalOpen(false);
-    setNewLoginPass('');
-    setConfirmLoginPass('');
+    try {
+      const res = await api.put(`/admin/users/${userId}`, { password: newLoginPass });
+      if (res.data && res.data.success) {
+        toast.success(`Login password for @${userData.username} has been reset successfully!`);
+        setResetLoginModalOpen(false);
+        setNewLoginPass('');
+        setConfirmLoginPass('');
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to reset password');
+    }
   };
 
-  const handleResetWithdrawalPasswordSubmit = (e) => {
+  const handleResetWithdrawalPasswordSubmit = async (e) => {
     e.preventDefault();
     if (!newWithdrawalPass || newWithdrawalPass.length < 4) {
       toast.error('New withdrawal PIN/password must be at least 4 digits/characters.');
@@ -100,10 +177,17 @@ export default function AdminUserDetailPage({ params }) {
       toast.error('Withdrawal passwords do not match.');
       return;
     }
-    toast.success(`Withdrawal PIN/password for @${userData.username} has been reset successfully!`);
-    setResetWithdrawalModalOpen(false);
-    setNewWithdrawalPass('');
-    setConfirmWithdrawalPass('');
+    try {
+      const res = await api.put(`/admin/users/${userId}`, { withdrawal_pin: newWithdrawalPass });
+      if (res.data && res.data.success) {
+        toast.success(`Withdrawal PIN for @${userData.username} has been updated successfully!`);
+        setResetWithdrawalModalOpen(false);
+        setNewWithdrawalPass('');
+        setConfirmWithdrawalPass('');
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update withdrawal PIN');
+    }
   };
 
   const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
@@ -123,15 +207,18 @@ export default function AdminUserDetailPage({ params }) {
     setCountrySearch('');
   };
 
+  const [walletDropdownOpen, setWalletDropdownOpen] = useState(false);
+
   const handleOpenBalanceModal = (actionType) => {
     setBalanceAction(actionType);
     setWalletType('Main Balance');
     setAmount('');
     setRemark('');
+    setWalletDropdownOpen(false);
     setBalanceModalOpen(true);
   };
 
-  const handleBalanceSubmit = (e) => {
+  const handleBalanceSubmit = async (e) => {
     e.preventDefault();
     if (!amount || parseFloat(amount) <= 0) {
       toast.error('Please provide a positive amount.');
@@ -143,48 +230,83 @@ export default function AdminUserDetailPage({ params }) {
     }
 
     setSubmitting(true);
-    setTimeout(() => {
-      const val = parseFloat(amount).toFixed(2);
-      if (balanceAction === 'add') {
-        toast.success(`Successfully added ₮${val} to ${userData.firstName}'s balance!`);
-      } else {
-        toast.success(`Successfully subtracted ₮${val} from ${userData.firstName}'s balance!`);
+    try {
+      const res = await api.post('/admin/users/balance', {
+        user_id: userId,
+        action: balanceAction,
+        wallet_type: walletType,
+        amount: parseFloat(amount),
+        remark,
+      });
+
+      if (res.data && res.data.success) {
+        toast.success(res.data.message || `Successfully adjusted user balance!`);
+        if (res.data.user) {
+          const updatedUsdt = parseFloat(res.data.user.balance_usdt || res.data.user.balance || 0).toFixed(2);
+          setUserData((prev) => ({
+            ...prev,
+            mainBalance: `$${updatedUsdt} USD`,
+            walletBalanceUsdt: `$${updatedUsdt} USDT`,
+            stakedBalance: `$${parseFloat(res.data.user.staked_balance || 0).toFixed(2)} USDT`,
+          }));
+        }
+        setBalanceModalOpen(false);
+        setAmount('');
+        setRemark('');
       }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update user balance');
+    } finally {
       setSubmitting(false);
-      setBalanceModalOpen(false);
-    }, 600);
+    }
   };
 
-  const handleBanSubmit = (e) => {
+  const handleBanSubmit = async (e) => {
     e.preventDefault();
-    if (!banReason) {
-      toast.error('Ban reason is required.');
-      return;
-    }
-
     setSubmitting(true);
-    setTimeout(() => {
-      setUserData({ ...userData, banned: true });
-      toast.warning(`User ${userData.username} has been banned.`);
+    try {
+      const nextActiveState = userData.banned; // if currently banned (banned=true), unban it -> is_active=true
+      const res = await api.put(`/admin/users/${userId}`, { is_active: nextActiveState });
+      if (res.data && res.data.success) {
+        const newBannedState = !nextActiveState;
+        setUserData((prev) => ({ ...prev, banned: newBannedState }));
+        toast.warning(`User ${userData.username} status updated (${newBannedState ? 'Banned' : 'Active'}).`);
+        setBanModalOpen(false);
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update user status');
+    } finally {
       setSubmitting(false);
-      setBanModalOpen(false);
-    }, 600);
-  };
-
-  const handleLoginAsUser = () => {
-    toast.success(`Logging in as ${userData.username}... Opening User Dashboard.`);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('stakelab_token', 'impersonated_token_' + userId);
-      const userPortalUrl = window.location.origin.includes('3001')
-        ? 'http://localhost:3000/dashboard'
-        : '/dashboard';
-      window.open(userPortalUrl, '_blank');
     }
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    toast.success('User information updated successfully!');
+    setSubmitting(true);
+    try {
+      const fullName = `${userData.firstName || ''} ${userData.lastName || ''}`.trim();
+      const res = await api.put(`/admin/users/${userId}`, {
+        full_name: fullName,
+        email: userData.email,
+        mobile: userData.mobile,
+        country: userData.country,
+        address: userData.address,
+        city: userData.city,
+        state: userData.state,
+        zip_code: userData.zipCode,
+        email_verified: userData.emailVerified,
+        mobile_verified: userData.mobileVerified,
+        two_factor_enabled: userData.twoFaEnabled,
+      });
+
+      if (res.data && res.data.success) {
+        toast.success('User details updated successfully!');
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update user information');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -305,13 +427,13 @@ export default function AdminUserDetailPage({ params }) {
           </Link>
         </div>
 
-        {/* Middle Action Buttons Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {/* Middle Action Buttons Row (Horizontally Scrollable, Balanced Single-Line Buttons) */}
+        <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-thin">
           {/* Button 1: + Balance */}
           <button
             type="button"
             onClick={() => handleOpenBalanceModal('add')}
-            className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs py-3 px-3 rounded-lg flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
+            className="flex-1 min-w-[130px] whitespace-nowrap bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs py-3 px-4 rounded-lg flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer shrink-0"
           >
             <PlusCircle className="w-4 h-4" /> Balance
           </button>
@@ -320,7 +442,7 @@ export default function AdminUserDetailPage({ params }) {
           <button
             type="button"
             onClick={() => handleOpenBalanceModal('subtract')}
-            className="bg-red-500 hover:bg-red-600 text-white font-bold text-xs py-3 px-3 rounded-lg flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
+            className="flex-1 min-w-[130px] whitespace-nowrap bg-red-500 hover:bg-red-600 text-white font-bold text-xs py-3 px-4 rounded-lg flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer shrink-0"
           >
             <MinusCircle className="w-4 h-4" /> Balance
           </button>
@@ -329,7 +451,7 @@ export default function AdminUserDetailPage({ params }) {
           <button
             type="button"
             onClick={() => setResetLoginModalOpen(true)}
-            className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs py-3 px-3 rounded-lg flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
+            className="flex-1 min-w-[160px] whitespace-nowrap bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs py-3 px-4 rounded-lg flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer shrink-0"
           >
             <Key className="w-4 h-4" /> Reset Login Pass
           </button>
@@ -338,7 +460,7 @@ export default function AdminUserDetailPage({ params }) {
           <button
             type="button"
             onClick={() => setResetWithdrawalModalOpen(true)}
-            className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs py-3 px-3 rounded-lg flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
+            className="flex-1 min-w-[170px] whitespace-nowrap bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs py-3 px-4 rounded-lg flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer shrink-0"
           >
             <Lock className="w-4 h-4" /> Reset Withdraw Pass
           </button>
@@ -346,7 +468,7 @@ export default function AdminUserDetailPage({ params }) {
           {/* Button 5: Logins */}
           <Link
             href={`/admin/report/login/history?search=${userData.username}`}
-            className="bg-[#5b5bf5] hover:bg-indigo-600 text-white font-bold text-xs py-3 px-3 rounded-lg flex items-center justify-center gap-1.5 shadow-sm transition-all text-center"
+            className="flex-1 min-w-[120px] whitespace-nowrap bg-[#5b5bf5] hover:bg-indigo-600 text-white font-bold text-xs py-3 px-4 rounded-lg flex items-center justify-center gap-1.5 shadow-sm transition-all text-center shrink-0"
           >
             <List className="w-4 h-4" /> Logins
           </Link>
@@ -355,7 +477,7 @@ export default function AdminUserDetailPage({ params }) {
           <button
             type="button"
             onClick={() => setBanModalOpen(true)}
-            className={`font-bold text-xs py-3 px-3 rounded-lg flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer text-white ${
+            className={`flex-1 min-w-[130px] whitespace-nowrap font-bold text-xs py-3 px-4 rounded-lg flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer text-white shrink-0 ${
               userData.banned
                 ? 'bg-emerald-600 hover:bg-emerald-700'
                 : 'bg-[#ffb020] hover:bg-amber-500'
@@ -386,11 +508,10 @@ export default function AdminUserDetailPage({ params }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 font-sans mb-1.5">
-                  First Name <span className="text-red-500">*</span>
+                  First Name
                 </label>
                 <input
                   type="text"
-                  required
                   value={userData.firstName}
                   onChange={(e) => setUserData({ ...userData, firstName: e.target.value })}
                   className="w-full h-11 bg-white border border-slate-200 rounded-lg px-4 text-xs text-slate-800 font-sans focus:outline-none focus:ring-1 focus:ring-indigo-500"
@@ -399,11 +520,10 @@ export default function AdminUserDetailPage({ params }) {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 font-sans mb-1.5">
-                  Last Name <span className="text-red-500">*</span>
+                  Last Name
                 </label>
                 <input
                   type="text"
-                  required
                   value={userData.lastName}
                   onChange={(e) => setUserData({ ...userData, lastName: e.target.value })}
                   className="w-full h-11 bg-white border border-slate-200 rounded-lg px-4 text-xs text-slate-800 font-sans focus:outline-none focus:ring-1 focus:ring-indigo-500"
@@ -415,11 +535,10 @@ export default function AdminUserDetailPage({ params }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 font-sans mb-1.5">
-                  Email <span className="text-red-500">*</span>
+                  Email
                 </label>
                 <input
                   type="email"
-                  required
                   value={userData.email}
                   onChange={(e) => setUserData({ ...userData, email: e.target.value })}
                   className="w-full h-11 bg-white border border-slate-200 rounded-lg px-4 text-xs text-slate-800 font-sans focus:outline-none focus:ring-1 focus:ring-indigo-500"
@@ -428,7 +547,7 @@ export default function AdminUserDetailPage({ params }) {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 font-sans mb-1.5">
-                  Mobile Number <span className="text-red-500">*</span>
+                  Mobile Number
                 </label>
                 <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white focus-within:ring-1 focus-within:ring-indigo-500">
                   <div className="h-11 bg-slate-100 border-r border-slate-200 px-3.5 text-xs font-bold text-slate-600 flex items-center shrink-0">
@@ -436,7 +555,6 @@ export default function AdminUserDetailPage({ params }) {
                   </div>
                   <input
                     type="text"
-                    required
                     value={userData.mobile}
                     onChange={(e) => setUserData({ ...userData, mobile: e.target.value })}
                     className="w-full h-11 bg-transparent border-0 outline-none px-4 text-xs text-slate-800 font-sans"
@@ -499,7 +617,7 @@ export default function AdminUserDetailPage({ params }) {
               {/* Country Searchable Dropdown */}
               <div className="relative">
                 <label className="block text-xs font-semibold text-slate-700 font-sans mb-1.5">
-                  Country <span className="text-red-500">*</span>
+                  Country
                 </label>
 
                 {/* Dropdown Trigger Box */}
@@ -682,8 +800,14 @@ export default function AdminUserDetailPage({ params }) {
 
         {/* Reset Login Password Modal */}
         {resetLoginModalOpen && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl max-w-md w-full p-6 space-y-4 shadow-2xl relative animate-in fade-in zoom-in duration-200">
+          <div
+            onClick={() => setResetLoginModalOpen(false)}
+            className="fixed inset-0 min-h-screen w-full bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-xl max-w-md w-full p-6 space-y-4 shadow-2xl relative animate-in fade-in zoom-in duration-200 my-auto"
+            >
               <div className="flex justify-between items-center pb-2 border-b border-slate-100">
                 <h3 className="text-base font-bold text-slate-800 font-sans">
                   Reset Login Password
@@ -744,8 +868,14 @@ export default function AdminUserDetailPage({ params }) {
 
         {/* Reset Withdrawal Password Modal */}
         {resetWithdrawalModalOpen && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl max-w-md w-full p-6 space-y-4 shadow-2xl relative animate-in fade-in zoom-in duration-200">
+          <div
+            onClick={() => setResetWithdrawalModalOpen(false)}
+            className="fixed inset-0 min-h-screen w-full bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-xl max-w-md w-full p-6 space-y-4 shadow-2xl relative animate-in fade-in zoom-in duration-200 my-auto"
+            >
               <div className="flex justify-between items-center pb-2 border-b border-slate-100">
                 <h3 className="text-base font-bold text-slate-800 font-sans">
                   Reset Withdrawal PIN / Password
@@ -767,28 +897,46 @@ export default function AdminUserDetailPage({ params }) {
                   <label className="block text-xs font-semibold text-slate-700 font-sans mb-1.5">
                     New Withdrawal PIN/Password <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="password"
-                    required
-                    value={newWithdrawalPass}
-                    onChange={(e) => setNewWithdrawalPass(e.target.value)}
-                    placeholder="Enter new PIN/password..."
-                    className="w-full bg-white border border-slate-200 rounded-lg px-3.5 h-11 text-xs text-slate-800 font-sans focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  />
+                  <div className="relative flex items-center">
+                    <input
+                      type={showWithdrawalPass ? 'text' : 'password'}
+                      required
+                      value={newWithdrawalPass}
+                      onChange={(e) => setNewWithdrawalPass(e.target.value)}
+                      placeholder="Enter new PIN/password..."
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3.5 pr-10 h-11 text-xs text-slate-800 font-sans focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowWithdrawalPass(!showWithdrawalPass)}
+                      className="absolute right-3 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer p-1"
+                    >
+                      {showWithdrawalPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 font-sans mb-1.5">
                     Confirm Withdrawal PIN/Password <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="password"
-                    required
-                    value={confirmWithdrawalPass}
-                    onChange={(e) => setConfirmWithdrawalPass(e.target.value)}
-                    placeholder="Confirm new PIN/password..."
-                    className="w-full bg-white border border-slate-200 rounded-lg px-3.5 h-11 text-xs text-slate-800 font-sans focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  />
+                  <div className="relative flex items-center">
+                    <input
+                      type={showWithdrawalPass ? 'text' : 'password'}
+                      required
+                      value={confirmWithdrawalPass}
+                      onChange={(e) => setConfirmWithdrawalPass(e.target.value)}
+                      placeholder="Confirm new PIN/password..."
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3.5 pr-10 h-11 text-xs text-slate-800 font-sans focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowWithdrawalPass(!showWithdrawalPass)}
+                      className="absolute right-3 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer p-1"
+                    >
+                      {showWithdrawalPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="pt-2">
@@ -804,10 +952,16 @@ export default function AdminUserDetailPage({ params }) {
           </div>
         )}
 
-        {/* Add Balance / Subtract Balance Modal (Matching Exact Reference Screenshot 1 & 2) */}
+        {/* Add Balance / Subtract Balance Modal */}
         {balanceModalOpen && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl max-w-md w-full p-6 space-y-5 shadow-2xl relative animate-in fade-in zoom-in duration-200">
+          <div
+            onClick={() => setBalanceModalOpen(false)}
+            className="fixed inset-0 min-h-screen w-full bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-xl max-w-md w-full p-6 space-y-5 shadow-2xl relative animate-in fade-in zoom-in duration-200 my-auto"
+            >
               <div className="flex justify-between items-center pb-3 border-b border-slate-100">
                 <h3 className="text-base font-bold text-slate-800 font-sans">
                   {balanceAction === 'add' ? 'Add Balance' : 'Subtract Balance'}
@@ -821,21 +975,56 @@ export default function AdminUserDetailPage({ params }) {
               </div>
 
               <form onSubmit={handleBalanceSubmit} className="space-y-4">
-                {/* Wallet Select Dropdown */}
-                <div>
+                {/* Customized Wallet Select Dropdown (Limited to 2 Supported Balances) */}
+                <div className="relative">
                   <label className="block text-xs font-semibold text-slate-700 font-sans mb-1.5">
                     Wallet
                   </label>
-                  <select
-                    value={walletType}
-                    onChange={(e) => setWalletType(e.target.value)}
-                    className="w-full h-11 bg-white border border-slate-200 rounded-lg px-3.5 text-xs text-slate-800 font-sans focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                  <button
+                    type="button"
+                    onClick={() => setWalletDropdownOpen(!walletDropdownOpen)}
+                    className="w-full h-11 bg-white border border-slate-200 rounded-lg px-3.5 flex items-center justify-between text-xs text-slate-800 font-sans focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer shadow-xs transition-all"
                   >
-                    <option value="Main Balance">Main Balance (Available Wallet Balance)</option>
-                    <option value="Staked Balance">Staked Balance (Active Staking Portfolio)</option>
-                    <option value="Referral Earnings Balance">Referral Earnings Balance (Commission Wallet)</option>
-                    <option value="Total Earned Profit Balance">Total Earned Profit Balance (Yield Earnings)</option>
-                  </select>
+                    <span>
+                      {walletType === 'Staked Balance'
+                        ? 'Staked Balance (Active Staking Portfolio)'
+                        : 'Main Balance (Available Wallet Balance)'}
+                    </span>
+                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${walletDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {walletDropdownOpen && (
+                    <div className="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl py-1 z-50 text-xs text-slate-700 font-sans animate-in fade-in zoom-in-95 duration-150">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setWalletType('Main Balance');
+                          setWalletDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-2.5 font-medium transition-colors cursor-pointer flex items-center justify-between ${
+                          walletType === 'Main Balance'
+                            ? 'bg-[#5b5bf5] text-white font-bold'
+                            : 'hover:bg-indigo-50 text-slate-700'
+                        }`}
+                      >
+                        <span>Main Balance (Available Wallet Balance)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setWalletType('Staked Balance');
+                          setWalletDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-2.5 font-medium transition-colors cursor-pointer flex items-center justify-between ${
+                          walletType === 'Staked Balance'
+                            ? 'bg-[#5b5bf5] text-white font-bold'
+                            : 'hover:bg-indigo-50 text-slate-700'
+                        }`}
+                      >
+                        <span>Staked Balance (Active Staking Portfolio)</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Amount Input Group with USDT Badge */}
@@ -879,24 +1068,39 @@ export default function AdminUserDetailPage({ params }) {
                   <label className="block text-xs font-bold text-amber-700 font-sans mb-1.5 flex items-center gap-1">
                     <Lock className="w-3.5 h-3.5 text-amber-600" /> Admin Security Password <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="password"
-                    required
-                    value={adminPassword}
-                    onChange={(e) => setAdminPassword(e.target.value)}
-                    placeholder="Enter admin password to confirm..."
-                    className="w-full h-11 bg-white border border-amber-300 rounded-lg px-3.5 text-xs text-slate-800 font-sans focus:outline-none focus:ring-1 focus:ring-amber-500"
-                  />
+                  <div className="relative flex items-center">
+                    <input
+                      type={showAdminPass ? 'text' : 'password'}
+                      required
+                      value={adminPassword}
+                      onChange={(e) => setAdminPassword(e.target.value)}
+                      placeholder="Enter admin password to confirm..."
+                      className="w-full h-11 bg-white border border-amber-300 rounded-lg px-3.5 pr-10 text-xs text-slate-800 font-sans focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowAdminPass(!showAdminPass)}
+                      className="absolute right-3 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer p-1"
+                    >
+                      {showAdminPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
-                {/* Submit Button (Vibrant Indigo Button) */}
+                {/* Submit Button */}
                 <div className="pt-2">
                   <button
                     type="submit"
                     disabled={submitting}
                     className="w-full bg-[#5b5bf5] hover:bg-indigo-600 text-white font-bold py-3.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-md shadow-indigo-500/20 disabled:opacity-50"
                   >
-                    {submitting ? 'Verifying & Submitting...' : 'Confirm Balance Adjustment'}
+                    {submitting ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" /> Verifying & Submitting
+                      </span>
+                    ) : (
+                      'Confirm Balance Adjustment'
+                    )}
                   </button>
                 </div>
               </form>
@@ -904,10 +1108,16 @@ export default function AdminUserDetailPage({ params }) {
           </div>
         )}
 
-        {/* Ban User Modal (Matching Exact Reference Screenshot 4) */}
+        {/* Ban User Modal */}
         {banModalOpen && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl max-w-md w-full p-6 space-y-4 shadow-2xl relative animate-in fade-in zoom-in duration-200">
+          <div
+            onClick={() => setBanModalOpen(false)}
+            className="fixed inset-0 min-h-screen w-full bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-xl max-w-md w-full p-6 space-y-4 shadow-2xl relative animate-in fade-in zoom-in duration-200 my-auto"
+            >
               <div className="flex justify-between items-center pb-2 border-b border-slate-100">
                 <h3 className="text-base font-bold text-slate-800 font-sans">
                   Ban User
@@ -945,7 +1155,13 @@ export default function AdminUserDetailPage({ params }) {
                     disabled={submitting}
                     className="w-full bg-[#5b5bf5] hover:bg-indigo-600 text-white font-bold py-3.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-md shadow-indigo-500/20 disabled:opacity-50"
                   >
-                    {submitting ? 'Submitting...' : 'Submit'}
+                    {submitting ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" /> Submitting
+                      </span>
+                    ) : (
+                      'Submit'
+                    )}
                   </button>
                 </div>
               </form>
@@ -955,8 +1171,14 @@ export default function AdminUserDetailPage({ params }) {
 
         {/* KYC Document Review Modal */}
         {kycModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-200">
+          <div
+            onClick={() => setKycModalOpen(false)}
+            className="fixed inset-0 min-h-screen w-full bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-200 my-auto"
+            >
               <div className="bg-[#5b5bf5] text-white p-4 px-6 flex justify-between items-center">
                 <h3 className="font-bold text-sm font-sans tracking-wide">
                   KYC Documents - {userData.username}

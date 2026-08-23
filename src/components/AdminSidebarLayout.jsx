@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAdminAuth } from '../context/AdminAuthContext';
+import api from '../lib/api';
 import {
   LayoutDashboard,
   DollarSign,
@@ -24,38 +25,138 @@ import {
   Wrench,
   UserCheck,
   LogOut,
-  ChevronDown,
+  Gift,
+  ClipboardList,
+  CalendarCheck,
+  Disc,
+  Key,
+  ShieldCheck,
+  User,
   Menu,
-  X,
+  ChevronDown,
 } from 'lucide-react';
 
 export default function AdminSidebarLayout({ children }) {
   const pathname = usePathname();
   const { admin, logout } = useAdminAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [openSubmenu, setOpenSubmenu] = useState(null);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
+  const [notifications, setNotifications] = useState({ unreadCount: 0, tickets: [], deposits: [], withdrawals: [] });
+  const profileRef = useRef(null);
+  const notifRef = useRef(null);
 
-  const toggleSubmenu = (name) => {
-    setOpenSubmenu(openSubmenu === name ? null : name);
-  };
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
+  const searchRef = useRef(null);
+
+  const [counts, setCounts] = useState({
+    emailUnverified: '0',
+    mobileUnverified: '0',
+    kycUnverified: '0',
+    kycPending: '0',
+    pendingDeposits: '0',
+    pendingWithdrawals: '0',
+    pendingTickets: '0',
+  });
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileDropdownOpen(false);
+      }
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setSearchDropdownOpen(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setNotifDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const fetchNotifs = async () => {
+      try {
+        const res = await api.get('/admin/notifications');
+        if (res.data && res.data.success) {
+          setNotifications(res.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch admin notifications:', err);
+      }
+    };
+    fetchNotifs();
+    const interval = setInterval(fetchNotifs, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults(null);
+      setSearchDropdownOpen(false);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        setIsSearching(true);
+        const res = await api.get(`/admin/global-search?query=${encodeURIComponent(searchQuery)}`);
+        if (res.data && res.data.success) {
+          setSearchResults(res.data.results);
+          setSearchDropdownOpen(true);
+        }
+      } catch (err) {
+        console.error('Global search error:', err);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const res = await api.get('/admin/stats');
+        if (res.data && res.data.success && res.data.stats) {
+          const s = res.data.stats;
+          setCounts({
+            emailUnverified: String(s.emailUnverified ?? 0),
+            mobileUnverified: String(s.mobileUnverified ?? 0),
+            kycUnverified: String(s.kycUnverified ?? 0),
+            kycPending: String(s.kycPending ?? 0),
+            pendingDeposits: String(s.pendingDeposits ?? 0),
+            pendingWithdrawals: String(s.pendingWithdrawals ?? 0),
+            pendingTickets: String(s.pendingTickets ?? 0),
+          });
+        }
+      } catch (err) {
+        // Quiet fallback
+      }
+    };
+    fetchCounts();
+  }, []);
 
   const navItems = [
     { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
-    { label: 'Manage Currency', path: '/admin/currency', icon: DollarSign },
     { label: 'Staking Plan', path: '/admin/staking-plans', icon: Coins },
     {
       label: 'Manage Users',
       icon: Users,
       badge: '!',
-      matchPath: '/admin/users',
+      matchPaths: ['/admin/users'],
       submenu: [
         { label: 'Active Users', path: '/admin/users/active' },
         { label: 'Banned Users', path: '/admin/users/banned' },
-        { label: 'Email Unverified', path: '/admin/users/email-unverified', countBadge: '11' },
-        { label: 'Mobile Unverified', path: '/admin/users/mobile-unverified', countBadge: '1' },
-        { label: 'KYC Unverified', path: '/admin/users/kyc-unverified', countBadge: '14' },
-        { label: 'KYC Pending', path: '/admin/users/kyc-pending', countBadge: '2' },
-        { label: 'With Balance', path: '/admin/users/with-balance' },
+        { label: 'Email Unverified', path: '/admin/users/email-unverified', countBadge: counts.emailUnverified },
+        { label: 'Mobile Unverified', path: '/admin/users/mobile-unverified', countBadge: counts.mobileUnverified },
+        { label: 'KYC Unverified', path: '/admin/users/kyc-unverified', countBadge: counts.kycUnverified },
+        { label: 'KYC Pending', path: '/admin/users/kyc-pending', countBadge: counts.kycPending },
         { label: 'All Users', path: '/admin/users' },
         { label: 'Send Notification', path: '/admin/users/send-notification' },
       ],
@@ -64,13 +165,11 @@ export default function AdminSidebarLayout({ children }) {
       label: 'Deposits',
       icon: ArrowDownLeft,
       badge: '!',
-      matchPath: '/admin/deposit',
+      matchPaths: ['/admin/deposits', '/admin/deposit'],
       submenu: [
-        { label: 'Pending Deposits', path: '/admin/deposits/pending', countBadge: '48' },
+        { label: 'Pending Deposits', path: '/admin/deposits/pending', countBadge: counts.pendingDeposits },
         { label: 'Approved Deposits', path: '/admin/deposits/approved' },
-        { label: 'Successful Deposits', path: '/admin/deposits/successful' },
         { label: 'Rejected Deposits', path: '/admin/deposits/rejected' },
-        { label: 'Initiated Deposits', path: '/admin/deposits/initiated' },
         { label: 'All Deposits', path: '/admin/deposits' },
       ],
     },
@@ -78,9 +177,9 @@ export default function AdminSidebarLayout({ children }) {
       label: 'Withdrawals',
       icon: ArrowUpRight,
       badge: '!',
-      matchPath: '/admin/withdraw',
+      matchPaths: ['/admin/withdrawals', '/admin/withdraw'],
       submenu: [
-        { label: 'Pending Withdrawals', path: '/admin/withdrawals/pending', countBadge: '14' },
+        { label: 'Pending Withdrawals', path: '/admin/withdrawals/pending', countBadge: counts.pendingWithdrawals },
         { label: 'Approved Withdrawals', path: '/admin/withdrawals/approved' },
         { label: 'Rejected Withdrawals', path: '/admin/withdrawals/rejected' },
         { label: 'All Withdrawals', path: '/admin/withdrawals' },
@@ -90,9 +189,9 @@ export default function AdminSidebarLayout({ children }) {
       label: 'Support Ticket',
       icon: LifeBuoy,
       badge: '!',
-      matchPath: '/admin/ticket',
+      matchPaths: ['/admin/tickets', '/admin/ticket'],
       submenu: [
-        { label: 'Pending Ticket', path: '/admin/tickets/pending', countBadge: '23' },
+        { label: 'Pending Ticket', path: '/admin/tickets/pending', countBadge: counts.pendingTickets },
         { label: 'Closed Ticket', path: '/admin/tickets/closed' },
         { label: 'Answered Ticket', path: '/admin/tickets/answered' },
         { label: 'All Ticket', path: '/admin/tickets' },
@@ -101,51 +200,71 @@ export default function AdminSidebarLayout({ children }) {
     {
       label: 'Report',
       icon: FileText,
-      matchPath: '/admin/report',
+      matchPaths: ['/admin/reports', '/admin/report'],
       submenu: [
         { label: 'Transaction History', path: '/admin/reports/transactions' },
         { label: 'Staking History', path: '/admin/reports/staking' },
         { label: 'Login History', path: '/admin/reports/logins' },
       ],
     },
-    { label: 'Manage Referral', path: '/admin/referral', icon: Share2 },
-    { label: 'System Setting', path: '/admin/settings', icon: Settings },
     {
-      label: 'Extra',
-      icon: MoreHorizontal,
+      label: 'Gift Bonus',
+      icon: Gift,
+      matchPaths: ['/admin/gift-bonus'],
       submenu: [
-        { label: 'Spin Wheel', path: '/admin/extra/spin' },
-        { label: 'Daily Check-in', path: '/admin/extra/daily-checkin' },
-        { label: 'Tasks & Rewards', path: '/admin/extra/tasks' },
-        { label: 'Gift Bonus', path: '/admin/extra/gift-bonus' },
-        { label: 'Application System', path: '/admin/extra/system' },
-        { label: 'Clear Cache', path: '/admin/extra/cache' },
+        { label: 'Gift Bonus Codes', path: '/admin/gift-bonus/bonus' },
+        { label: 'Usage History', path: '/admin/gift-bonus/uses-list' },
       ],
     },
-    { label: 'Report & Request', path: '/admin/requests', icon: FileCheck },
+    { label: 'Tasks', path: '/admin/tasks', icon: ClipboardList },
+    { label: 'Daily Check-In', path: '/admin/daily-check-in', icon: CalendarCheck },
+    { label: 'Spin Wheel', path: '/admin/spin-wheel', icon: Disc },
+    { label: 'Manage Referral', path: '/admin/referral', icon: Share2 },
+    { label: 'System Setting', path: '/admin/settings', icon: Settings },
+    { label: 'Logout', action: 'logout', icon: LogOut },
   ];
+
+  const [openSubmenu, setOpenSubmenu] = useState(null);
+
+  // Auto-expand parent section for current route on page load & navigation
+  useEffect(() => {
+    const activeItem = navItems.find((item) => {
+      if (!item.submenu) return false;
+      if (item.matchPaths && item.matchPaths.some((mp) => pathname.startsWith(mp))) return true;
+      return item.submenu.some((sub) => pathname === sub.path || pathname.startsWith(sub.path));
+    });
+
+    if (activeItem) {
+      setOpenSubmenu(activeItem.label);
+    }
+  }, [pathname]);
+
+  const toggleSubmenu = (name) => {
+    setOpenSubmenu(openSubmenu === name ? null : name);
+  };
 
   return (
     <div className="h-screen overflow-hidden bg-[#f3f5f9] text-slate-800 font-sans flex">
       {/* Left Sidebar Drawer (Full Height Top-to-Bottom) */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-30 w-64 bg-[#091630] border-r border-[#142343] text-slate-300 transform transition-transform duration-300 ease-in-out flex flex-col justify-between h-full overflow-y-auto no-scrollbar shrink-0 ${
+        className={`fixed lg:static inset-y-0 left-0 z-30 w-64 bg-[#091630] border-r border-[#142343] text-slate-300 transform transition-transform duration-300 ease-in-out flex flex-col h-full shrink-0 ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
-        <div>
-          {/* Top Sidebar Brand Logo */}
-          <div className="h-16 px-6 flex items-center border-b border-[#142343]">
-            <Link href="/admin/dashboard" className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded bg-gradient-to-r from-[#ff0044] to-[#fe780b] flex items-center justify-center font-righteous text-white font-bold text-lg shadow-md">
-                S
-              </div>
-              <span className="text-xl font-extrabold text-white font-righteous tracking-wide">
-                Stake<span className="text-gradient-stakelab">Lab</span>
-              </span>
-            </Link>
-          </div>
+        {/* Top Sidebar Brand Logo - FIXED (Does NOT scroll) */}
+        <div className="h-16 px-6 flex items-center border-b border-[#142343] shrink-0">
+          <Link href="/admin/dashboard" className="flex items-center space-x-2">
+            <div className="w-8 h-8 rounded bg-gradient-to-r from-[#ff0044] to-[#fe780b] flex items-center justify-center font-righteous text-white font-bold text-lg shadow-md">
+              E
+            </div>
+            <span className="text-xl font-extrabold text-white font-righteous tracking-wide">
+              Ever<span className="text-[#5b5bf5]">Stake</span>
+            </span>
+          </Link>
+        </div>
 
+        {/* Scrollable Navigation Area */}
+        <div className="flex-1 overflow-y-auto no-scrollbar">
           {/* Sidebar Navigation Items */}
           <nav className="p-3 space-y-1">
             {navItems.map((item) => {
@@ -155,7 +274,9 @@ export default function AdminSidebarLayout({ children }) {
               const isSubOpen = openSubmenu === item.label;
 
               if (hasSubmenu) {
-                const isParentActive = Boolean(item.matchPath) && pathname.startsWith(item.matchPath);
+                const isParentActive =
+                  (item.matchPaths && item.matchPaths.some((mp) => pathname.startsWith(mp))) ||
+                  (item.submenu && item.submenu.some((sub) => pathname === sub.path || pathname.startsWith(sub.path)));
                 return (
                   <div key={item.label} className="space-y-1">
                     <button
@@ -216,6 +337,23 @@ export default function AdminSidebarLayout({ children }) {
                 );
               }
 
+              if (item.action === 'logout') {
+                return (
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={() => {
+                      setMobileOpen(false);
+                      logout();
+                    }}
+                    className="w-full px-3.5 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-3 transition-all text-red-400 hover:text-white hover:bg-red-500/20 cursor-pointer text-left"
+                  >
+                    <Icon className="w-4 h-4 text-red-400" />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              }
+
               return (
                 <Link
                   key={item.label}
@@ -238,7 +376,7 @@ export default function AdminSidebarLayout({ children }) {
         {/* Bottom Footer Label */}
         <div className="p-4 border-t border-[#142343] text-center">
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-            STAKELAB V1.0.0
+            EVERSTAKE V1.0.0
           </span>
         </div>
       </aside>
@@ -253,9 +391,9 @@ export default function AdminSidebarLayout({ children }) {
 
       {/* Right Main Column (Header + Canvas) */}
       <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
-        {/* Top Header Navbar (Joins Sidebar from the Right) */}
+        {/* Top Header Navbar */}
         <header className="h-16 bg-[#091630] text-white border-b border-[#142343] shrink-0 z-20 px-4 sm:px-6 flex items-center justify-between shadow-md">
-          {/* Left Side: Mobile Menu Button & Search Bar */}
+          {/* Left Side: Mobile Menu Button, Brand Logo & Search Bar */}
           <div className="flex items-center space-x-4">
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -264,46 +402,318 @@ export default function AdminSidebarLayout({ children }) {
               {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
 
-            {/* Search Box */}
-            <div className="relative hidden sm:block w-64">
+            {/* Mobile Screen Logo & Brand Name */}
+            <Link href="/admin/dashboard" className="flex lg:hidden items-center space-x-2">
+              <div className="w-7 h-7 rounded bg-gradient-to-r from-[#ff0044] to-[#fe780b] flex items-center justify-center text-white font-bold text-sm shadow-md shadow-red-500/20 shrink-0">
+                E
+              </div>
+              <span className="text-base font-extrabold text-white tracking-wide font-sans">
+                Ever<span className="text-[#5b5bf5]">Stake</span>
+              </span>
+            </Link>
+
+            {/* Live Global Search Box */}
+            <div className="relative hidden sm:block w-64 lg:w-96" ref={searchRef}>
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search here.."
-                className="w-full bg-[#122347] border border-[#1e3463] rounded-md pl-9 pr-4 py-1.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => searchQuery.trim() && setSearchDropdownOpen(true)}
+                placeholder="Search users, deposits, withdrawals, tickets..."
+                className="w-full bg-[#122347] border border-[#1e3463] rounded-lg pl-9 pr-8 py-2.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all font-sans shadow-sm"
               />
+              {isSearching && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+              )}
+
+              {/* Instant Search Results Dropdown */}
+              {searchDropdownOpen && searchResults && (
+                <div className="absolute left-0 top-full mt-2 w-full max-h-[380px] bg-[#0a1835] border border-[#1e3463] rounded-xl shadow-2xl overflow-y-auto z-50 p-2 text-xs font-sans space-y-2.5 divide-y divide-white/10 no-scrollbar">
+                  {/* Users Results */}
+                  {searchResults.users?.length > 0 && (
+                    <div className="pt-1">
+                      <div className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider px-2 mb-1 flex items-center gap-1.5">
+                        <Users className="w-3.5 h-3.5" /> Users ({searchResults.users.length})
+                      </div>
+                      {searchResults.users.map((u) => (
+                        <Link
+                          key={u.id}
+                          href={`/admin/users/detail/${u.id}`}
+                          onClick={() => setSearchDropdownOpen(false)}
+                          className="flex items-center justify-between p-2 rounded-lg hover:bg-[#142852] transition-colors group"
+                        >
+                          <div>
+                            <div className="font-bold text-white group-hover:text-indigo-300 transition-colors">{u.full_name || u.username}</div>
+                            <div className="text-[10px] text-slate-400">@{u.username} • {u.email}</div>
+                          </div>
+                          <span className="text-[10px] text-indigo-400 font-semibold shrink-0 ml-2">Edit →</span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Deposits Results */}
+                  {searchResults.deposits?.length > 0 && (
+                    <div className="pt-2">
+                      <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider px-2 mb-1 flex items-center gap-1.5">
+                        <ArrowDownLeft className="w-3.5 h-3.5" /> Deposits ({searchResults.deposits.length})
+                      </div>
+                      {searchResults.deposits.map((d) => (
+                        <Link
+                          key={d.id}
+                          href="/admin/deposits/pending"
+                          onClick={() => setSearchDropdownOpen(false)}
+                          className="flex items-center justify-between p-2 rounded-lg hover:bg-[#142852] transition-colors group"
+                        >
+                          <div>
+                            <div className="font-bold text-white group-hover:text-emerald-300 transition-colors">${Number(d.amount).toFixed(2)} deposit</div>
+                            <div className="text-[10px] text-slate-400">@{d.username || 'User'} • TRX: {d.trx} ({d.status})</div>
+                          </div>
+                          <span className="text-[10px] text-emerald-400 font-semibold shrink-0 ml-2">Inspect →</span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Withdrawals Results */}
+                  {searchResults.withdrawals?.length > 0 && (
+                    <div className="pt-2">
+                      <div className="text-[10px] font-bold text-amber-400 uppercase tracking-wider px-2 mb-1 flex items-center gap-1.5">
+                        <ArrowUpRight className="w-3.5 h-3.5" /> Withdrawals ({searchResults.withdrawals.length})
+                      </div>
+                      {searchResults.withdrawals.map((w) => (
+                        <Link
+                          key={w.id}
+                          href={`/admin/withdraw/details/${w.id}`}
+                          onClick={() => setSearchDropdownOpen(false)}
+                          className="flex items-center justify-between p-2 rounded-lg hover:bg-[#142852] transition-colors group"
+                        >
+                          <div>
+                            <div className="font-bold text-white group-hover:text-amber-300 transition-colors">${Number(w.amount).toFixed(2)} withdrawal</div>
+                            <div className="text-[10px] text-slate-400">@{w.username || 'User'} • {w.status}</div>
+                          </div>
+                          <span className="text-[10px] text-amber-400 font-semibold shrink-0 ml-2">Review →</span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Support Tickets Results */}
+                  {searchResults.tickets?.length > 0 && (
+                    <div className="pt-2">
+                      <div className="text-[10px] font-bold text-red-400 uppercase tracking-wider px-2 mb-1 flex items-center gap-1.5">
+                        <Headphones className="w-3.5 h-3.5" /> Support Tickets ({searchResults.tickets.length})
+                      </div>
+                      {searchResults.tickets.map((t) => (
+                        <Link
+                          key={t.id}
+                          href={`/admin/ticket/view/${t.id}`}
+                          onClick={() => setSearchDropdownOpen(false)}
+                          className="flex items-center justify-between p-2 rounded-lg hover:bg-[#142852] transition-colors group"
+                        >
+                          <div>
+                            <div className="font-bold text-white group-hover:text-red-300 transition-colors">#{t.ticket_code} - {t.subject}</div>
+                            <div className="text-[10px] text-slate-400">@{t.username || 'User'} • {t.status}</div>
+                          </div>
+                          <span className="text-[10px] text-red-400 font-semibold shrink-0 ml-2">Open →</span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Empty Results State */}
+                  {searchResults.users?.length === 0 &&
+                    searchResults.deposits?.length === 0 &&
+                    searchResults.withdrawals?.length === 0 &&
+                    searchResults.tickets?.length === 0 && (
+                      <div className="p-4 text-center text-slate-400 text-xs font-medium">
+                        No matches found for "{searchQuery}"
+                      </div>
+                    )}
+                </div>
+              )}
             </div>
           </div>
 
           {/* Right Side: Header Quick Icons & Admin User Profile */}
           <div className="flex items-center space-x-4">
-            {/* Header Action Icons */}
-            <button className="text-slate-300 hover:text-white transition-colors" title="Language / Globe">
+            {/* Globe Icon - Navigates to EverStake.cx site */}
+            <button
+              type="button"
+              onClick={() => window.open('http://localhost:3000', '_blank')}
+              className="text-slate-300 hover:text-white transition-colors cursor-pointer"
+              title="Visit Site (EverStake.cx)"
+            >
               <Globe className="w-4 h-4" />
             </button>
 
-            <button className="relative text-slate-300 hover:text-white transition-colors" title="Notifications">
-              <Bell className="w-4 h-4" />
-              <span className="absolute -top-1.5 -right-1.5 bg-[#ff0044] text-white text-[9px] font-bold px-1 py-0.2 rounded-full">
-                9+
-              </span>
-            </button>
+            {/* Notification Bell Dropdown */}
+            <div className="relative" ref={notifRef}>
+              <button
+                type="button"
+                onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
+                className="relative text-slate-300 hover:text-white transition-colors p-1 cursor-pointer"
+                title="Notifications"
+              >
+                <Bell className="w-4 h-4" />
+                {notifications.unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-[#ff0044] text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full shadow-md animate-pulse">
+                    {notifications.unreadCount > 9 ? '9+' : notifications.unreadCount}
+                  </span>
+                )}
+              </button>
 
-            <button className="text-slate-300 hover:text-white transition-colors" title="Tools">
-              <Wrench className="w-4 h-4" />
-            </button>
+              {/* Notification Popover Dropdown */}
+              {notifDropdownOpen && (
+                <div className="absolute right-0 top-full mt-3 w-80 bg-[#0a1835] border border-[#1e3463] rounded-2xl shadow-2xl overflow-hidden z-50 text-xs font-sans animate-in zoom-in-95 duration-200">
+                  <div className="p-3.5 bg-[#0f2249] border-b border-[#1e3463] flex items-center justify-between">
+                    <h3 className="font-bold text-white font-righteous flex items-center gap-2">
+                      <Bell className="w-4 h-4 text-[#5b5bf5]" /> Notifications
+                    </h3>
+                    <span className="px-2 py-0.5 rounded-full bg-[#5b5bf5]/20 text-[#5b5bf5] text-[10px] font-bold">
+                      {notifications.unreadCount} Pending
+                    </span>
+                  </div>
+
+                  <div className="max-h-80 overflow-y-auto divide-y divide-white/5">
+                    {/* Pending Tickets */}
+                    {notifications.tickets?.length > 0 && (
+                      <div className="p-3">
+                        <div className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                          <span>📩 Pending Support Tickets ({notifications.tickets.length})</span>
+                          <Link href="/admin/tickets/pending" onClick={() => setNotifDropdownOpen(false)} className="text-[#5b5bf5] hover:underline">View All →</Link>
+                        </div>
+                        <div className="space-y-1.5">
+                          {notifications.tickets.map((t) => (
+                            <Link
+                              key={t.id}
+                              href={`/admin/ticket/view/${t.id}`}
+                              onClick={() => setNotifDropdownOpen(false)}
+                              className="block p-2 rounded-lg bg-[#061127] hover:bg-[#12244a] border border-[#1d335f] transition-all"
+                            >
+                              <div className="font-bold text-white truncate">#{t.ticket_code} - {t.subject}</div>
+                              <div className="text-[10px] text-slate-400 mt-0.5 flex justify-between">
+                                <span>@{t.user?.username || 'User'}</span>
+                                <span className="text-amber-400 font-semibold">PENDING</span>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Pending Deposits */}
+                    {notifications.deposits?.length > 0 && (
+                      <div className="p-3">
+                        <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                          <span>📥 Pending Deposits ({notifications.deposits.length})</span>
+                          <Link href="/admin/deposit/pending" onClick={() => setNotifDropdownOpen(false)} className="text-[#5b5bf5] hover:underline">View All →</Link>
+                        </div>
+                        <div className="space-y-1.5">
+                          {notifications.deposits.map((d) => (
+                            <Link
+                              key={d.id}
+                              href="/admin/deposit/pending"
+                              onClick={() => setNotifDropdownOpen(false)}
+                              className="block p-2 rounded-lg bg-[#061127] hover:bg-[#12244a] border border-[#1d335f] transition-all"
+                            >
+                              <div className="font-bold text-emerald-400">+${parseFloat(d.amount).toFixed(2)} USDT</div>
+                              <div className="text-[10px] text-slate-400 mt-0.5 flex justify-between">
+                                <span>@{d.user?.username || 'User'}</span>
+                                <span className="text-emerald-400 font-semibold">PENDING</span>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Pending Withdrawals */}
+                    {notifications.withdrawals?.length > 0 && (
+                      <div className="p-3">
+                        <div className="text-[10px] font-bold text-sky-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                          <span>📤 Pending Withdrawals ({notifications.withdrawals.length})</span>
+                          <Link href="/admin/withdraw/pending" onClick={() => setNotifDropdownOpen(false)} className="text-[#5b5bf5] hover:underline">View All →</Link>
+                        </div>
+                        <div className="space-y-1.5">
+                          {notifications.withdrawals.map((w) => (
+                            <Link
+                              key={w.id}
+                              href="/admin/withdraw/pending"
+                              onClick={() => setNotifDropdownOpen(false)}
+                              className="block p-2 rounded-lg bg-[#061127] hover:bg-[#12244a] border border-[#1d335f] transition-all"
+                            >
+                              <div className="font-bold text-sky-400">-${parseFloat(w.amount).toFixed(2)} USDT</div>
+                              <div className="text-[10px] text-slate-400 mt-0.5 flex justify-between">
+                                <span>@{w.user?.username || 'User'}</span>
+                                <span className="text-sky-400 font-semibold">PENDING</span>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Empty Notifications State */}
+                    {notifications.unreadCount === 0 && (
+                      <div className="p-6 text-center text-slate-400 text-xs font-semibold">
+                        🎉 All caught up! No pending tickets or requests.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Admin Profile Pill Dropdown */}
-            <div
-              onClick={logout}
-              className="flex items-center space-x-2 bg-[#122347] hover:bg-[#1a305e] px-3 py-1.5 rounded-full border border-[#1e3463] cursor-pointer transition-all"
-              title="Click to Log Out"
-            >
-              <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs">
-                <UserCheck className="w-3.5 h-3.5" />
-              </div>
-              <span className="text-xs font-bold text-white">admin</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            <div className="relative" ref={profileRef}>
+              <button
+                type="button"
+                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                className="flex items-center space-x-2.5 bg-[#122347] hover:bg-[#1a305e] px-3 py-1.5 rounded-full border border-[#1e3463] cursor-pointer transition-all focus:outline-none select-none"
+              >
+                <div className="w-7 h-7 rounded-full bg-[#1e3463] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                  <User className="w-4 h-4 text-slate-200" />
+                </div>
+                <div className="text-left hidden sm:block">
+                  <div className="text-xs font-bold text-white leading-tight">
+                    EverStake Admin
+                  </div>
+                  <div className="text-[10px] text-slate-400 leading-tight">
+                    admin@everstake.cx
+                  </div>
+                </div>
+                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Dropdown Menu Panel (Only Password Change & Logout) */}
+              {profileDropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 w-52 bg-[#0a1835] border border-[#1e3463] rounded-xl shadow-2xl overflow-hidden z-50 py-1.5 font-sans">
+                  <Link
+                    href="/admin/password"
+                    onClick={() => setProfileDropdownOpen(false)}
+                    className="px-4 py-2.5 text-xs font-bold text-slate-200 hover:bg-[#142852] hover:text-white flex items-center gap-3 transition-colors"
+                  >
+                    <Key className="w-4 h-4 text-slate-300" />
+                    <span>Password Change</span>
+                  </Link>
+
+                  <div className="my-1 border-t border-white/10" />
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setProfileDropdownOpen(false);
+                      logout();
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-200 hover:bg-[#ff0044]/15 hover:text-white flex items-center gap-3 transition-colors cursor-pointer"
+                  >
+                    <LogOut className="w-4 h-4 text-slate-300" />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>

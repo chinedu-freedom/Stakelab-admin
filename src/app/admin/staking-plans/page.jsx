@@ -1,77 +1,86 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AdminSidebarLayout from '../../../components/AdminSidebarLayout';
-import { Plus, Edit, EyeOff, CheckCircle2, BarChart2, X } from 'lucide-react';
+import { Plus, Edit, EyeOff, CheckCircle2, BarChart2, X, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import api from '../../../lib/api';
 
 export default function AdminStakingPlansPage() {
-  const [plans, setPlans] = useState([
-    {
-      id: '1',
-      name: 'Silver',
-      duration: '30 Days',
-      days: 30,
-      status: 'Active',
-      segments: [
-        { range: '10.00 USDT – 100.00 USDT', rate: '15.00%' },
-        { range: '101.00 USDT – 250.00 USDT', rate: '30.00%' },
-        { range: '251.00 USDT – 500.00 USDT', rate: '50.00%' },
-      ],
-    },
-    {
-      id: '2',
-      name: 'Golden',
-      duration: '90 Days',
-      days: 90,
-      status: 'Active',
-      segments: [
-        { range: '100.00 USDT – 500.00 USDT', rate: '20.00%' },
-        { range: '501.00 USDT – 1000.00 USDT', rate: '40.00%' },
-        { range: '1001.00 USDT – 5000.00 USDT', rate: '65.00%' },
-      ],
-    },
-    {
-      id: '3',
-      name: 'Platinum',
-      duration: '180 Days',
-      days: 180,
-      status: 'Active',
-      segments: [
-        { range: '500.00 USDT – 2000.00 USDT', rate: '30.00%' },
-        { range: '2001.00 USDT – 5000.00 USDT', rate: '55.00%' },
-        { range: '5001.00 USDT – 20000.00 USDT', rate: '85.00%' },
-      ],
-    },
-  ]);
+  const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [segmentModalOpen, setSegmentModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
+
+  const fetchPlans = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/staking/plans');
+      if (res.data && res.data.success && Array.isArray(res.data.plans)) {
+        const formatted = res.data.plans.map((p) => {
+          const minAmt = parseFloat(p.min_amount || 10);
+          const maxAmt = parseFloat(p.max_amount || 5000);
+          const dailyRate = parseFloat(p.daily_return_percent || 1.5);
+          const step = Math.round((maxAmt - minAmt) / 3) || 100;
+
+          return {
+            id: p.id,
+            name: p.title,
+            duration: `${p.duration_days} Days`,
+            days: p.duration_days,
+            status: p.is_active !== false ? 'Active' : 'Unavailable',
+            segments: [
+              { range: `${minAmt.toLocaleString()} USDT – ${(minAmt + step).toLocaleString()} USDT`, rate: `${dailyRate.toFixed(2)}%` },
+              { range: `${(minAmt + step + 1).toLocaleString()} USDT – ${(minAmt + step * 2).toLocaleString()} USDT`, rate: `${(dailyRate * 1.5).toFixed(2)}%` },
+              { range: `${(minAmt + step * 2 + 1).toLocaleString()} USDT – ${maxAmt.toLocaleString()} USDT`, rate: `${(dailyRate * 2.0).toFixed(2)}%` },
+            ],
+          };
+        });
+        setPlans(formatted);
+      }
+    } catch (err) {
+      console.error('Failed to load admin plans:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPlans();
+  }, []);
 
   const handleOpenSegmentModal = (plan) => {
     setSelectedPlan(plan);
     setSegmentModalOpen(true);
   };
 
-  const handleToggleStatus = (id) => {
-    setPlans(
-      plans.map((p) => {
-        if (p.id === id) {
-          const nextStatus =
-            p.status === 'Active'
-              ? 'Coming Soon'
-              : p.status === 'Coming Soon'
-              ? 'Unavailable'
-              : 'Active';
-          toast.success(
-            `Plan "${p.name}" status updated to ${nextStatus}. Existing investor profits continue normally!`
-          );
-          return { ...p, status: nextStatus };
-        }
-        return p;
-      })
-    );
+  const handleToggleStatus = async (id) => {
+    const target = plans.find((p) => p.id === id);
+    if (!target) return;
+
+    const nextIsActive = target.status !== 'Active';
+    const nextStatusText = nextIsActive ? 'Active' : 'Unavailable';
+
+    try {
+      await api.put(`/admin/staking-plans/${id}`, { is_active: nextIsActive });
+      toast.success(`Plan "${target.name}" status updated to ${nextStatusText}!`);
+      setPlans(plans.map((p) => (p.id === id ? { ...p, status: nextStatusText } : p)));
+    } catch (err) {
+      toast.error('Failed to update plan status');
+    }
+  };
+
+  const handleDeletePlan = async (id, name) => {
+    if (!confirm(`Are you sure you want to delete the "${name}" staking plan?`)) return;
+    try {
+      await api.delete(`/admin/staking-plans/${id}`);
+      toast.success(`Plan "${name}" deleted successfully!`);
+      setPlans(plans.filter((p) => p.id !== id));
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to delete plan');
+    }
   };
 
   return (
@@ -92,10 +101,10 @@ export default function AdminStakingPlansPage() {
           </Link>
         </div>
 
-        {/* Staking Plans Table Container (Matching Exact Reference Screenshot) */}
+        {/* Staking Plans Table Container (Horizontally Scrollable) */}
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full min-w-[1000px] text-left border-collapse">
               {/* Vibrant Indigo / Purple Table Header */}
               <thead>
                 <tr className="bg-[#5b5bf5] text-white text-xs font-bold uppercase tracking-wider">
@@ -135,8 +144,6 @@ export default function AdminStakingPlansPage() {
                         className={`px-3 py-1 rounded-full text-[11px] font-bold inline-block ${
                           plan.status === 'Active'
                             ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-                            : plan.status === 'Coming Soon'
-                            ? 'bg-amber-50 text-amber-600 border border-amber-200'
                             : 'bg-slate-100 text-slate-600 border border-slate-300'
                         }`}
                       >
@@ -144,9 +151,9 @@ export default function AdminStakingPlansPage() {
                       </span>
                     </td>
 
-                    {/* Action Column (3 Outline Buttons) */}
+                    {/* Action Column (Full Suite of Action Buttons) */}
                     <td className="py-4 px-6 text-right">
-                      <div className="flex items-center justify-end space-x-2">
+                      <div className="flex items-center justify-end space-x-2 whitespace-nowrap">
                         {/* Edit Button */}
                         <Link
                           href={`/admin/plan/manage/${plan.id}`}
@@ -155,28 +162,22 @@ export default function AdminStakingPlansPage() {
                           <Edit className="w-3.5 h-3.5" /> Edit
                         </Link>
 
-                        {/* Status Cycle Button */}
+                        {/* Disable / Enable Button */}
                         <button
                           onClick={() => handleToggleStatus(plan.id)}
                           className={`border px-3 py-1.5 rounded text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
                             plan.status === 'Active'
                               ? 'border-amber-500 text-amber-600 hover:bg-amber-50'
-                              : plan.status === 'Coming Soon'
-                              ? 'border-slate-400 text-slate-600 hover:bg-slate-50'
                               : 'border-emerald-500 text-emerald-600 hover:bg-emerald-50'
                           }`}
                         >
                           {plan.status === 'Active' ? (
                             <>
-                              <EyeOff className="w-3.5 h-3.5" /> Set Coming Soon
-                            </>
-                          ) : plan.status === 'Coming Soon' ? (
-                            <>
-                              <EyeOff className="w-3.5 h-3.5" /> Set Unavailable
+                              <EyeOff className="w-3.5 h-3.5" /> Disable Plan
                             </>
                           ) : (
                             <>
-                              <CheckCircle2 className="w-3.5 h-3.5" /> Make Active
+                              <CheckCircle2 className="w-3.5 h-3.5" /> Enable Plan
                             </>
                           )}
                         </button>
@@ -188,6 +189,14 @@ export default function AdminStakingPlansPage() {
                         >
                           <BarChart2 className="w-3.5 h-3.5" /> Segment
                         </button>
+
+                        {/* Delete Button */}
+                        <button
+                          onClick={() => handleDeletePlan(plan.id, plan.name)}
+                          className="border border-red-500 text-red-600 hover:bg-red-50 px-3 py-1.5 rounded text-xs font-bold flex items-center gap-1 transition-all cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" /> Delete
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -197,10 +206,16 @@ export default function AdminStakingPlansPage() {
           </div>
         </div>
 
-        {/* Staking Segment Popup Modal (Matching Exact Reference Screenshot) */}
+        {/* Staking Segment Popup Modal (Full Height & Click Outside to Close) */}
         {segmentModalOpen && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl max-w-lg w-full overflow-hidden shadow-2xl relative animate-in fade-in zoom-in duration-200">
+          <div
+            onClick={() => setSegmentModalOpen(false)}
+            className="fixed inset-0 min-h-screen w-full bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-xl max-w-lg w-full overflow-hidden shadow-2xl relative animate-in fade-in zoom-in duration-200 my-auto"
+            >
               {/* Modal Header Bar */}
               <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100">
                 <h3 className="text-base font-bold text-slate-800 font-sans">

@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
-import { Mail, Smartphone, Check, Bold, Italic, Underline, Strikethrough, AlignLeft, AlignCenter, AlignRight, List, Link as LinkIcon, Image as ImageIcon } from 'lucide-react';
+import { Mail, Smartphone, Check, Bold, Italic, Underline, Strikethrough, AlignLeft, AlignCenter, AlignRight, List, Link as LinkIcon, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+
+import api from '../../../../lib/api';
 
 export default function AdminSendNotificationPage() {
   const [channel, setChannel] = useState('email'); // 'email' | 'sms'
@@ -15,22 +17,32 @@ export default function AdminSendNotificationPage() {
   const [coolingPeriod, setCoolingPeriod] = useState('2');
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!subject.trim() || !message.trim()) {
       toast.error('Subject and message content are required.');
       return;
     }
 
-    setSubmitting(true);
-    setTimeout(() => {
-      toast.success(
-        `Notification batch started via ${channel.toUpperCase()}! Target: ${beingSentTo} (${perBatch} users/batch, ${coolingPeriod}s cooldown).`
-      );
-      setSubject('');
-      setMessage('');
+    try {
+      setSubmitting(true);
+      const res = await api.post('/admin/users/send-notification', {
+        channel,
+        target_users: beingSentTo,
+        subject,
+        message,
+      });
+
+      if (res.data.success) {
+        toast.success(res.data.message || `Notification batch started via ${channel.toUpperCase()}!`);
+        setSubject('');
+        setMessage('');
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to send notification batch');
+    } finally {
       setSubmitting(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -106,7 +118,6 @@ export default function AdminSendNotificationPage() {
                 <option value="Mobile Unverified">Mobile Unverified Users</option>
                 <option value="KYC Unverified">KYC Unverified Users</option>
                 <option value="KYC Pending">KYC Pending Users</option>
-                <option value="With Balance">Users With Balance</option>
               </select>
             </div>
 
@@ -243,7 +254,13 @@ export default function AdminSendNotificationPage() {
                 disabled={submitting}
                 className="w-full bg-[#5b5bf5] hover:bg-indigo-600 text-white font-bold py-3.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-md shadow-indigo-500/20 disabled:opacity-50 cursor-pointer"
               >
-                {submitting ? 'Sending Batch Notifications...' : 'Submit'}
+                {submitting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Sending Batch Notifications
+                  </span>
+                ) : (
+                  'Submit'
+                )}
               </button>
             </div>
           </form>

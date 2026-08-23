@@ -46,7 +46,7 @@ function AdminResetPasswordContent() {
     try {
       const res = await submitResetPassword(email, newPassword);
       if (res && res.success) {
-        toast.success('Admin password reset successfully! Redirecting to login...');
+        // toast.success('Admin password reset successfully! Redirecting to login...'); // Handled in AdminAuthContext hook
         setTimeout(() => {
           router.push('/admin/login');
         }, 1200);

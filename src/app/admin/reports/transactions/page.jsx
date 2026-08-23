@@ -1,161 +1,56 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
 import Pagination from '../../../../components/Pagination';
 import { ChevronDown } from 'lucide-react';
-
-const mockTransactionLogsList = [
-  {
-    id: '1',
-    user: 'baba Name',
-    username: '@username',
-    trx: '3A72IJMTKJDT',
-    date: '2026-08-08 05:05 PM',
-    relativeTime: '1 week ago',
-    amount: '+ 1,000.00 USDT',
-    amountType: 'positive',
-    postBalance: '6,407.56 USDT',
-    details: '1,000.00 USDT added for wallet deposit',
-    type: 'Plus',
-    remark: 'Deposit',
-  },
-  {
-    id: '2',
-    user: 'baba Name',
-    username: '@username',
-    trx: '3A72IJMTKJDT',
-    date: '2026-08-08 05:05 PM',
-    relativeTime: '1 week ago',
-    amount: '- 15.00 USDT',
-    amountType: 'negative',
-    postBalance: '6,392.56 USDT',
-    details: '15.00 USDT fee deducted for transaction',
-    type: 'Minus',
-    remark: 'Balance subtract',
-  },
-  {
-    id: '3',
-    user: 'Test test',
-    username: '@testingmailinator',
-    trx: 'VHGTF2VU8Z4V',
-    date: '2026-07-09 02:29 PM',
-    relativeTime: '1 month ago',
-    amount: '+ 40.00 USDT',
-    amountType: 'positive',
-    postBalance: '540.10 USDT',
-    details: '40.00 USDT profit claimed from stake plan',
-    type: 'Plus',
-    remark: 'Profit Claim',
-  },
-  {
-    id: '4',
-    user: 'Test test',
-    username: '@testingmailinator',
-    trx: 'VHGTF2VU8Z4V',
-    date: '2026-07-09 02:29 PM',
-    relativeTime: '1 month ago',
-    amount: '- 70.00 USDT',
-    amountType: 'negative',
-    postBalance: '470.10 USDT',
-    details: '70.00 USDT staked into Silver plan',
-    type: 'Minus',
-    remark: 'Staking',
-  },
-  {
-    id: '5',
-    user: 'Rahul Chauhan',
-    username: '@rahulchauhan',
-    trx: 'NM7ZMPOCP6FO',
-    date: '2026-06-12 01:46 AM',
-    relativeTime: '2 months ago',
-    amount: '- 10.00 USDT',
-    amountType: 'negative',
-    postBalance: '17,092.00 USDT',
-    details: '10.00 USDT deducted for withdrawal request',
-    type: 'Minus',
-    remark: 'Withdrawal',
-  },
-  {
-    id: '6',
-    user: 'Rahul Chauhan',
-    username: '@rahulchauhan',
-    trx: 'NM7ZMPOCP6FO',
-    date: '2026-06-12 01:46 AM',
-    relativeTime: '2 months ago',
-    amount: '+ 100.00 USDT',
-    amountType: 'positive',
-    postBalance: '17,192.00 USDT',
-    details: '100.00 USDT added by admin balance credit',
-    type: 'Plus',
-    remark: 'Balance add',
-  },
-  {
-    id: '7',
-    user: 'baba Name',
-    username: '@username',
-    trx: 'OUARG4QLYK8U',
-    date: '2026-05-07 01:41 PM',
-    relativeTime: '3 months ago',
-    amount: '- 1.00 USDT',
-    amountType: 'negative',
-    postBalance: '5,407.56 USDT',
-    details: '1.00 USDT deducted for admin charge',
-    type: 'Minus',
-    remark: 'Balance subtract',
-  },
-  {
-    id: '8',
-    user: 'Test test',
-    username: '@testingmailinator',
-    trx: '72RUS43CISSH',
-    date: '2026-01-16 06:56 AM',
-    relativeTime: '7 months ago',
-    amount: '+ 500.00 USDT',
-    amountType: 'positive',
-    postBalance: '500.10 USDT',
-    details: '500.00 USDT added for stake maturity payout',
-    type: 'Plus',
-    remark: 'Profit Claim',
-  },
-  {
-    id: '9',
-    user: 'Test test',
-    username: '@testingmailinator',
-    trx: '1D3U5ZTRVJMX',
-    date: '2026-01-16 06:56 AM',
-    relativeTime: '7 months ago',
-    amount: '- 99.00 USDT',
-    amountType: 'negative',
-    postBalance: '0.10 USDT',
-    details: '99.00 USDT deducted for plan subscription',
-    type: 'Minus',
-    remark: 'Staking',
-  },
-];
+import api from '../../../../lib/api';
 
 export default function AdminTransactionLogsPage({ userId = null }) {
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [trxUsername, setTrxUsername] = useState('');
   const [type, setType] = useState('All');
   const [remark, setRemark] = useState('All');
   const [selectedDateFilter, setSelectedDateFilter] = useState('All');
 
-  // Real-time Instant Filtering on every change (No Blue Filter Button needed!)
-  const filteredTransactions = mockTransactionLogsList.filter((trx) => {
-    // Filter by TRX / Username
+  const fetchTransactions = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/admin/transactions');
+      if (res.data.success) {
+        setTransactions(res.data.transactions || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch admin transactions:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
+  const filteredTransactions = transactions.filter((t) => {
     if (trxUsername.trim()) {
       const q = trxUsername.toLowerCase();
-      if (!trx.user.toLowerCase().includes(q) && !trx.username.toLowerCase().includes(q) && !trx.trx.toLowerCase().includes(q)) {
+      const userName = t.user?.full_name || '';
+      const userHandle = t.user?.username || '';
+      const refId = t.id || '';
+      if (!userName.toLowerCase().includes(q) && !userHandle.toLowerCase().includes(q) && !refId.toLowerCase().includes(q)) {
         return false;
       }
     }
 
-    // Filter by Type
-    if (type === 'Plus' && trx.type !== 'Plus') return false;
-    if (type === 'Minus' && trx.type !== 'Minus') return false;
+    if (type === 'Plus' && parseFloat(t.amount || 0) < 0) return false;
+    if (type === 'Minus' && parseFloat(t.amount || 0) >= 0) return false;
 
-    // Filter by Remark
-    if (remark !== 'All' && trx.remark !== remark) return false;
+    if (remark !== 'All') {
+      const actType = t.type || '';
+      if (!actType.toLowerCase().includes(remark.toLowerCase())) return false;
+    }
 
     return true;
   });
@@ -279,55 +174,64 @@ export default function AdminTransactionLogsPage({ userId = null }) {
                     </td>
                   </tr>
                 ) : (
-                  filteredTransactions.map((trx) => (
-                    <tr key={trx.id} className="hover:bg-slate-50/80 transition-colors">
-                      {/* User Column */}
-                      <td className="py-4 px-6">
-                        <div className="font-bold text-slate-800">{trx.user}</div>
-                        <span className="text-[#5b5bf5] font-semibold text-[11px]">
-                          {trx.username}
-                        </span>
-                      </td>
+                  filteredTransactions.map((trx) => {
+                    const userName = trx.user?.full_name || trx.user?.username || 'User';
+                    const userHandle = trx.user?.username ? `@${trx.user.username}` : '';
+                    const refCode = trx.reference_id || trx.id.substring(0, 10).toUpperCase();
+                    const txDate = trx.created_at ? new Date(trx.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recently';
+                    const isPositive = !['WITHDRAWAL', 'ADMIN_DEBIT', 'STAKE'].includes(trx.type);
+                    const formattedAmount = `${isPositive ? '+' : '-'} $${parseFloat(trx.amount || 0).toFixed(2)}`;
+                    const formattedPostBal = `$${parseFloat(trx.balance_after || 0).toFixed(2)}`;
 
-                      {/* TRX Column */}
-                      <td className="py-4 px-6 font-mono font-bold text-slate-700">
-                        {trx.trx}
-                      </td>
+                    return (
+                      <tr key={trx.id} className="hover:bg-slate-50/80 transition-colors">
+                        {/* User Column */}
+                        <td className="py-4 px-6">
+                          <div className="font-bold text-slate-800">{userName}</div>
+                          <span className="text-[#5b5bf5] font-semibold text-[11px]">
+                            {userHandle}
+                          </span>
+                        </td>
 
-                      {/* Transacted Column */}
-                      <td className="py-4 px-6">
-                        <div className="font-medium text-slate-800">{trx.date}</div>
-                        <div className="text-[11px] text-slate-400">{trx.relativeTime}</div>
-                      </td>
+                        {/* TRX Column */}
+                        <td className="py-4 px-6 font-mono font-bold text-slate-700">
+                          {refCode}
+                        </td>
 
-                      {/* Amount Column (Strictly USDT, Green for +, Red for -) */}
-                      <td className="py-4 px-6 font-bold font-righteous">
-                        <span className={trx.amountType === 'positive' ? 'text-emerald-600' : 'text-red-500'}>
-                          {trx.amount}
-                        </span>
-                      </td>
+                        {/* Transacted Column */}
+                        <td className="py-4 px-6">
+                          <div className="font-medium text-slate-800">{txDate}</div>
+                        </td>
 
-                      {/* Post Balance Column (USDT Only) */}
-                      <td className="py-4 px-6 font-semibold text-slate-800 font-mono">
-                        {trx.postBalance}
-                      </td>
+                        {/* Amount Column */}
+                        <td className="py-4 px-6 font-bold font-righteous">
+                          <span className={isPositive ? 'text-emerald-600' : 'text-red-500'}>
+                            {formattedAmount}
+                          </span>
+                        </td>
 
-                      {/* Details Column */}
-                      <td className="py-4 px-6 text-right text-slate-500 font-medium">
-                        {trx.details}
-                      </td>
-                    </tr>
-                  ))
+                        {/* Post Balance Column */}
+                        <td className="py-4 px-6 font-semibold text-slate-800 font-mono">
+                          {formattedPostBal}
+                        </td>
+
+                        {/* Details Column */}
+                        <td className="py-4 px-6 text-right text-slate-500 font-medium">
+                          {trx.description || trx.type}
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
           </div>
 
-          {/* Universal Pagination Utility Footer (Matching Screenshot 5) */}
+          {/* Universal Pagination Utility Footer */}
           <Pagination
             currentPage={1}
-            totalPages={62}
-            totalResults={918}
+            totalPages={Math.max(1, Math.ceil(filteredTransactions.length / 15))}
+            totalResults={filteredTransactions.length}
             pageSize={15}
             onPageChange={(page) => console.log('Page:', page)}
           />

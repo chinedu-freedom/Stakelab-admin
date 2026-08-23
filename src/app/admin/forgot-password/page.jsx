@@ -29,7 +29,7 @@ export default function AdminForgotPasswordPage() {
     try {
       const res = await requestPasswordReset(email);
       if (res && res.success) {
-        toast.success('Password reset OTP has been sent to admin email.');
+        // toast.success('Password reset OTP has been sent to admin email.'); // Handled in AdminAuthContext hook
         setTimeout(() => {
           router.push(`/admin/verify-otp?email=${encodeURIComponent(email)}`);
         }, 1000);

@@ -8,6 +8,8 @@ const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
+  fallback: ['system-ui', 'sans-serif'],
+  adjustFontFallback: false,
 });
 
 const righteous = Righteous({
@@ -15,6 +17,8 @@ const righteous = Righteous({
   subsets: ['latin'],
   variable: '--font-righteous',
   display: 'swap',
+  fallback: ['system-ui', 'cursive'],
+  adjustFontFallback: false,
 });
 
 export const metadata = {
@@ -34,7 +38,7 @@ export default function RootLayout({ children }) {
       <body className={`${inter.className} bg-[#07193b] text-slate-100 antialiased min-h-screen font-sans`}>
         <AdminAuthProvider>
           {children}
-          <Toaster position="top-right" theme="dark" richColors closeButton />
+          <Toaster position="top-right" closeButton />
         </AdminAuthProvider>
       </body>
     </html>

@@ -10,7 +10,7 @@ const mockTasksList = [
   {
     id: '1',
     title: 'Join Telegram Official Channel',
-    reward: '₮5.00 USDT',
+    reward: '$5.00 USDT',
     link: 'https://t.me/stakelab_official',
     completions: '412 users',
     status: 'Active',
@@ -18,7 +18,7 @@ const mockTasksList = [
   {
     id: '2',
     title: 'Follow Twitter / X Page',
-    reward: '₮3.00 USDT',
+    reward: '$3.00 USDT',
     link: 'https://x.com/stakelab_app',
     completions: '280 users',
     status: 'Active',
@@ -26,7 +26,7 @@ const mockTasksList = [
   {
     id: '3',
     title: 'Deposit First $50',
-    reward: '₮10.00 USDT',
+    reward: '$10.00 USDT',
     link: 'https://stakelab.app/deposit',
     completions: '195 users',
     status: 'Active',
@@ -49,7 +49,7 @@ export default function AdminTasksPage() {
     const newTask = {
       id: String(Date.now()),
       title: taskTitle,
-      reward: `₮${parseFloat(taskReward).toFixed(2)} USDT`,
+      reward: `$${parseFloat(taskReward).toFixed(2)} USDT`,
       link: taskLink || '#',
       completions: '0 users',
       status: 'Active',
@@ -138,10 +138,16 @@ export default function AdminTasksPage() {
           />
         </div>
 
-        {/* Create Task Modal */}
+        {/* Create Task Modal (Full Height & Click Outside to Close) */}
         {modalOpen && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl max-w-md w-full p-6 space-y-4 shadow-2xl relative animate-in fade-in zoom-in duration-200">
+          <div
+            onClick={() => setModalOpen(false)}
+            className="fixed inset-0 min-h-screen w-full bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-xl max-w-md w-full p-6 space-y-4 shadow-2xl relative animate-in fade-in zoom-in duration-200 my-auto"
+            >
               <div className="flex justify-between items-center pb-2 border-b border-slate-100">
                 <h3 className="text-base font-bold text-slate-800 font-sans">
                   Create Reward Task
