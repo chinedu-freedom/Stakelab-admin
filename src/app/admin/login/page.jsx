@@ -62,11 +62,6 @@ export default function AdminLoginPage() {
               </p>
             </div>
 
-            {/* General Form Error */}
-            {errors.form && (
-              <p className="mb-4 text-red-400 text-xs font-medium">{errors.form}</p>
-            )}
-
             {/* Login Form */}
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Username / Email Field */}
