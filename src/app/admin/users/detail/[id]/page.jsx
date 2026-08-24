@@ -721,30 +721,6 @@ export default function AdminUserDetailPage({ params }) {
                 </button>
               </div>
 
-              {/* 2FA Verification */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 font-sans mb-1.5">
-                  2FA Verification
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setUserData({ ...userData, twoFaEnabled: !userData.twoFaEnabled })}
-                  className={`w-full h-11 rounded-lg text-xs font-bold text-white transition-all cursor-pointer shadow-sm relative flex items-center justify-between px-2 overflow-hidden ${
-                    userData.twoFaEnabled ? 'bg-[#22c55e] hover:bg-[#16a34a]' : 'bg-[#ef4444] hover:bg-[#dc2626]'
-                  }`}
-                >
-                  {!userData.twoFaEnabled && (
-                    <span className="w-2.5 h-7 rounded bg-[#061127] shadow-inner shrink-0" />
-                  )}
-                  <span className="flex-1 text-center font-bold text-white tracking-wide">
-                    {userData.twoFaEnabled ? 'Enable' : 'Disable'}
-                  </span>
-                  {userData.twoFaEnabled && (
-                    <span className="w-2.5 h-7 rounded bg-[#061127] shadow-inner shrink-0" />
-                  )}
-                </button>
-              </div>
-
               {/* KYC Button (Matching Screenshot 3) */}
               <div>
                 <div className="flex justify-between items-center mb-1.5">
