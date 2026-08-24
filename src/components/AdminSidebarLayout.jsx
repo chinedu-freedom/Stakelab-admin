@@ -393,7 +393,7 @@ export default function AdminSidebarLayout({ children }) {
       <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
         {/* Top Header Navbar */}
         <header className="h-16 bg-[#091630] text-white border-b border-[#142343] shrink-0 z-20 px-4 sm:px-6 flex items-center justify-between shadow-md">
-          {/* Left Side: Mobile Menu Button, Brand Logo & Search Bar */}
+          {/* Left Side: Mobile Menu Button & Search Bar */}
           <div className="flex items-center space-x-4">
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -401,16 +401,6 @@ export default function AdminSidebarLayout({ children }) {
             >
               {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
-
-            {/* Mobile Screen Logo & Brand Name */}
-            <Link href="/admin/dashboard" className="flex lg:hidden items-center space-x-2">
-              <div className="w-7 h-7 rounded bg-gradient-to-r from-[#ff0044] to-[#fe780b] flex items-center justify-center text-white font-bold text-sm shadow-md shadow-red-500/20 shrink-0">
-                E
-              </div>
-              <span className="text-base font-extrabold text-white tracking-wide font-sans">
-                Ever<span className="text-[#5b5bf5]">Stake</span>
-              </span>
-            </Link>
 
             {/* Live Global Search Box */}
             <div className="relative hidden sm:block w-64 lg:w-96" ref={searchRef}>
