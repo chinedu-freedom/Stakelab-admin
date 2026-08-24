@@ -33,6 +33,7 @@ import {
   ShieldCheck,
   User,
   Menu,
+  X,
   ChevronDown,
 } from 'lucide-react';
 
