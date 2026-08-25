@@ -136,11 +136,23 @@ export default function AdminUserDetailPage({ params }) {
     try {
       const res = await api.post(`/admin/users/${userId}/impersonate`);
       if (res.data && res.data.success && res.data.token) {
-        localStorage.setItem('stakelab_token', res.data.token);
-        window.open('http://localhost:3000/dashboard', '_blank');
+        const token = res.data.token;
+        const isLocal = typeof window !== 'undefined' && window.location.hostname.includes('localhost');
+        const defaultUserAppUrl = isLocal ? 'http://localhost:3000' : 'https://everstake.cx';
+        const userAppUrl = process.env.NEXT_PUBLIC_USER_APP_URL || defaultUserAppUrl;
+
+        document.cookie = `stakelab_token=${token}; path=/; max-age=7200; SameSite=Lax${!isLocal ? '; domain=.everstake.cx; Secure' : ''}`;
+        document.cookie = `sec-prd-token=${token}; path=/; max-age=7200; SameSite=Lax${!isLocal ? '; domain=.everstake.cx; Secure' : ''}`;
+        localStorage.setItem('stakelab_token', token);
+
+        const targetUrl = `${userAppUrl.replace(/\/$/, '')}/dashboard?impersonate_token=${token}`;
+        toast.success(`Logging in as @${userData.username}...`);
+        window.open(targetUrl, '_blank');
+      } else {
+        toast.error(res.data?.message || 'Failed to generate user impersonation token.');
       }
     } catch (err) {
-      // Only keep actual system failure errors if needed, or swallow quietly
+      toast.error(err.response?.data?.message || 'Error occurred during user impersonation.');
     }
   };
 

@@ -42,19 +42,28 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState({
     totalUsers: 0,
     activeUsers: 0,
+    todayUsers: 0,
     emailUnverified: 0,
     mobileUnverified: 0,
     kycUnverified: 0,
     totalDeposited: 0,
     todaysDeposit: 0,
     pendingDeposits: 0,
+    pendingDepositsSum: 0,
+    approvedDepositsCount: 0,
     rejectedDeposits: 0,
     depositCharge: 0,
     depositChargeCount: 0,
     totalWithdrawn: 0,
+    todaysWithdrawal: 0,
     pendingWithdrawals: 0,
+    pendingWithdrawalsSum: 0,
+    approvedWithdrawalsCount: 0,
     rejectedWithdrawals: 0,
     withdrawalCharge: 0,
+    totalStaked: 0,
+    todaysStaking: 0,
+    activeStakingCount: 0,
   });
 
   const [dateFilterDep, setDateFilterDep] = useState('Last 15 Days');
@@ -93,20 +102,20 @@ export default function AdminDashboardPage() {
           </h1>
         </div>
 
-        {/* Top 4 Stat Cards Row (Matching Image 1) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {/* User Metrics Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {/* Card 1: Total Users */}
           <Link
             href="/admin/users"
-            className="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-indigo-500 shadow-sm flex items-center justify-between hover:shadow-md transition-all group"
+            className="bg-white p-4 rounded-xl border border-slate-200 border-l-4 border-l-indigo-500 shadow-sm flex items-center justify-between hover:shadow-md transition-all group"
           >
-            <div className="flex items-center space-x-3.5">
-              <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-                <Users className="w-5 h-5" />
+            <div className="flex items-center space-x-3">
+              <div className="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                <Users className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-xs font-semibold text-slate-500">Total Users</div>
-                <div className="text-xl font-bold text-slate-800 mt-0.5">
+                <div className="text-[11px] font-semibold text-slate-500">Total Users</div>
+                <div className="text-lg font-bold text-slate-800 mt-0.5">
                   {stats.totalUsers}
                 </div>
               </div>
@@ -117,15 +126,15 @@ export default function AdminDashboardPage() {
           {/* Card 2: Active Users */}
           <Link
             href="/admin/users/active"
-            className="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm flex items-center justify-between hover:shadow-md transition-all group"
+            className="bg-white p-4 rounded-xl border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm flex items-center justify-between hover:shadow-md transition-all group"
           >
-            <div className="flex items-center space-x-3.5">
-              <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                <UserCheck className="w-5 h-5" />
+            <div className="flex items-center space-x-3">
+              <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                <UserCheck className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-xs font-semibold text-slate-500">Active Users</div>
-                <div className="text-xl font-bold text-slate-800 mt-0.5">
+                <div className="text-[11px] font-semibold text-slate-500">Active Users</div>
+                <div className="text-lg font-bold text-slate-800 mt-0.5">
                   {stats.activeUsers}
                 </div>
               </div>
@@ -133,38 +142,38 @@ export default function AdminDashboardPage() {
             <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
           </Link>
 
-          {/* Card 3: Email Unverified Users */}
+          {/* Card 3: Today's Users */}
           <Link
-            href="/admin/users/email-unverified"
-            className="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-red-500 shadow-sm flex items-center justify-between hover:shadow-md transition-all group"
+            href="/admin/users"
+            className="bg-white p-4 rounded-xl border border-slate-200 border-l-4 border-l-blue-500 shadow-sm flex items-center justify-between hover:shadow-md transition-all group"
           >
-            <div className="flex items-center space-x-3.5">
-              <div className="w-10 h-10 rounded-lg bg-red-50 text-red-600 flex items-center justify-center shrink-0">
-                <Mail className="w-5 h-5" />
+            <div className="flex items-center space-x-3">
+              <div className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <UserPlus className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-xs font-semibold text-slate-500">Email Unverified Users</div>
-                <div className="text-xl font-bold text-slate-800 mt-0.5">
-                  {stats.emailUnverified}
+                <div className="text-[11px] font-semibold text-slate-500">Today's Users</div>
+                <div className="text-lg font-bold text-slate-800 mt-0.5">
+                  {stats.todayUsers}
                 </div>
               </div>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
           </Link>
 
-          {/* Card 4: Mobile Unverified Users */}
+          {/* Card 4: Email Unverified Users */}
           <Link
-            href="/admin/users/mobile-unverified"
-            className="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-sky-500 shadow-sm flex items-center justify-between hover:shadow-md transition-all group"
+            href="/admin/users/email-unverified"
+            className="bg-white p-4 rounded-xl border border-slate-200 border-l-4 border-l-red-500 shadow-sm flex items-center justify-between hover:shadow-md transition-all group"
           >
-            <div className="flex items-center space-x-3.5">
-              <div className="w-10 h-10 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
-                <Smartphone className="w-5 h-5" />
+            <div className="flex items-center space-x-3">
+              <div className="w-9 h-9 rounded-lg bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+                <Mail className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-xs font-semibold text-slate-500">Mobile Unverified Users</div>
-                <div className="text-xl font-bold text-slate-800 mt-0.5">
-                  {stats.mobileUnverified}
+                <div className="text-[11px] font-semibold text-slate-500">Email Unverified</div>
+                <div className="text-lg font-bold text-slate-800 mt-0.5">
+                  {stats.emailUnverified}
                 </div>
               </div>
             </div>
@@ -174,15 +183,15 @@ export default function AdminDashboardPage() {
           {/* Card 5: KYC Unverified Users */}
           <Link
             href="/admin/users/kyc-unverified"
-            className="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-amber-500 shadow-sm flex items-center justify-between hover:shadow-md transition-all group"
+            className="bg-white p-4 rounded-xl border border-slate-200 border-l-4 border-l-amber-500 shadow-sm flex items-center justify-between hover:shadow-md transition-all group"
           >
-            <div className="flex items-center space-x-3.5">
-              <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                <UserCheck className="w-5 h-5" />
+            <div className="flex items-center space-x-3">
+              <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                <UserCheck className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-xs font-semibold text-slate-500">KYC Unverified Users</div>
-                <div className="text-xl font-bold text-slate-800 mt-0.5">
+                <div className="text-[11px] font-semibold text-slate-500">KYC Unverified</div>
+                <div className="text-lg font-bold text-slate-800 mt-0.5">
                   {stats.kycUnverified}
                 </div>
               </div>
@@ -191,27 +200,28 @@ export default function AdminDashboardPage() {
           </Link>
         </div>
 
-        {/* Middle 2 Large Cards (Deposits Summary & Withdrawals Summary) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Box: Deposits Summary */}
+        {/* Middle Large Cards Grid (Deposits Summary, Withdrawals Summary, Staking Summary) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Box 1: Deposits Summary */}
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-            <h2 className="text-base font-bold text-slate-800 font-sans">
-              Deposits
+            <h2 className="text-base font-bold text-slate-800 font-sans flex items-center justify-between">
+              <span>Deposits Overview</span>
+              <span className="text-xs text-slate-400 font-normal">Live</span>
             </h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-3">
               {/* Total Deposited */}
               <Link
                 href="/admin/deposits"
-                className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between hover:bg-slate-100/80 transition-all group"
+                className="p-3 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between hover:bg-slate-100/80 transition-all group"
               >
                 <div className="flex items-center space-x-3">
-                  <div className="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
                     <HandCoins className="w-4 h-4" />
                   </div>
                   <div>
                     <div className="text-sm font-bold text-slate-800">
-                      ${stats.totalDeposited.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      ${Number(stats.totalDeposited || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </div>
                     <div className="text-[11px] text-slate-400">Total Deposited</div>
                   </div>
@@ -222,34 +232,53 @@ export default function AdminDashboardPage() {
               {/* Today's Deposit */}
               <Link
                 href="/admin/deposits"
-                className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between hover:bg-slate-100/80 transition-all group"
+                className="p-3 rounded-xl border border-blue-100 bg-blue-50/40 flex items-center justify-between hover:bg-blue-100/60 transition-all group"
               >
                 <div className="flex items-center space-x-3">
-                  <div className="w-9 h-9 rounded-lg bg-cyan-100 text-cyan-600 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
                     <Calendar className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-sm font-bold text-slate-800">
-                      ${stats.todaysDeposit.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    <div className="text-sm font-bold text-blue-900">
+                      ${Number(stats.todaysDeposit || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </div>
-                    <div className="text-[11px] text-slate-400">Today's Deposit</div>
+                    <div className="text-[11px] text-blue-600 font-medium">Today's Deposit</div>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-blue-400 group-hover:translate-x-1 transition-transform" />
+              </Link>
+
+              {/* Pending Deposits Amount & Count */}
+              <Link
+                href="/admin/deposits/pending"
+                className="p-3 rounded-xl border border-amber-100 bg-amber-50/40 flex items-center justify-between hover:bg-amber-100/60 transition-all group"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-slate-800">
+                      ${Number(stats.pendingDepositsSum || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })} ({stats.pendingDeposits})
+                    </div>
+                    <div className="text-[11px] text-amber-600 font-medium">Pending Deposits</div>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
               </Link>
 
-              {/* Pending Deposits */}
+              {/* Approved Deposits Count */}
               <Link
-                href="/admin/deposits/pending"
-                className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between hover:bg-slate-100/80 transition-all group"
+                href="/admin/deposits/approved"
+                className="p-3 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between hover:bg-slate-100/80 transition-all group"
               >
                 <div className="flex items-center space-x-3">
-                  <div className="w-9 h-9 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
-                    <Loader2 className="w-4 h-4" />
+                  <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                    <HandCoins className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-sm font-bold text-slate-800">{stats.pendingDeposits}</div>
-                    <div className="text-[11px] text-slate-400">Pending Deposits</div>
+                    <div className="text-sm font-bold text-slate-800">{stats.approvedDepositsCount || 0}</div>
+                    <div className="text-[11px] text-slate-400">Approved Deposit Count</div>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
@@ -258,10 +287,10 @@ export default function AdminDashboardPage() {
               {/* Rejected Deposits */}
               <Link
                 href="/admin/deposits/rejected"
-                className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between hover:bg-slate-100/80 transition-all group"
+                className="p-3 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between hover:bg-slate-100/80 transition-all group"
               >
                 <div className="flex items-center space-x-3">
-                  <div className="w-9 h-9 rounded-lg bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center shrink-0">
                     <XCircle className="w-4 h-4" />
                   </div>
                   <div>
@@ -271,57 +300,29 @@ export default function AdminDashboardPage() {
                 </div>
                 <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
               </Link>
-
-              {/* Deposited Charge */}
-              <div className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
-                    <Percent className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-slate-800">
-                      ${stats.depositCharge.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                    </div>
-                    <div className="text-[11px] text-slate-400">Deposit Charge</div>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400" />
-              </div>
-
-              {/* Deposit Charge Count */}
-              <div className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-9 h-9 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center shrink-0">
-                    <Percent className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-slate-800">{stats.depositChargeCount}</div>
-                    <div className="text-[11px] text-slate-400">Deposit Charge Count</div>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400" />
-              </div>
             </div>
           </div>
 
-          {/* Right Box: Withdrawals Summary */}
+          {/* Box 2: Withdrawals Summary */}
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-            <h2 className="text-base font-bold text-slate-800 font-sans">
-              Withdrawals
+            <h2 className="text-base font-bold text-slate-800 font-sans flex items-center justify-between">
+              <span>Withdrawals Overview</span>
+              <span className="text-xs text-slate-400 font-normal">Live</span>
             </h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              {/* Total Withdrawn */}
               <Link
                 href="/admin/withdrawals"
-                className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between hover:bg-slate-100/80 transition-all group"
+                className="p-3 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between hover:bg-slate-100/80 transition-all group"
               >
                 <div className="flex items-center space-x-3">
-                  <div className="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
                     <Wallet className="w-4 h-4" />
                   </div>
                   <div>
                     <div className="text-sm font-bold text-slate-800">
-                      ${stats.totalWithdrawn.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      ${Number(stats.totalWithdrawn || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </div>
                     <div className="text-[11px] text-slate-400">Total Withdrawn</div>
                   </div>
@@ -329,28 +330,68 @@ export default function AdminDashboardPage() {
                 <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
               </Link>
 
+              {/* Today's Withdrawal */}
               <Link
-                href="/admin/withdrawals/pending"
-                className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between hover:bg-slate-100/80 transition-all group"
+                href="/admin/withdrawals"
+                className="p-3 rounded-xl border border-red-100 bg-red-50/40 flex items-center justify-between hover:bg-red-100/60 transition-all group"
               >
                 <div className="flex items-center space-x-3">
-                  <div className="w-9 h-9 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
-                    <Loader2 className="w-4 h-4" />
+                  <div className="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                    <Calendar className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-sm font-bold text-slate-800">{stats.pendingWithdrawals}</div>
-                    <div className="text-[11px] text-slate-400">Pending Withdrawals</div>
+                    <div className="text-sm font-bold text-red-900">
+                      ${Number(stats.todaysWithdrawal || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    </div>
+                    <div className="text-[11px] text-red-600 font-medium">Today's Withdrawal</div>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-red-400 group-hover:translate-x-1 transition-transform" />
+              </Link>
+
+              {/* Pending Withdrawals Amount & Count */}
+              <Link
+                href="/admin/withdrawals/pending"
+                className="p-3 rounded-xl border border-amber-100 bg-amber-50/40 flex items-center justify-between hover:bg-amber-100/60 transition-all group"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-slate-800">
+                      ${Number(stats.pendingWithdrawalsSum || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })} ({stats.pendingWithdrawals})
+                    </div>
+                    <div className="text-[11px] text-amber-600 font-medium">Pending Withdrawals</div>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
               </Link>
 
+              {/* Approved Withdrawals Count */}
               <Link
-                href="/admin/withdrawals/rejected"
-                className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between hover:bg-slate-100/80 transition-all group"
+                href="/admin/withdrawals/approved"
+                className="p-3 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between hover:bg-slate-100/80 transition-all group"
               >
                 <div className="flex items-center space-x-3">
-                  <div className="w-9 h-9 rounded-lg bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                    <Wallet className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-slate-800">{stats.approvedWithdrawalsCount || 0}</div>
+                    <div className="text-[11px] text-slate-400">Approved Withdraw Count</div>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+              </Link>
+
+              {/* Rejected Withdrawals */}
+              <Link
+                href="/admin/withdrawals/rejected"
+                className="p-3 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between hover:bg-slate-100/80 transition-all group"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center shrink-0">
                     <XCircle className="w-4 h-4" />
                   </div>
                   <div>
@@ -360,21 +401,71 @@ export default function AdminDashboardPage() {
                 </div>
                 <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
               </Link>
+            </div>
+          </div>
 
-              <div className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between">
+          {/* Box 3: Staking & Investment Overview */}
+          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+            <h2 className="text-base font-bold text-slate-800 font-sans flex items-center justify-between">
+              <span>Staking & Investments</span>
+              <span className="text-xs text-slate-400 font-normal">Live</span>
+            </h2>
+
+            <div className="space-y-3">
+              {/* Total Staked */}
+              <Link
+                href="/admin/reports/staking"
+                className="p-3 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between hover:bg-slate-100/80 transition-all group"
+              >
                 <div className="flex items-center space-x-3">
-                  <div className="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
-                    <Percent className="w-4 h-4" />
+                  <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center shrink-0">
+                    <Layers className="w-4 h-4" />
                   </div>
                   <div>
                     <div className="text-sm font-bold text-slate-800">
-                      ${stats.withdrawalCharge.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      ${Number(stats.totalStaked || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </div>
-                    <div className="text-[11px] text-slate-400">Withdrawal Charge</div>
+                    <div className="text-[11px] text-slate-400">Total Staked Value</div>
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-400" />
-              </div>
+                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+              </Link>
+
+              {/* Today's Staking */}
+              <Link
+                href="/admin/reports/staking"
+                className="p-3 rounded-xl border border-emerald-100 bg-emerald-50/40 flex items-center justify-between hover:bg-emerald-100/60 transition-all group"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                    <Zap className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-emerald-900">
+                      ${Number(stats.todaysStaking || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    </div>
+                    <div className="text-[11px] text-emerald-600 font-medium">Today's Staking Investments</div>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform" />
+              </Link>
+
+              {/* Active Staking Plans Count */}
+              <Link
+                href="/admin/reports/staking"
+                className="p-3 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between hover:bg-slate-100/80 transition-all group"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                    <TrendingUp className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-slate-800">{stats.activeStakingCount || 0}</div>
+                    <div className="text-[11px] text-slate-400">Active Staking Investments</div>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+              </Link>
             </div>
           </div>
         </div>
