@@ -67,7 +67,13 @@ export default function AdminUserDetailPage({ params }) {
         const u = res.data.user;
         const nameParts = (u.full_name || '').split(' ');
         const fName = nameParts[0] || 'User';
-        const lName = nameParts.slice(1).join(' ') || '';
+        const foundCountry = countries.find((c) => c.name.toLowerCase() === (u.country || '').toLowerCase()) || countries[0];
+        let rawMobile = u.mobile || '';
+        // Clean mobile number to contain only digits, removing dial code prefix if embedded
+        rawMobile = rawMobile.replace(/^\+\d+\s*/, '').replace(/\D/g, '');
+        if (rawMobile.startsWith('0') && rawMobile.length === 11) {
+          rawMobile = rawMobile.substring(1);
+        }
 
         setUserData({
           id: u.id,
@@ -75,13 +81,13 @@ export default function AdminUserDetailPage({ params }) {
           lastName: lName,
           username: u.username || 'user',
           email: u.email || '',
-          dialCode: '+1',
-          mobile: u.mobile || '',
+          dialCode: foundCountry.dialCode || '+1',
+          mobile: rawMobile,
           address: u.address || '',
           city: u.city || '',
           state: u.state || '',
           zipCode: u.zip_code || '',
-          country: u.country || 'United States',
+          country: u.country || foundCountry.name,
           mainBalance: `$${parseFloat(u.balance || 0).toFixed(2)}`,
           walletBalanceUsdt: `$${parseFloat(u.staked_balance || 0).toFixed(2)}`,
           deposits: `$${(u.deposits || []).reduce((acc, d) => acc + parseFloat(d.amount || 0), 0).toFixed(2)}`,
@@ -516,8 +522,8 @@ export default function AdminUserDetailPage({ params }) {
           </div>
 
           <form onSubmit={handleFormSubmit} className="space-y-5">
-            {/* Row 1: First Name & Last Name */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Row 1: First Name, Last Name, Username */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 font-sans mb-1.5">
                   First Name
@@ -538,6 +544,18 @@ export default function AdminUserDetailPage({ params }) {
                   type="text"
                   value={userData.lastName}
                   onChange={(e) => setUserData({ ...userData, lastName: e.target.value })}
+                  className="w-full h-11 bg-white border border-slate-200 rounded-lg px-4 text-xs text-slate-800 font-sans focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 font-sans mb-1.5">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  value={userData.username}
+                  onChange={(e) => setUserData({ ...userData, username: e.target.value })}
                   className="w-full h-11 bg-white border border-slate-200 rounded-lg px-4 text-xs text-slate-800 font-sans focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
@@ -567,8 +585,14 @@ export default function AdminUserDetailPage({ params }) {
                   </div>
                   <input
                     type="text"
+                    maxLength={10}
                     value={userData.mobile}
-                    onChange={(e) => setUserData({ ...userData, mobile: e.target.value })}
+                    onChange={(e) => {
+                      let val = e.target.value.replace(/\D/g, '');
+                      if (val.startsWith('0')) val = val.substring(1);
+                      setUserData({ ...userData, mobile: val.slice(0, 10) });
+                    }}
+                    placeholder="e.g. 8158051119"
                     className="w-full h-11 bg-transparent border-0 outline-none px-4 text-xs text-slate-800 font-sans"
                   />
                 </div>

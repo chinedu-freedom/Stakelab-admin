@@ -26,6 +26,8 @@ export const metadata = {
   description: 'Manage users, staking pools, deposits, withdrawals, and system settings for EverStake (everstake.cx).',
 };
 
+import FaviconGuard from '../components/FaviconGuard';
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${inter.variable} ${righteous.variable}`}>
@@ -36,6 +38,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className={`${inter.className} bg-[#07193b] text-slate-100 antialiased min-h-screen font-sans`}>
+        <FaviconGuard />
         <AdminAuthProvider>
           {children}
           <Toaster position="top-right" closeButton />
