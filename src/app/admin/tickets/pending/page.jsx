@@ -39,8 +39,10 @@ export default function AdminTicketsFilteredPage({
     if (statusFilter === 'Pending' && t.status === 'CLOSED') return false;
     if (search.trim()) {
       const q = search.toLowerCase();
-      const userName = t.user?.full_name || t.user?.username || '';
-      return t.subject.toLowerCase().includes(q) || userName.toLowerCase().includes(q) || t.ticket_id.toLowerCase().includes(q);
+      const subjectStr = String(t.subject || '').toLowerCase();
+      const ticketIdStr = String(t.ticket_id || '').toLowerCase();
+      const userName = String(t.user?.full_name || t.user?.username || '').toLowerCase();
+      return subjectStr.includes(q) || userName.includes(q) || ticketIdStr.includes(q);
     }
     return true;
   });

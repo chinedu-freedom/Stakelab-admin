@@ -42,8 +42,12 @@ export default function AdminUsersFilteredPage({ title = 'Active Users', filterT
 
     // Apply Search Filter
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      return u.name.toLowerCase().includes(q) || u.username.toLowerCase().includes(q);
+      const q = searchQuery.toLowerCase().trim();
+      const nameStr = String(u.name || u.full_name || '').toLowerCase();
+      const userStr = String(u.username || '').toLowerCase();
+      const emailStr = String(u.email || '').toLowerCase();
+      const mobileStr = String(u.mobile || '').toLowerCase();
+      return nameStr.includes(q) || userStr.includes(q) || emailStr.includes(q) || mobileStr.includes(q);
     }
     return true;
   });
