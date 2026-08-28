@@ -149,8 +149,6 @@ export default function AdminCreatePlanPage() {
                 </Select>
               </div>
             </div>
-              </div>
-            </div>
 
             {/* Feature Configuration Toggles Grid */}
             <div className="pt-2 border-t border-slate-100">
