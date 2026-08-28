@@ -183,7 +183,15 @@ export default function AdminLogoFaviconPage() {
                   disabled={saving}
                   className="w-full bg-[#5b5bf5] hover:bg-indigo-600 text-white font-bold py-3.5 rounded-lg text-xs tracking-wider transition-all shadow-md shadow-indigo-500/20 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Submit
+                  {saving ? (
+                    <>
+                      Submit <Loader2 className="w-4 h-4 animate-spin" />
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" /> Submit
+                    </>
+                  )}
                 </button>
               </div>
             </form>
