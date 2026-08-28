@@ -15,6 +15,7 @@ export default function AdminCreatePlanPage() {
   const [segments, setSegments] = useState([
     { id: '1', minAmount: '', maxAmount: '', interest: '' },
   ]);
+  const [tier, setTier] = useState('Flexible Tier');
   const [isFixedDeposit, setIsFixedDeposit] = useState(true);
   const [capitalReturn, setCapitalReturn] = useState(true);
   const [isCompounding, setIsCompounding] = useState(true);
@@ -61,6 +62,7 @@ export default function AdminCreatePlanPage() {
         max_amount: maxAmt,
         daily_return_percent: dailyReturn,
         duration_days: parseInt(duration),
+        tier,
         capital_return: capitalReturn,
       });
       toast.success('Staking Plan created successfully!');
@@ -90,11 +92,11 @@ export default function AdminCreatePlanPage() {
           </Link>
         </div>
 
-        {/* Form Card Container (Matching Exact Reference Screenshot) */}
+        {/* Form Card Container */}
         <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Row 1: Name & Duration */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Row 1: Name, Duration & Tier */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Name Input */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 font-sans mb-2">
@@ -110,7 +112,7 @@ export default function AdminCreatePlanPage() {
                 />
               </div>
 
-              {/* Duration Input Group with Days Badge */}
+              {/* Duration Input Group */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 font-sans mb-2">
                   Duration <span className="text-red-500">*</span>
@@ -128,6 +130,21 @@ export default function AdminCreatePlanPage() {
                     Days
                   </div>
                 </div>
+              </div>
+
+              {/* Plan Tier Select */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 font-sans mb-2">
+                  Plan Tier <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={tier}
+                  onChange={(e) => setTier(e.target.value)}
+                  className="w-full h-11 bg-white border border-slate-200 rounded-lg px-4 text-slate-800 text-xs font-bold font-sans focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all cursor-pointer"
+                >
+                  <option value="Flexible Tier">Flexible Tier</option>
+                  <option value="Dynamic Tier">Dynamic Tier</option>
+                </select>
               </div>
             </div>
 
