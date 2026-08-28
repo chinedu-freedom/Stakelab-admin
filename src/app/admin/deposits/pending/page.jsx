@@ -4,15 +4,16 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
 import Pagination from '../../../../components/Pagination';
-import { Search, Monitor } from 'lucide-react';
+import { Search, Monitor, Loader2 } from 'lucide-react';
 import api from '../../../../lib/api';
 
 export default function AdminDepositsFilteredPage({
   title = 'Pending Deposits',
-  statusFilter = 'Pending',
+  filterStatus = 'PENDING',
 }) {
   const [deposits, setDeposits] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTrx, setSearchTrx] = useState('');
   const [searchUser, setSearchUser] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -36,23 +37,26 @@ export default function AdminDepositsFilteredPage({
   }, []);
 
   const filteredDeposits = deposits.filter((d) => {
-    if (statusFilter !== 'All') {
-      const matchStatus = statusFilter.toUpperCase();
-      if (d.status !== matchStatus) return false;
+    // Status filter
+    if (filterStatus !== 'ALL' && d.status !== filterStatus) return false;
+
+    // Search TRX
+    if (searchTrx.trim()) {
+      const q = searchTrx.toLowerCase().trim();
+      const refId = (d.payment_id || d.id || '').toLowerCase();
+      if (!refId.includes(q)) return false;
     }
+
+    // Search User / Email
     if (searchUser.trim()) {
-      const q = searchUser.toLowerCase();
-      const userName = d.user?.full_name || '';
-      const userHandle = d.user?.username || '';
-      const userEmail = d.user?.email || '';
-      const trx = d.payment_id || d.id || '';
-      const matches =
-        userName.toLowerCase().includes(q) ||
-        userHandle.toLowerCase().includes(q) ||
-        userEmail.toLowerCase().includes(q) ||
-        trx.toLowerCase().includes(q);
-      if (!matches) return false;
+      const q = searchUser.toLowerCase().trim();
+      const nameStr = String(d.user?.full_name || d.user?.username || '').toLowerCase();
+      const userStr = String(d.user?.username || '').toLowerCase();
+      const emailStr = String(d.user?.email || '').toLowerCase();
+      if (!nameStr.includes(q) && !userStr.includes(q) && !emailStr.includes(q)) return false;
     }
+
+    // Date range filter
     if (startDate) {
       const itemDate = new Date(d.created_at);
       const start = new Date(startDate);
@@ -140,7 +144,16 @@ export default function AdminDepositsFilteredPage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
-                {filteredDeposits.length === 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan={7} className="py-12 text-center text-slate-400 font-semibold">
+                      <div className="flex items-center justify-center gap-2">
+                        <span>Loading deposits data</span>
+                        <Loader2 className="w-5 h-5 animate-spin text-[#5b5bf5]" />
+                      </div>
+                    </td>
+                  </tr>
+                ) : filteredDeposits.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="py-12 text-center text-slate-400 font-semibold">
                       No deposits found in this category

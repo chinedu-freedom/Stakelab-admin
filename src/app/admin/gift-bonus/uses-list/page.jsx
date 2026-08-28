@@ -69,8 +69,9 @@ export default function AdminGiftBonusUsesListPage() {
         {/* Table */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           {loading ? (
-            <div className="p-12 text-center text-slate-400 font-semibold flex items-center justify-center gap-2">
-              <Loader2 className="w-5 h-5 animate-spin text-[#5b5bf5]" /> Loading usage logs...
+            <div className="p-12 text-center text-slate-400 font-semibold flex items-center justify-center gap-2 text-xs">
+              <span>Loading usage logs</span>
+              <Loader2 className="w-5 h-5 animate-spin text-[#5b5bf5]" />
             </div>
           ) : filteredClaims.length === 0 ? (
             <div className="p-12 text-center text-slate-400 text-xs font-semibold">

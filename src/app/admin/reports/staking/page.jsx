@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
 import Pagination from '../../../../components/Pagination';
+import { Loader2 } from 'lucide-react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../../components/ui/select';
 import api from '../../../../lib/api';
 
 export default function AdminStakingHistoryPage() {
   const [stakes, setStakes] = useState([]);
+  const [plansList, setPlansList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState('');
   const [selectedPlan, setSelectedPlan] = useState('Any');
@@ -31,6 +33,16 @@ export default function AdminStakingHistoryPage() {
 
   useEffect(() => {
     fetchStakes();
+
+    // Fetch dynamic active staking plans
+    api
+      .get('/public/staking-plans')
+      .then((res) => {
+        if (res.data && res.data.success) {
+          setPlansList(res.data.plans || []);
+        }
+      })
+      .catch(() => null);
   }, []);
 
   // Real-time Instant Filtering
@@ -39,8 +51,14 @@ export default function AdminStakingHistoryPage() {
       const q = username.toLowerCase();
       const uName = s.user?.full_name || '';
       const uHandle = s.user?.username || '';
+      const uEmail = s.user?.email || '';
       const pName = s.plan?.name || '';
-      if (!uName.toLowerCase().includes(q) && !uHandle.toLowerCase().includes(q) && !pName.toLowerCase().includes(q)) {
+      if (
+        !uName.toLowerCase().includes(q) &&
+        !uHandle.toLowerCase().includes(q) &&
+        !uEmail.toLowerCase().includes(q) &&
+        !pName.toLowerCase().includes(q)
+      ) {
         return false;
       }
     }
@@ -51,8 +69,9 @@ export default function AdminStakingHistoryPage() {
     }
 
     if (selectedStatus !== 'All') {
-      const st = s.status || '';
-      if (st.toUpperCase() !== selectedStatus.toUpperCase()) return false;
+      const st = (s.status || '').toUpperCase();
+      if (selectedStatus === 'Active' && !['ACTIVE', 'RUNNING'].includes(st)) return false;
+      if (selectedStatus === 'Completed' && !['COMPLETED', 'MATURE'].includes(st)) return false;
     }
 
     if (startDate) {
@@ -78,13 +97,13 @@ export default function AdminStakingHistoryPage() {
           Staking History
         </h1>
 
-        {/* Filter Bar Controls (NO Blue Filter Button, Instant Real-time Filtering) */}
+        {/* Filter Bar Controls (Instant Real-time Filtering) */}
         <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-sm">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-            {/* Search Username / Plan */}
+            {/* Search Username / Email / Plan */}
             <div>
               <label className="block text-[11px] font-semibold text-slate-500 mb-1 font-sans">
-                TRX / Username / Plan
+                Username / Email / Plan
               </label>
               <input
                 type="text"
@@ -106,9 +125,11 @@ export default function AdminStakingHistoryPage() {
                 </SelectTrigger>
                 <SelectContent className="bg-white border-slate-200 text-slate-800 shadow-lg">
                   <SelectItem value="Any" className="text-slate-800 hover:bg-slate-100">Any</SelectItem>
-                  <SelectItem value="Silver" className="text-slate-800 hover:bg-slate-100">Silver</SelectItem>
-                  <SelectItem value="Golden" className="text-slate-800 hover:bg-slate-100">Golden</SelectItem>
-                  <SelectItem value="Platinum" className="text-slate-800 hover:bg-slate-100">Platinum</SelectItem>
+                  {plansList.map((plan) => (
+                    <SelectItem key={plan.id} value={plan.name} className="text-slate-800 hover:bg-slate-100">
+                      {plan.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -124,9 +145,8 @@ export default function AdminStakingHistoryPage() {
                 </SelectTrigger>
                 <SelectContent searchable={false} className="bg-white border-slate-200 text-slate-800 shadow-lg">
                   <SelectItem value="All" className="text-slate-800 hover:bg-slate-100">All</SelectItem>
-                  <SelectItem value="Running" className="text-slate-800 hover:bg-slate-100">Running</SelectItem>
+                  <SelectItem value="Active" className="text-slate-800 hover:bg-slate-100">Active</SelectItem>
                   <SelectItem value="Completed" className="text-slate-800 hover:bg-slate-100">Completed</SelectItem>
-                  <SelectItem value="Mature" className="text-slate-800 hover:bg-slate-100">Mature</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -177,7 +197,10 @@ export default function AdminStakingHistoryPage() {
                 {loading ? (
                   <tr>
                     <td colSpan={7} className="py-12 text-center text-slate-400 font-semibold">
-                      Loading staking records...
+                      <div className="flex items-center justify-center gap-2">
+                        <span>Loading staking data</span>
+                        <Loader2 className="w-5 h-5 animate-spin text-[#5b5bf5]" />
+                      </div>
                     </td>
                   </tr>
                 ) : filteredStakes.length === 0 ? (
@@ -202,9 +225,10 @@ export default function AdminStakingHistoryPage() {
                         {/* User Column */}
                         <td className="py-4 px-6">
                           <div className="font-bold text-slate-800">{uName}</div>
-                          <span className="text-[#5b5bf5] font-semibold text-[11px]">
+                          <span className="text-[#5b5bf5] font-semibold text-[11px] block">
                             {uHandle}
                           </span>
+                          {log.user?.email && <div className="text-[10px] text-slate-400 font-sans">{log.user.email}</div>}
                         </td>
 
                         {/* Plan Column */}

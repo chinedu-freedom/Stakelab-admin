@@ -4,16 +4,17 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
 import Pagination from '../../../../components/Pagination';
-import { Search, Monitor, Copy } from 'lucide-react';
+import { Search, Monitor, Copy, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../../../lib/api';
 
 export default function AdminWithdrawalsFilteredPage({
   title = 'Pending Withdrawals',
-  statusFilter = 'Pending',
+  filterStatus = 'PENDING',
 }) {
   const [withdrawals, setWithdrawals] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTrx, setSearchTrx] = useState('');
   const [searchUser, setSearchUser] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -43,25 +44,22 @@ export default function AdminWithdrawalsFilteredPage({
   };
 
   const filteredWithdrawals = withdrawals.filter((w) => {
-    if (statusFilter !== 'All') {
-      const matchStatus = statusFilter.toUpperCase();
-      if (w.status !== matchStatus) return false;
+    if (filterStatus !== 'ALL' && w.status !== filterStatus) return false;
+
+    if (searchTrx.trim()) {
+      const q = searchTrx.toLowerCase().trim();
+      const refId = (w.id || '').toLowerCase();
+      if (!refId.includes(q)) return false;
     }
+
     if (searchUser.trim()) {
-      const q = searchUser.toLowerCase();
-      const userName = w.user?.full_name || '';
-      const userHandle = w.user?.username || '';
-      const userEmail = w.user?.email || '';
-      const trx = w.id || '';
-      const walletAddr = w.wallet_address || '';
-      const matches =
-        userName.toLowerCase().includes(q) ||
-        userHandle.toLowerCase().includes(q) ||
-        userEmail.toLowerCase().includes(q) ||
-        trx.toLowerCase().includes(q) ||
-        walletAddr.toLowerCase().includes(q);
-      if (!matches) return false;
+      const q = searchUser.toLowerCase().trim();
+      const nameStr = String(w.user?.full_name || w.user?.username || '').toLowerCase();
+      const userStr = String(w.user?.username || '').toLowerCase();
+      const emailStr = String(w.user?.email || '').toLowerCase();
+      if (!nameStr.includes(q) && !userStr.includes(q) && !emailStr.includes(q)) return false;
     }
+
     if (startDate) {
       const itemDate = new Date(w.created_at);
       const start = new Date(startDate);
@@ -72,6 +70,7 @@ export default function AdminWithdrawalsFilteredPage({
       const end = new Date(endDate + 'T23:59:59');
       if (itemDate > end) return false;
     }
+
     return true;
   });
 
@@ -137,7 +136,16 @@ export default function AdminWithdrawalsFilteredPage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
-                {filteredWithdrawals.length === 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan={7} className="py-12 text-center text-slate-400 font-semibold">
+                      <div className="flex items-center justify-center gap-2">
+                        <span>Loading withdrawals data</span>
+                        <Loader2 className="w-5 h-5 animate-spin text-[#5b5bf5]" />
+                      </div>
+                    </td>
+                  </tr>
+                ) : filteredWithdrawals.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="py-12 text-center text-slate-400 font-semibold">
                       No withdrawals found in this category

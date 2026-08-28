@@ -42,9 +42,12 @@ const availableIcons = [
   { name: 'Star', icon: Star },
 ];
 
+import ConfirmModal from '../../../../components/ConfirmModal';
+
 export default function AdminWhyChooseUsPage() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteIdx, setDeleteIdx] = useState(null);
   const [saving, setSaving] = useState(false);
 
   // Form State
@@ -81,11 +84,12 @@ export default function AdminWhyChooseUsPage() {
     setIcon(items[idx].icon || 'ShieldCheck');
   };
 
-  const handleDelete = (idx) => {
-    if (!confirm('Are you sure you want to delete this item?')) return;
-    const updated = items.filter((_, i) => i !== idx);
+  const handleDelete = () => {
+    if (deleteIdx === null) return;
+    const updated = items.filter((_, i) => i !== deleteIdx);
     setItems(updated);
     toast.info('Item removed. Click Save Changes to persist.');
+    setDeleteIdx(null);
   };
 
   const handleFormSubmit = (e) => {
@@ -249,7 +253,7 @@ export default function AdminWhyChooseUsPage() {
                     <Edit2 className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => handleDelete(idx)}
+                    onClick={() => setDeleteIdx(idx)}
                     className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                     title="Delete Feature"
                   >
@@ -260,6 +264,18 @@ export default function AdminWhyChooseUsPage() {
             );
           })}
         </div>
+
+        {/* Delete Confirmation Modal */}
+        <ConfirmModal
+          isOpen={deleteIdx !== null}
+          onClose={() => setDeleteIdx(null)}
+          onConfirm={handleDelete}
+          title="Delete Feature Card"
+          description="Are you sure you want to delete this feature card? Click Save Changes afterwards to persist."
+          confirmText="Yes, Delete"
+          cancelText="Cancel"
+          isDanger={true}
+        />
       </div>
     </AdminSidebarLayout>
   );

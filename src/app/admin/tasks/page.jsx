@@ -7,9 +7,12 @@ import { ClipboardList, Plus, Search, Trash2, Edit2, ExternalLink, Loader2 } fro
 import { toast } from 'sonner';
 import api from '../../../lib/api';
 
+import ConfirmModal from '../../../components/ConfirmModal';
+
 export default function AdminTasksPage() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteTaskId, setDeleteTaskId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -100,16 +103,18 @@ export default function AdminTasksPage() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this task?')) return;
+  const handleDelete = async () => {
+    if (!deleteTaskId) return;
     try {
-      const res = await api.delete(`/admin/tasks/${id}`);
+      const res = await api.delete(`/admin/tasks/${deleteTaskId}`);
       if (res.data && res.data.success) {
         toast.success('Task deleted successfully!');
         fetchTasks();
       }
     } catch (err) {
       toast.error('Failed to delete task');
+    } finally {
+      setDeleteTaskId(null);
     }
   };
 
@@ -162,8 +167,9 @@ export default function AdminTasksPage() {
         {/* Tasks Table */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           {loading ? (
-            <div className="p-12 text-center text-slate-400 font-semibold flex items-center justify-center gap-2">
-              <Loader2 className="w-5 h-5 animate-spin text-[#5b5bf5]" /> Loading tasks...
+            <div className="p-12 text-center text-slate-400 font-semibold flex items-center justify-center gap-2 text-xs">
+              <span>Loading tasks</span>
+              <Loader2 className="w-5 h-5 animate-spin text-[#5b5bf5]" />
             </div>
           ) : filteredTasks.length === 0 ? (
             <div className="p-12 text-center text-slate-400 text-xs font-semibold">
@@ -217,7 +223,7 @@ export default function AdminTasksPage() {
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleDelete(item.id)}
+                            onClick={() => setDeleteTaskId(item.id)}
                             className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -232,10 +238,15 @@ export default function AdminTasksPage() {
           )}
         </div>
 
-        {/* Modal Form */}
         {showModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+          <div
+            onClick={() => setShowModal(false)}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 cursor-pointer overflow-y-auto"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 border border-slate-200 animate-in fade-in zoom-in-95 duration-150 cursor-default"
+            >
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
                   <ClipboardList className="w-4 h-4 text-[#5b5bf5]" />
@@ -334,6 +345,18 @@ export default function AdminTasksPage() {
             </div>
           </div>
         )}
+
+        {/* Delete Confirmation Modal */}
+        <ConfirmModal
+          isOpen={!!deleteTaskId}
+          onClose={() => setDeleteTaskId(null)}
+          onConfirm={handleDelete}
+          title="Delete Task"
+          description="Are you sure you want to delete this task? This action cannot be undone."
+          confirmText="Yes, Delete"
+          cancelText="Cancel"
+          isDanger={true}
+        />
       </div>
     </AdminSidebarLayout>
   );

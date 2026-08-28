@@ -6,9 +6,12 @@ import { Gift, Plus, Search, Trash2, Calendar, Users, Loader2, Sparkles } from '
 import { toast } from 'sonner';
 import api from '../../../../lib/api';
 
+import ConfirmModal from '../../../../components/ConfirmModal';
+
 export default function AdminGiftBonusPage() {
   const [codes, setCodes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteCodeId, setDeleteCodeId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [search, setSearch] = useState('');
@@ -66,16 +69,18 @@ export default function AdminGiftBonusPage() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this gift code?')) return;
+  const handleDelete = async () => {
+    if (!deleteCodeId) return;
     try {
-      const res = await api.delete(`/admin/gift-codes/${id}`);
+      const res = await api.delete(`/admin/gift-codes/${deleteCodeId}`);
       if (res.data && res.data.success) {
         toast.success(res.data.message);
         fetchCodes();
       }
     } catch (err) {
       toast.error('Failed to delete gift code');
+    } finally {
+      setDeleteCodeId(null);
     }
   };
 
@@ -129,8 +134,9 @@ export default function AdminGiftBonusPage() {
         {/* Gift Codes Table */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           {loading ? (
-            <div className="p-12 text-center text-slate-400 font-semibold flex items-center justify-center gap-2">
-              <Loader2 className="w-5 h-5 animate-spin text-[#5b5bf5]" /> Loading gift codes...
+            <div className="p-12 text-center text-slate-400 font-semibold flex items-center justify-center gap-2 text-xs">
+              <span>Loading gift codes</span>
+              <Loader2 className="w-5 h-5 animate-spin text-[#5b5bf5]" />
             </div>
           ) : filteredCodes.length === 0 ? (
             <div className="p-12 text-center text-slate-400 text-xs font-semibold">
@@ -181,7 +187,7 @@ export default function AdminGiftBonusPage() {
                       </td>
                       <td className="py-3.5 px-4 text-right">
                         <button
-                          onClick={() => handleDelete(item.id)}
+                          onClick={() => setDeleteCodeId(item.id)}
                           className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -197,8 +203,14 @@ export default function AdminGiftBonusPage() {
 
         {/* Create Modal */}
         {showModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+          <div
+            onClick={() => setShowModal(false)}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 cursor-pointer overflow-y-auto"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 border border-slate-200 animate-in fade-in zoom-in-95 duration-150 cursor-default"
+            >
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
                   <Gift className="w-4 h-4 text-[#5b5bf5]" /> Create Gift Code
@@ -295,6 +307,18 @@ export default function AdminGiftBonusPage() {
             </div>
           </div>
         )}
+
+        {/* Delete Confirmation Modal */}
+        <ConfirmModal
+          isOpen={!!deleteCodeId}
+          onClose={() => setDeleteCodeId(null)}
+          onConfirm={handleDelete}
+          title="Delete Gift Code"
+          description="Are you sure you want to delete this gift bonus code? Users will no longer be able to claim it."
+          confirmText="Yes, Delete"
+          cancelText="Cancel"
+          isDanger={true}
+        />
       </div>
     </AdminSidebarLayout>
   );

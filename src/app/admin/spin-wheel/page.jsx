@@ -5,6 +5,7 @@ import AdminSidebarLayout from '../../../components/AdminSidebarLayout';
 import { Disc, Save, Loader2, Coins, Edit2, Plus, Trash2, Award } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../../lib/api';
+import ConfirmModal from '../../../components/ConfirmModal';
 
 export default function AdminSpinWheelPage() {
   const [settings, setSettings] = useState({
@@ -21,6 +22,7 @@ export default function AdminSpinWheelPage() {
 
   const [prizes, setPrizes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteSliceId, setDeleteSliceId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingPrize, setEditingPrize] = useState(null);
@@ -112,14 +114,16 @@ export default function AdminSpinWheelPage() {
     }
   };
 
-  const handleDeletePrize = async (id) => {
-    if (!confirm('Are you sure you want to delete this prize slice?')) return;
+  const handleDeletePrize = async () => {
+    if (!deleteSliceId) return;
     try {
-      await api.delete(`/admin/spin-prizes/${id}`);
+      await api.delete(`/admin/spin-prizes/${deleteSliceId}`);
       toast.success('Prize slice deleted!');
       fetchData();
     } catch (err) {
       toast.error('Failed to delete prize slice');
+    } finally {
+      setDeleteSliceId(null);
     }
   };
 
@@ -264,7 +268,7 @@ export default function AdminSpinWheelPage() {
                         <Edit2 className="w-3.5 h-3.5" />
                       </button>
                       <button
-                        onClick={() => handleDeletePrize(prize.id)}
+                        onClick={() => setDeleteSliceId(prize.id)}
                         className="p-1 text-slate-400 hover:text-red-600 rounded"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -292,8 +296,14 @@ export default function AdminSpinWheelPage() {
 
         {/* Prize Modal */}
         {showModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+          <div
+            onClick={() => setShowModal(false)}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 cursor-pointer overflow-y-auto"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-200 animate-in fade-in zoom-in-95 duration-150 cursor-default"
+            >
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
                   <Award className="w-4 h-4 text-[#5b5bf5]" />
@@ -380,6 +390,18 @@ export default function AdminSpinWheelPage() {
             </div>
           </div>
         )}
+
+        {/* Delete Confirmation Modal */}
+        <ConfirmModal
+          isOpen={!!deleteSliceId}
+          onClose={() => setDeleteSliceId(null)}
+          onConfirm={handleDeletePrize}
+          title="Delete Prize Slice"
+          description="Are you sure you want to delete this prize slice? This action cannot be undone."
+          confirmText="Yes, Delete"
+          cancelText="Cancel"
+          isDanger={true}
+        />
       </div>
     </AdminSidebarLayout>
   );

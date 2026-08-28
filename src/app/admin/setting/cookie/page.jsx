@@ -81,8 +81,9 @@ We don't sell, exchange, or in any case move to outside gatherings your data.
         </h1>
 
         {loading ? (
-          <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-400 font-semibold flex items-center justify-center gap-2">
-            <Loader2 className="w-5 h-5 animate-spin text-[#5b5bf5]" /> Loading cookie settings...
+          <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-400 font-semibold flex items-center justify-center gap-2 text-xs">
+            <span>Loading cookie settings</span>
+            <Loader2 className="w-5 h-5 animate-spin text-[#5b5bf5]" />
           </div>
         ) : (
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">

@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import AdminSidebarLayout from '../../../../../components/AdminSidebarLayout';
 import Pagination from '../../../../../components/Pagination';
+import { Loader2 } from 'lucide-react';
 import api from '../../../../../lib/api';
 
 function UserLoginHistoryContent() {
@@ -64,12 +65,12 @@ function UserLoginHistoryContent() {
 
           {/* Top Search Controls */}
           <div className="flex flex-col sm:flex-row items-center gap-3">
-            {/* Search Username Input */}
+            {/* Search Username / Email Input */}
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search Username..."
+              placeholder="Username / Email"
               className="w-48 sm:w-56 h-10 bg-white border border-slate-200 rounded-lg px-3.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans shadow-sm"
             />
 
@@ -110,7 +111,16 @@ function UserLoginHistoryContent() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs text-slate-700 font-sans">
-                {filteredLogins.length === 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan={5} className="py-12 text-center text-slate-400 font-semibold">
+                      <div className="flex items-center justify-center gap-2">
+                        <span>Loading login history</span>
+                        <Loader2 className="w-5 h-5 animate-spin text-[#5b5bf5]" />
+                      </div>
+                    </td>
+                  </tr>
+                ) : filteredLogins.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="py-12 text-center text-slate-400 font-semibold">
                       No login records found
@@ -127,9 +137,10 @@ function UserLoginHistoryContent() {
                         {/* User Column */}
                         <td className="py-4 px-6">
                           <div className="font-bold text-slate-800">{fullName}</div>
-                          <span className="text-[#5b5bf5] font-semibold text-[11px]">
+                          <span className="text-[#5b5bf5] font-semibold text-[11px] block">
                             {usernameStr}
                           </span>
+                          {u.email && <div className="text-[10px] text-slate-400 font-sans">{u.email}</div>}
                         </td>
 
                         {/* Login at Column */}

@@ -5,66 +5,45 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../../components/ui/select';
-import { Undo2, Plus, X, Loader2 } from 'lucide-react';
+import { Undo2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../../../lib/api';
 
 export default function AdminCreatePlanPage() {
   const router = useRouter();
   const [name, setName] = useState('');
+  const [minAmount, setMinAmount] = useState('');
+  const [maxAmount, setMaxAmount] = useState('');
+  const [dailyInterest, setDailyInterest] = useState('');
   const [duration, setDuration] = useState('');
-  const [segments, setSegments] = useState([
-    { id: '1', minAmount: '', maxAmount: '', interest: '' },
-  ]);
   const [tier, setTier] = useState('Flexible Tier');
+  const [status, setStatus] = useState('ACTIVE');
   const [isFixedDeposit, setIsFixedDeposit] = useState(true);
   const [capitalReturn, setCapitalReturn] = useState(true);
   const [isCompounding, setIsCompounding] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  const handleAddSegment = () => {
-    setSegments([
-      ...segments,
-      { id: Date.now().toString(), minAmount: '', maxAmount: '', interest: '' },
-    ]);
-  };
-
-  const handleRemoveSegment = (index) => {
-    if (segments.length === 1) {
-      toast.error('At least one stake segment is required.');
-      return;
-    }
-    setSegments(segments.filter((_, idx) => idx !== index));
-  };
-
-  const handleSegmentChange = (index, field, value) => {
-    const updated = [...segments];
-    updated[index][field] = value;
-    setSegments(updated);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !duration) {
-      toast.error('Plan Name and Duration are required.');
+    if (!name || !duration || !minAmount || !maxAmount || !dailyInterest) {
+      toast.error('Please fill in all required plan fields.');
       return;
     }
-
-    const minAmt = parseFloat(segments[0]?.minAmount || 10);
-    const maxAmt = parseFloat(segments[segments.length - 1]?.maxAmount || 5000);
-    const dailyReturn = parseFloat(segments[0]?.interest || 0.1);
 
     setSubmitting(true);
     try {
       await api.post('/admin/staking-plans', {
         title: name,
-        badge: 'ACTIVE',
-        min_amount: minAmt,
-        max_amount: maxAmt,
-        daily_return_percent: dailyReturn,
+        badge: status,
+        status: status,
+        min_amount: parseFloat(minAmount),
+        max_amount: parseFloat(maxAmount),
+        daily_return_percent: parseFloat(dailyInterest),
         duration_days: parseInt(duration),
         tier,
+        is_fixed_deposit: isFixedDeposit,
         capital_return: capitalReturn,
+        is_compounding: isCompounding,
       });
       toast.success('Staking Plan created successfully!');
       router.push('/admin/staking-plans');
@@ -96,27 +75,27 @@ export default function AdminCreatePlanPage() {
         {/* Form Card Container */}
         <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Row 1: Name, Duration & Tier */}
+            {/* Basic Info Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Name Input */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 font-sans mb-2">
-                  Name <span className="text-red-500">*</span>
+                  Plan Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Plan name"
+                  placeholder="e.g. EverStake Starter"
                   className="w-full h-11 bg-white border border-slate-200 rounded-lg px-4 text-slate-800 text-xs font-sans placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all shadow-inner"
                 />
               </div>
 
-              {/* Duration Input Group */}
+              {/* Duration Input */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 font-sans mb-2">
-                  Duration <span className="text-red-500">*</span>
+                  Duration (Days) <span className="text-red-500">*</span>
                 </label>
                 <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
                   <input
@@ -133,194 +112,184 @@ export default function AdminCreatePlanPage() {
                 </div>
               </div>
 
-              {/* Plan Tier Select */}
+              {/* Daily Interest Rate (%) */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 font-sans mb-2">
-                  Plan Tier <span className="text-red-500">*</span>
+                  Daily Interest (%) <span className="text-red-500">*</span>
                 </label>
-                <Select value={tier} onValueChange={setTier}>
+                <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
+                  <input
+                    type="number"
+                    step="0.01"
+                    required
+                    value={dailyInterest}
+                    onChange={(e) => setDailyInterest(e.target.value)}
+                    placeholder="e.g. 1.5"
+                    className="w-full h-11 bg-transparent border-0 outline-none px-4 text-slate-800 text-xs font-sans placeholder-slate-400"
+                  />
+                  <div className="h-11 bg-slate-100 border-l border-slate-200 px-4 text-xs font-bold text-slate-600 flex items-center shrink-0 select-none">
+                    % Daily
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Min/Max Amount Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Min Amount */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 font-sans mb-2">
+                  Min Amount ($) <span className="text-red-500">*</span>
+                </label>
+                <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
+                  <input
+                    type="number"
+                    required
+                    value={minAmount}
+                    onChange={(e) => setMinAmount(e.target.value)}
+                    placeholder="Min amount"
+                    className="w-full h-11 bg-transparent border-0 outline-none px-4 text-slate-800 text-xs font-sans placeholder-slate-400"
+                  />
+                  <div className="h-11 bg-slate-100 border-l border-slate-200 px-4 text-xs font-bold text-slate-600 flex items-center shrink-0 select-none">
+                    USDT
+                  </div>
+                </div>
+              </div>
+
+              {/* Max Amount */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 font-sans mb-2">
+                  Max Amount ($) <span className="text-red-500">*</span>
+                </label>
+                <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
+                  <input
+                    type="number"
+                    required
+                    value={maxAmount}
+                    onChange={(e) => setMaxAmount(e.target.value)}
+                    placeholder="Max amount"
+                    className="w-full h-11 bg-transparent border-0 outline-none px-4 text-slate-800 text-xs font-sans placeholder-slate-400"
+                  />
+                  <div className="h-11 bg-slate-100 border-l border-slate-200 px-4 text-xs font-bold text-slate-600 flex items-center shrink-0 select-none">
+                    USDT
+                  </div>
+                </div>
+              </div>
+
+              {/* Plan Status (Active, Inactive, Unavailable) */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 font-sans mb-2">
+                  Plan Status <span className="text-red-500">*</span>
+                </label>
+                <Select value={status} onValueChange={setStatus}>
                   <SelectTrigger className="h-11 bg-white border-slate-200 text-slate-800 rounded-lg text-xs font-bold font-sans">
-                    <SelectValue placeholder="Flexible Tier" />
+                    <SelectValue placeholder="Select Status" />
                   </SelectTrigger>
                   <SelectContent searchable={false} className="bg-white border-slate-200 text-slate-800 shadow-lg">
-                    <SelectItem value="Flexible Tier" className="text-slate-800 hover:bg-slate-100 font-bold">Flexible Tier</SelectItem>
-                    <SelectItem value="Dynamic Tier" className="text-slate-800 hover:bg-slate-100 font-bold">Dynamic Tier</SelectItem>
+                    <SelectItem value="ACTIVE" className="text-slate-800 hover:bg-slate-100 font-bold">Active</SelectItem>
+                    <SelectItem value="INACTIVE" className="text-slate-800 hover:bg-slate-100 font-bold">Inactive</SelectItem>
+                    <SelectItem value="UNAVAILABLE" className="text-slate-800 hover:bg-slate-100 font-bold">Unavailable</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            {/* Feature Configuration Toggles Grid */}
+            {/* Plan Rules & Payout Features (Sleek Toggle Switches) */}
             <div className="pt-2 border-t border-slate-100">
               <h3 className="text-xs font-bold text-slate-700 font-sans mb-3">
                 Plan Rules & Payout Features
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                {/* 1. Fixed Deposit Switch */}
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-800 font-sans">
-                    Fixed Deposit Lockup
-                  </label>
-                  <div className="flex items-center gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5 bg-slate-50 p-5 rounded-xl border border-slate-200">
+                {/* 1. Fixed Deposit Lockup Toggle */}
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-800 font-sans">
+                      Fixed Deposit Lockup
+                    </label>
                     <button
                       type="button"
                       onClick={() => setIsFixedDeposit(!isFixedDeposit)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                        isFixedDeposit
-                          ? 'bg-emerald-600 text-white shadow-sm'
-                          : 'bg-slate-200 text-slate-600'
+                      className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-200 ease-in-out ${
+                        isFixedDeposit ? 'bg-[#2563eb]' : 'bg-slate-300'
                       }`}
                     >
-                      {isFixedDeposit ? 'Fixed Deposit: YES' : 'Flexible: NO'}
+                      <div
+                        className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ease-in-out ${
+                          isFixedDeposit ? 'translate-x-6' : 'translate-x-0'
+                        }`}
+                      />
                     </button>
                   </div>
-                  <p className="text-[11px] text-slate-500 leading-tight">
-                    {isFixedDeposit
-                      ? 'Capital is locked until maturity.'
-                      : 'Capital can be withdrawn anytime.'}
+                  <p className="text-[11px] text-slate-500 leading-tight font-sans">
+                    {isFixedDeposit ? 'Fixed Deposit: YES (Capital locked until maturity)' : 'Fixed Deposit: NO (Capital flexible)'}
                   </p>
                 </div>
 
-                {/* 2. Capital Return Switch */}
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-800 font-sans">
-                    Capital Return at Maturity
-                  </label>
-                  <div className="flex items-center gap-2">
+                {/* 2. Capital Return Toggle */}
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-800 font-sans">
+                      Capital Return at Maturity
+                    </label>
                     <button
                       type="button"
                       onClick={() => setCapitalReturn(!capitalReturn)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                        capitalReturn
-                          ? 'bg-emerald-600 text-white shadow-sm'
-                          : 'bg-red-500 text-white shadow-sm'
+                      className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-200 ease-in-out ${
+                        capitalReturn ? 'bg-[#2563eb]' : 'bg-slate-300'
                       }`}
                     >
-                      {capitalReturn ? 'Capital Return: YES (PV + Profit)' : 'Capital Return: NO (Profit Only)'}
+                      <div
+                        className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ease-in-out ${
+                          capitalReturn ? 'translate-x-6' : 'translate-x-0'
+                        }`}
+                      />
                     </button>
                   </div>
-                  <p className="text-[11px] text-slate-500 leading-tight">
-                    {capitalReturn
-                      ? 'Principal + Profit paid at maturity.'
-                      : 'Principal consumed; Profit only.'}
+                  <p className="text-[11px] text-slate-500 leading-tight font-sans">
+                    {capitalReturn ? 'Capital Return: YES (Principal + Profit returned)' : 'Capital Return: NO (Profit only)'}
                   </p>
                 </div>
 
-                {/* 3. Compounding Switch */}
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-800 font-sans">
-                    Daily Compounding Yield
-                  </label>
-                  <div className="flex items-center gap-2">
+                {/* 3. Daily Compounding Toggle */}
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-800 font-sans">
+                      Daily Compounding Yield
+                    </label>
                     <button
                       type="button"
                       onClick={() => setIsCompounding(!isCompounding)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                        isCompounding
-                          ? 'bg-emerald-600 text-white shadow-sm'
-                          : 'bg-slate-200 text-slate-600'
+                      className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-200 ease-in-out ${
+                        isCompounding ? 'bg-[#2563eb]' : 'bg-slate-300'
                       }`}
                     >
-                      {isCompounding ? 'Compounding: YES FV = PV(1+r)ⁿ' : 'Simple Yield: NO'}
+                      <div
+                        className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ease-in-out ${
+                          isCompounding ? 'translate-x-6' : 'translate-x-0'
+                        }`}
+                      />
                     </button>
                   </div>
-                  <p className="text-[11px] text-slate-500 leading-tight">
-                    {isCompounding
-                      ? 'Daily profit compounds automatically.'
-                      : 'Simple daily interest rate.'}
+                  <p className="text-[11px] text-slate-500 leading-tight font-sans">
+                    {isCompounding ? 'Compounding: YES (Daily profit compounds)' : 'Compounding: NO (Simple yield)'}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Stake Segments Section Header */}
-            <div className="space-y-4 pt-2">
-              <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-                <h3 className="text-xs font-bold text-slate-700 font-sans">
-                  Stake Segments
-                </h3>
-
-                {/* + Add Segment Button (Vibrant Indigo / Blue Pill Button) */}
-                <button
-                  type="button"
-                  onClick={handleAddSegment}
-                  className="bg-[#5b5bf5] hover:bg-indigo-600 text-white px-3.5 py-1.5 rounded text-xs font-bold font-sans flex items-center gap-1 transition-all shadow-sm cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5" /> Add Segment
-                </button>
-              </div>
-
-              {/* Dynamic Stake Segment Input Bar Rows (Exact Match to Screenshot) */}
-              <div className="space-y-3">
-                {segments.map((seg, idx) => (
-                  <div
-                    key={seg.id}
-                    className="flex flex-col md:flex-row items-stretch border border-slate-200 rounded-lg overflow-hidden bg-white focus-within:ring-1 focus-within:ring-indigo-500 transition-all"
-                  >
-                    {/* Min amount input */}
-                    <input
-                      type="number"
-                      value={seg.minAmount}
-                      onChange={(e) => handleSegmentChange(idx, 'minAmount', e.target.value)}
-                      placeholder="Min amount"
-                      className="flex-1 h-11 bg-transparent border-0 outline-none px-4 text-xs text-slate-800 placeholder-slate-400 font-sans border-b md:border-b-0 md:border-r border-slate-200"
-                    />
-
-                    {/* Max amount input */}
-                    <input
-                      type="number"
-                      value={seg.maxAmount}
-                      onChange={(e) => handleSegmentChange(idx, 'maxAmount', e.target.value)}
-                      placeholder="Max amount"
-                      className="flex-1 h-11 bg-transparent border-0 outline-none px-4 text-xs text-slate-800 placeholder-slate-400 font-sans"
-                    />
-
-                    {/* USDT Suffix Badge */}
-                    <div className="h-11 bg-slate-100 border-l border-slate-200 px-5 text-xs font-bold text-slate-600 flex items-center shrink-0 select-none">
-                      USDT
-                    </div>
-
-                    {/* Interest in % input */}
-                    <input
-                      type="text"
-                      value={seg.interest}
-                      onChange={(e) => handleSegmentChange(idx, 'interest', e.target.value)}
-                      placeholder="Interest in %"
-                      className="flex-1 h-11 bg-transparent border-0 outline-none px-4 text-xs text-slate-800 placeholder-slate-400 font-sans border-t md:border-t-0 md:border-l border-slate-200"
-                    />
-
-                    {/* % Suffix Badge */}
-                    <div className="h-11 bg-slate-100 border-l border-slate-200 px-4 text-xs font-bold text-slate-600 flex items-center shrink-0 select-none">
-                      %
-                    </div>
-
-                    {/* Red Square Delete Button (X) */}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSegment(idx)}
-                      className="h-11 w-11 bg-[#ff0044] hover:bg-[#e0003c] text-white flex items-center justify-center shrink-0 transition-all cursor-pointer"
-                      title="Remove Segment"
-                    >
-                      <X className="w-4 h-4 text-white" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Full-width Vibrant Indigo Submit Button (Matching Exact Screenshot) */}
+            {/* Submit Button */}
             <div className="pt-4">
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-[#5b5bf5] hover:bg-indigo-600 text-white font-bold py-3.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-md shadow-indigo-500/20 disabled:opacity-50"
+                className="w-full bg-[#5b5bf5] hover:bg-indigo-600 text-white font-bold py-3.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-md shadow-indigo-500/20 disabled:opacity-50 cursor-pointer"
               >
                 {submitting ? (
                   <span className="flex items-center justify-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin" /> Submitting
+                    <Loader2 className="w-4 h-4 animate-spin" /> Creating Plan
                   </span>
                 ) : (
-                  'Submit'
+                  'Create Staking Plan'
                 )}
               </button>
             </div>

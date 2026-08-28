@@ -68,6 +68,7 @@ export default function AdminUserDetailPage({ params }) {
         const u = res.data.user;
         const nameParts = (u.full_name || '').split(' ');
         const fName = nameParts[0] || 'User';
+        const lName = nameParts.slice(1).join(' ') || '';
         const foundCountry = countries.find((c) => c.name.toLowerCase() === (u.country || '').toLowerCase()) || countries[0];
         let rawMobile = u.mobile || '';
         // Clean mobile number to contain only digits, removing dial code prefix if embedded
@@ -1311,8 +1312,14 @@ export default function AdminUserDetailPage({ params }) {
 
         {/* 6. Delete User Confirmation Modal */}
         {deleteModalOpen && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+          <div
+            onClick={() => setDeleteModalOpen(false)}
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 cursor-pointer overflow-y-auto"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 duration-200 cursor-default"
+            >
               <div className="flex justify-between items-center border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2 text-red-600">
                   <Trash2 className="w-5 h-5" />

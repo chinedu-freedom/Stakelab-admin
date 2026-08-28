@@ -66,6 +66,7 @@ export default function AdminDashboardPage() {
     activeStakingCount: 0,
   });
 
+  const [loading, setLoading] = useState(true);
   const [dateFilterDep, setDateFilterDep] = useState('Last 15 Days');
   const [dateFilterTrx, setDateFilterTrx] = useState('Last 15 Days');
   const [openDepDropdown, setOpenDepDropdown] = useState(false);
@@ -84,11 +85,16 @@ export default function AdminDashboardPage() {
   ];
 
   useEffect(() => {
-    api.get('/admin/stats').then((res) => {
-      if (res.data.success && res.data.stats) {
-        setStats((prev) => ({ ...prev, ...res.data.stats }));
-      }
-    }).catch(() => null);
+    setLoading(true);
+    api
+      .get('/admin/stats')
+      .then((res) => {
+        if (res.data.success && res.data.stats) {
+          setStats((prev) => ({ ...prev, ...res.data.stats }));
+        }
+      })
+      .catch(() => null)
+      .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -652,7 +658,12 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="space-y-3.5 max-h-[350px] overflow-y-auto pr-1">
-              {(stats.recentUsers || []).length > 0 ? (
+              {loading ? (
+                <div className="py-12 flex items-center justify-center text-slate-400 text-xs font-semibold gap-2">
+                  <span>Loading recent registrations</span>
+                  <Loader2 className="w-5 h-5 animate-spin text-[#5b5bf5]" />
+                </div>
+              ) : (stats.recentUsers || []).length > 0 ? (
                 stats.recentUsers.map((usr) => (
                   <div key={usr.id} className="flex items-center justify-between p-3.5 bg-slate-50/70 rounded-xl border border-slate-100 hover:bg-slate-100/80 transition-colors">
                     <div className="min-w-0">

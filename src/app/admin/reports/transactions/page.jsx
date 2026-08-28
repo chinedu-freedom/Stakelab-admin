@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
 import Pagination from '../../../../components/Pagination';
+import { Loader2 } from 'lucide-react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../../components/ui/select';
 import api from '../../../../lib/api';
 
@@ -18,7 +19,8 @@ export default function AdminTransactionLogsPage({ userId = null }) {
   const fetchTransactions = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/admin/transactions');
+      const url = userId ? `/admin/transactions?userId=${userId}` : '/admin/transactions';
+      const res = await api.get(url);
       if (res.data.success) {
         setTransactions(res.data.transactions || []);
       }
@@ -35,21 +37,28 @@ export default function AdminTransactionLogsPage({ userId = null }) {
 
   const filteredTransactions = transactions.filter((t) => {
     if (trxUsername.trim()) {
-      const q = trxUsername.toLowerCase();
-      const userName = t.user?.full_name || '';
-      const userHandle = t.user?.username || '';
-      const refId = t.id || '';
-      if (!userName.toLowerCase().includes(q) && !userHandle.toLowerCase().includes(q) && !refId.toLowerCase().includes(q)) {
+      const q = trxUsername.toLowerCase().trim();
+      const userName = String(t.user?.full_name || '').toLowerCase();
+      const userHandle = String(t.user?.username || '').toLowerCase();
+      const userEmail = String(t.user?.email || '').toLowerCase();
+      const refId = String(t.reference_id || t.id || '').toLowerCase();
+      if (!userName.includes(q) && !userHandle.includes(q) && !userEmail.includes(q) && !refId.includes(q)) {
         return false;
       }
     }
 
-    if (type === 'Plus' && parseFloat(t.amount || 0) < 0) return false;
-    if (type === 'Minus' && parseFloat(t.amount || 0) >= 0) return false;
+    const isMinus = ['WITHDRAWAL', 'ADMIN_DEBIT', 'STAKE'].includes(t.type);
+    if (type === 'Plus' && isMinus) return false;
+    if (type === 'Minus' && !isMinus) return false;
 
     if (remark !== 'All') {
       const actType = t.type || '';
-      if (!actType.toLowerCase().includes(remark.toLowerCase())) return false;
+      if (remark === 'Balance add' && actType !== 'ADMIN_CREDIT') return false;
+      if (remark === 'Balance subtract' && actType !== 'ADMIN_DEBIT') return false;
+      if (remark === 'Deposit' && actType !== 'DEPOSIT') return false;
+      if (remark === 'Withdrawal' && actType !== 'WITHDRAWAL') return false;
+      if (remark === 'Staking' && actType !== 'STAKE') return false;
+      if (remark === 'Profit Claim' && !['STAKE_PROFIT', 'PROFIT'].includes(actType)) return false;
     }
 
     if (selectedDateFilter !== 'All') {
@@ -98,19 +107,19 @@ export default function AdminTransactionLogsPage({ userId = null }) {
           Transaction Logs
         </h1>
 
-        {/* Filter Bar Controls (NO Blue Filter Button, NO Currency Filter, Instant Real-Time Filtering!) */}
+        {/* Filter Bar Controls */}
         <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-sm">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-            {/* TRX / Username Search Input */}
+            {/* TRX / Username / Email Search Input */}
             <div>
               <label className="block text-[11px] font-semibold text-slate-500 mb-1 font-sans">
-                TRX/Username
+                TRX / Username / Email
               </label>
               <input
                 type="text"
                 value={trxUsername}
                 onChange={(e) => setTrxUsername(e.target.value)}
-                placeholder="Search..."
+                placeholder="Username / Email"
                 className="w-full h-10 bg-white border border-slate-200 rounded-lg px-3.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans"
               />
             </div>
@@ -179,11 +188,11 @@ export default function AdminTransactionLogsPage({ userId = null }) {
           </div>
         </div>
 
-        {/* Transaction Table Container */}
+        {/* Transaction Logs Table Container */}
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
-              {/* Vibrant Purple Table Header */}
+              {/* Vibrant Indigo Table Header */}
               <thead>
                 <tr className="bg-[#5b5bf5] text-white text-xs font-bold uppercase tracking-wider">
                   <th className="py-3.5 px-6">User</th>
@@ -195,7 +204,16 @@ export default function AdminTransactionLogsPage({ userId = null }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs text-slate-700 font-sans">
-                {filteredTransactions.length === 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} className="py-12 text-center text-slate-400 font-semibold">
+                      <div className="flex items-center justify-center gap-2">
+                        <span>Loading transactions data</span>
+                        <Loader2 className="w-5 h-5 animate-spin text-[#5b5bf5]" />
+                      </div>
+                    </td>
+                  </tr>
+                ) : filteredTransactions.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-12 text-center text-slate-400 font-semibold">
                       Data not found
@@ -216,9 +234,10 @@ export default function AdminTransactionLogsPage({ userId = null }) {
                         {/* User Column */}
                         <td className="py-4 px-6">
                           <div className="font-bold text-slate-800">{userName}</div>
-                          <span className="text-[#5b5bf5] font-semibold text-[11px]">
+                          <span className="text-[#5b5bf5] font-semibold text-[11px] block">
                             {userHandle}
                           </span>
+                          {trx.user?.email && <div className="text-[10px] text-slate-400 font-sans">{trx.user.email}</div>}
                         </td>
 
                         {/* TRX Column */}

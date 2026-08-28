@@ -66,7 +66,8 @@ export default function AdminSystemFeaturesPage() {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
           {loading ? (
             <div className="p-8 text-center text-slate-400 text-xs font-semibold flex items-center justify-center gap-2">
-              <Loader2 className="w-5 h-5 animate-spin text-[#5b5bf5]" /> Loading feature settings...
+              <span>Loading feature settings</span>
+              <Loader2 className="w-5 h-5 animate-spin text-[#5b5bf5]" />
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">

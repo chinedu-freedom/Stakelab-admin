@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
 import Pagination from '../../../../components/Pagination';
-import { Search, Monitor, UserCheck } from 'lucide-react';
+import { Search, Monitor, UserCheck, Loader2 } from 'lucide-react';
 import api from '../../../../lib/api';
 
 export default function AdminUsersFilteredPage({ title = 'Active Users', filterType = 'active' }) {
@@ -92,7 +92,16 @@ export default function AdminUsersFilteredPage({ title = 'Active Users', filterT
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
-                {filteredUsers.length === 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} className="py-12 text-center text-slate-400 font-semibold">
+                      <div className="flex items-center justify-center gap-2">
+                        <span>Loading users data</span>
+                        <Loader2 className="w-5 h-5 animate-spin text-[#5b5bf5]" />
+                      </div>
+                    </td>
+                  </tr>
+                ) : filteredUsers.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-12 text-center text-slate-400 font-semibold">
                       No users found in this category
