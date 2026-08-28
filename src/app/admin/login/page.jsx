@@ -32,7 +32,7 @@ export default function AdminLoginPage() {
     setSubmitting(true);
 
     try {
-      const res = await login(email, password);
+      const res = await login(email, password, keepMeLoggedIn);
       if (res && !res.success) {
         setErrors({ form: res.message || 'Invalid admin credentials' });
       } else {

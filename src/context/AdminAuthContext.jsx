@@ -27,9 +27,9 @@ export const AdminAuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (email, password) => {
+  const login = async (email, password, remember = false) => {
     try {
-      const res = await api.post('/admin/auth/login', { email, password });
+      const res = await api.post('/admin/auth/login', { email, password, remember_me: Boolean(remember) });
       if (res.data.success) {
         localStorage.setItem('stakelab_admin_token', res.data.token);
         localStorage.setItem('stakelab_admin', JSON.stringify(res.data.admin));
