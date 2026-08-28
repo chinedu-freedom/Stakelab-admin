@@ -672,10 +672,10 @@ export default function AdminSidebarLayout({ children }) {
               <button
                 type="button"
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center space-x-2.5 sm:bg-[#122347] sm:hover:bg-[#1a305e] sm:px-3 sm:py-1.5 sm:rounded-full sm:border sm:border-[#1e3463] cursor-pointer transition-all focus:outline-none select-none"
+                className="flex items-center space-x-2.5 p-1 sm:p-0 sm:bg-[#122347] sm:hover:bg-[#1a305e] sm:px-3 sm:py-1.5 sm:rounded-full sm:border sm:border-[#1e3463] cursor-pointer transition-all focus:outline-none select-none"
               >
-                <div className="w-9 h-9 sm:w-7 sm:h-7 rounded-full sm:bg-[#1e3463] text-white flex items-center justify-center font-bold text-xs shrink-0">
-                  <User className="w-5 h-5 sm:w-4 sm:h-4 text-slate-200" />
+                <div className="sm:w-7 sm:h-7 sm:rounded-full sm:bg-[#1e3463] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                  <User className="w-6 h-6 sm:w-4 sm:h-4 text-slate-200" />
                 </div>
                 <div className="text-left hidden sm:block">
                   <div className="text-xs font-bold text-white leading-tight">
