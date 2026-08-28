@@ -394,14 +394,24 @@ export default function AdminSidebarLayout({ children }) {
       <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
         {/* Top Header Navbar */}
         <header className="h-16 bg-[#091630] text-white border-b border-[#142343] shrink-0 z-20 px-4 sm:px-6 flex items-center justify-between shadow-md">
-          {/* Left Side: Mobile Menu Button & Search Bar */}
-          <div className="flex items-center space-x-4">
+          {/* Left Side: Mobile Menu Button, Mobile Brand Logo & Search Bar */}
+          <div className="flex items-center space-x-3">
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
               className="lg:hidden p-2 text-slate-300 hover:text-white rounded-md focus:outline-none"
             >
               {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
+
+            {/* Admin Brand Logo on Small Screens */}
+            <Link href="/admin/dashboard" className="lg:hidden flex items-center space-x-2">
+              <div className="w-7 h-7 rounded bg-gradient-to-r from-[#ff0044] to-[#fe780b] flex items-center justify-center font-righteous text-white font-bold text-sm shadow-md">
+                E
+              </div>
+              <span className="text-lg font-extrabold text-white font-righteous tracking-wide">
+                Ever<span className="text-[#5b5bf5]">Stake</span>
+              </span>
+            </Link>
 
             {/* Live Global Search Box */}
             <div className="relative hidden sm:block w-64 lg:w-96" ref={searchRef}>
@@ -657,15 +667,15 @@ export default function AdminSidebarLayout({ children }) {
               )}
             </div>
 
-            {/* Admin Profile Pill Dropdown */}
+            {/* Admin Profile Pill Dropdown - Shows ONLY image icon without border on small screens */}
             <div className="relative" ref={profileRef}>
               <button
                 type="button"
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center space-x-2.5 bg-[#122347] hover:bg-[#1a305e] px-3 py-1.5 rounded-full border border-[#1e3463] cursor-pointer transition-all focus:outline-none select-none"
+                className="flex items-center space-x-2.5 sm:bg-[#122347] sm:hover:bg-[#1a305e] sm:px-3 sm:py-1.5 sm:rounded-full sm:border sm:border-[#1e3463] cursor-pointer transition-all focus:outline-none select-none"
               >
-                <div className="w-7 h-7 rounded-full bg-[#1e3463] text-white flex items-center justify-center font-bold text-xs shrink-0">
-                  <User className="w-4 h-4 text-slate-200" />
+                <div className="w-9 h-9 sm:w-7 sm:h-7 rounded-full sm:bg-[#1e3463] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                  <User className="w-5 h-5 sm:w-4 sm:h-4 text-slate-200" />
                 </div>
                 <div className="text-left hidden sm:block">
                   <div className="text-xs font-bold text-white leading-tight">
@@ -675,7 +685,7 @@ export default function AdminSidebarLayout({ children }) {
                     admin@everstake.cx
                   </div>
                 </div>
-                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`hidden sm:block w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {/* Dropdown Menu Panel (Only Password Change & Logout) */}
