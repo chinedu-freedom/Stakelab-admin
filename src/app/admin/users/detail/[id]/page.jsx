@@ -23,6 +23,7 @@ import {
   EyeOff,
   Key,
   Lock,
+  Trash2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { countries } from '../../../../../lib/countries';
@@ -205,6 +206,27 @@ export default function AdminUserDetailPage({ params }) {
       }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to update withdrawal PIN');
+    }
+  };
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deletingUser, setDeletingUser] = useState(false);
+
+  const handleDeleteUser = async () => {
+    try {
+      setDeletingUser(true);
+      const res = await api.delete(`/admin/users/${userId}`);
+      if (res.data && res.data.success) {
+        toast.success(res.data.message || 'User deleted successfully!');
+        setDeleteModalOpen(false);
+        if (typeof window !== 'undefined') {
+          window.location.href = '/admin/users';
+        }
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to delete user.');
+    } finally {
+      setDeletingUser(false);
     }
   };
 
@@ -502,6 +524,15 @@ export default function AdminUserDetailPage({ params }) {
             }`}
           >
             <Ban className="w-4 h-4" /> {userData.banned ? 'Unban User' : 'Ban User'}
+          </button>
+
+          {/* Button 7: Delete User */}
+          <button
+            type="button"
+            onClick={() => setDeleteModalOpen(true)}
+            className="flex-1 min-w-[130px] whitespace-nowrap bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-3 px-4 rounded-lg flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer shrink-0"
+          >
+            <Trash2 className="w-4 h-4" /> Delete User
           </button>
         </div>
 
@@ -1273,6 +1304,56 @@ export default function AdminUserDetailPage({ params }) {
                     Reject KYC
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 6. Delete User Confirmation Modal */}
+        {deleteModalOpen && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+              <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2 text-red-600">
+                  <Trash2 className="w-5 h-5" />
+                  <h3 className="text-base font-bold text-slate-800 font-sans">Delete User Account</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDeleteModalOpen(false)}
+                  className="text-slate-400 hover:text-slate-600 p-1 rounded-lg transition-all"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Are you sure you want to permanently delete user <strong className="text-slate-900">@{userData.username}</strong> ({userData.email})?
+                </p>
+                <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-xs text-red-700 font-medium leading-relaxed">
+                  ⚠️ <strong>Warning:</strong> This will delete all user stakes, transaction history, deposits, withdrawals, and wallet records. This action cannot be undone!
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setDeleteModalOpen(false)}
+                  disabled={deletingUser}
+                  className="px-4 py-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold font-sans transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteUser}
+                  disabled={deletingUser}
+                  className="px-5 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold font-sans transition-all cursor-pointer flex items-center gap-2 shadow-md shadow-red-500/20 disabled:opacity-50"
+                >
+                  {deletingUser ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  {deletingUser ? 'Deleting...' : 'Yes, Delete Account'}
+                </button>
               </div>
             </div>
           </div>
