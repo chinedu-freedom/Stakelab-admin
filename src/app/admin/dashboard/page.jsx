@@ -549,9 +549,17 @@ export default function AdminDashboardPage() {
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
             <div>
               <h3 className="font-bold text-slate-800 text-base font-sans mb-1">Quick Admin Actions</h3>
-              <p className="text-xs text-slate-400 mb-4 font-sans">Common operational shortcuts</p>
+              <p className="text-xs text-slate-400 mb-1.5 font-sans">Common operational shortcuts</p>
             </div>
             <div className="space-y-2.5">
+                    <Link href="/admin/users/active" className="block w-full">
+                <button className="w-full flex items-center justify-between bg-slate-50 hover:bg-indigo-50/60 text-slate-700 hover:text-indigo-600 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold transition-all cursor-pointer">
+                  <span className="flex items-center gap-2.5">
+                    <Users className="w-4 h-4 text-slate-400" /> Manage All Customers
+                  </span>
+                  <ArrowUpRight className="w-4 h-4 text-slate-400" />
+                </button>
+              </Link>
               <Link href="/admin/deposits/pending" className="block w-full">
                 <button className="w-full flex items-center justify-between bg-[#5b5bf5] hover:bg-indigo-600 text-white rounded-xl px-4 py-3 text-xs font-bold transition-all shadow-sm cursor-pointer">
                   <span className="flex items-center gap-2.5">
@@ -584,14 +592,7 @@ export default function AdminDashboardPage() {
                   <ArrowUpRight className="w-4 h-4 text-slate-400" />
                 </button>
               </Link>
-              <Link href="/admin/users/active" className="block w-full">
-                <button className="w-full flex items-center justify-between bg-slate-50 hover:bg-indigo-50/60 text-slate-700 hover:text-indigo-600 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold transition-all cursor-pointer">
-                  <span className="flex items-center gap-2.5">
-                    <Users className="w-4 h-4 text-slate-400" /> Manage All Customers
-                  </span>
-                  <ArrowUpRight className="w-4 h-4 text-slate-400" />
-                </button>
-              </Link>
+        
             </div>
           </div>
         </div>

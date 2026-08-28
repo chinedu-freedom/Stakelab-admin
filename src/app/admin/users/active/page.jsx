@@ -35,9 +35,9 @@ export default function AdminUsersFilteredPage({ title = 'Active Users', filterT
     if (filterType === 'active' && !u.is_active) return false;
     if (filterType === 'banned' && u.is_active) return false;
     if (filterType === 'email-unverified' && u.email_verified) return false;
-    if (filterType === 'mobile-unverified' && u.mobile_verified) return false;
-    if (filterType === 'kyc-unverified' && u.kyc_status !== 'unverified') return false;
-    if (filterType === 'kyc-pending' && u.kyc_status !== 'pending') return false;
+    if (filterType === 'mobile-unverified' && (u.mobile_verified || (u.mobile && u.mobile.trim() !== ''))) return false;
+    if (filterType === 'kyc-unverified' && (u.profile_complete || u.kyc_status === 'verified')) return false;
+    if (filterType === 'kyc-pending' && (u.profile_complete || u.kyc_status === 'verified')) return false;
     if (filterType === 'with-balance' && parseFloat(u.balance || 0) <= 0) return false;
 
     // Apply Search Filter
