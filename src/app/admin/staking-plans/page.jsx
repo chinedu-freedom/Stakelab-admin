@@ -28,6 +28,7 @@ export default function AdminStakingPlansPage() {
           return {
             id: p.id,
             name: p.title,
+            tier: p.tier || 'Flexible Tier',
             duration: `${p.duration_days} Days`,
             days: p.duration_days,
             status: p.is_active !== false ? 'Active' : 'Unavailable',
@@ -109,6 +110,7 @@ export default function AdminStakingPlansPage() {
               <thead>
                 <tr className="bg-[#5b5bf5] text-white text-xs font-bold uppercase tracking-wider">
                   <th className="py-3.5 px-6">Name</th>
+                  <th className="py-3.5 px-6 text-center">Tier</th>
                   <th className="py-3.5 px-6 text-center">Duration</th>
                   <th className="py-3.5 px-6 text-center">Status</th>
                   <th className="py-3.5 px-6 text-right">Action</th>
@@ -131,6 +133,19 @@ export default function AdminStakingPlansPage() {
                           Compounding: YES
                         </span>
                       </div>
+                    </td>
+
+                    {/* Tier Column */}
+                    <td className="py-4 px-6 text-center">
+                      <span
+                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider inline-block ${
+                          plan.tier === 'Dynamic Tier'
+                            ? 'bg-purple-100 text-purple-700 border border-purple-300'
+                            : 'bg-blue-100 text-blue-700 border border-blue-300'
+                        }`}
+                      >
+                        {plan.tier}
+                      </span>
                     </td>
 
                     {/* Duration Column */}
@@ -210,7 +225,7 @@ export default function AdminStakingPlansPage() {
         {segmentModalOpen && (
           <div
             onClick={() => setSegmentModalOpen(false)}
-            className="fixed inset-0 min-h-screen w-full bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+            className="fixed inset-0 z-[100] w-full h-full min-h-screen bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
           >
             <div
               onClick={(e) => e.stopPropagation()}
