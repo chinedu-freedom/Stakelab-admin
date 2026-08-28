@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../../components/ui/select';
 import { Mail, Smartphone, Check, Bold, Italic, Underline, Strikethrough, AlignLeft, AlignCenter, AlignRight, List, Link as LinkIcon, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -106,19 +107,20 @@ export default function AdminSendNotificationPage() {
               <label className="block text-xs font-semibold text-slate-700 font-sans mb-1.5">
                 Being Sent To <span className="text-red-500">*</span>
               </label>
-              <select
-                value={beingSentTo}
-                onChange={(e) => setBeingSentTo(e.target.value)}
-                className="w-full h-11 bg-white border border-slate-200 rounded-lg px-4 text-xs text-slate-800 font-sans focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer shadow-sm"
-              >
-                <option value="All Users">All Users</option>
-                <option value="Active Users">Active Users</option>
-                <option value="Banned Users">Banned Users</option>
-                <option value="Email Unverified">Email Unverified Users</option>
-                <option value="Mobile Unverified">Mobile Unverified Users</option>
-                <option value="KYC Unverified">KYC Unverified Users</option>
-                <option value="KYC Pending">KYC Pending Users</option>
-              </select>
+              <Select value={beingSentTo} onValueChange={setBeingSentTo}>
+                <SelectTrigger className="w-full h-11 bg-white border border-slate-200 rounded-lg px-4 text-xs text-slate-800 font-sans focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer shadow-sm">
+                  <SelectValue placeholder="All Users" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border border-slate-200 shadow-lg">
+                  <SelectItem value="All Users">All Users</SelectItem>
+                  <SelectItem value="Active Users">Active Users</SelectItem>
+                  <SelectItem value="Banned Users">Banned Users</SelectItem>
+                  <SelectItem value="Email Unverified">Email Unverified Users</SelectItem>
+                  <SelectItem value="Mobile Unverified">Mobile Unverified Users</SelectItem>
+                  <SelectItem value="KYC Unverified">KYC Unverified Users</SelectItem>
+                  <SelectItem value="KYC Pending">KYC Pending Users</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Subject */}

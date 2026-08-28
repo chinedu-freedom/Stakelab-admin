@@ -11,7 +11,8 @@ function UserLoginHistoryContent() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [dateRange, setDateRange] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const fetchUsers = async () => {
     try {
       setLoading(true);
@@ -35,7 +36,19 @@ function UserLoginHistoryContent() {
       const q = search.toLowerCase();
       const name = u.full_name || '';
       const uname = u.username || '';
-      return name.toLowerCase().includes(q) || uname.toLowerCase().includes(q);
+      const uemail = u.email || '';
+      const matches = name.toLowerCase().includes(q) || uname.toLowerCase().includes(q) || uemail.toLowerCase().includes(q);
+      if (!matches) return false;
+    }
+    if (startDate) {
+      const itemDate = new Date(u.last_login_at || u.created_at);
+      const start = new Date(startDate);
+      if (itemDate < start) return false;
+    }
+    if (endDate) {
+      const itemDate = new Date(u.last_login_at || u.created_at);
+      const end = new Date(endDate + 'T23:59:59');
+      if (itemDate > end) return false;
     }
     return true;
   });
@@ -49,7 +62,7 @@ function UserLoginHistoryContent() {
             User Login History
           </h1>
 
-          {/* Top Search Controls (Instant Real-time Filtering, NO Blue Button - Matching Screenshot 2) */}
+          {/* Top Search Controls */}
           <div className="flex flex-col sm:flex-row items-center gap-3">
             {/* Search Username Input */}
             <input
@@ -60,14 +73,25 @@ function UserLoginHistoryContent() {
               className="w-48 sm:w-56 h-10 bg-white border border-slate-200 rounded-lg px-3.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans shadow-sm"
             />
 
-            {/* Date Input */}
-            <input
-              type="text"
-              value={dateRange}
-              onChange={(e) => setDateRange(e.target.value)}
-              placeholder="Start Date – End Date"
-              className="w-48 sm:w-56 h-10 bg-white border border-slate-200 rounded-lg px-3.5 text-[11px] text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans shadow-sm"
-            />
+            {/* Interactive Date Pickers */}
+            <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg px-3 h-10 shadow-sm focus-within:ring-1 focus-within:ring-indigo-500">
+              <span className="text-[11px] font-semibold text-slate-400">Date:</span>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="bg-transparent border-0 outline-none text-xs text-slate-700 font-sans cursor-pointer"
+                title="Start Date"
+              />
+              <span className="text-slate-400 font-bold text-xs">–</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="bg-transparent border-0 outline-none text-xs text-slate-700 font-sans cursor-pointer"
+                title="End Date"
+              />
+            </div>
           </div>
         </div>
 

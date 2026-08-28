@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../../components/ui/select';
 import {
   Plus,
   Trash2,
@@ -13,13 +14,15 @@ import {
   Headphones,
   Users,
   Lock,
+  Globe,
   Award,
+  CheckCircle2,
+  Loader2,
+  X,
   Shield,
   DollarSign,
   Wallet,
   Star,
-  Check,
-  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../../../lib/api';
@@ -174,17 +177,18 @@ export default function AdminWhyChooseUsPage() {
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Feature Icon</label>
-                  <select
-                    value={icon}
-                    onChange={(e) => setIcon(e.target.value)}
-                    className="w-full h-10 bg-white border border-slate-200 rounded-lg px-3 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  >
-                    {availableIcons.map((i) => (
-                      <option key={i.name} value={i.name}>
-                        {i.name}
-                      </option>
-                    ))}
-                  </select>
+                  <Select value={icon} onValueChange={setIcon}>
+                    <SelectTrigger className="h-10 bg-white border-slate-200 text-slate-800 text-xs rounded-lg">
+                      <SelectValue placeholder="Select Icon" />
+                    </SelectTrigger>
+                    <SelectContent searchable={false} className="bg-white border-slate-200 text-slate-800 shadow-lg">
+                      {availableIcons.map((i) => (
+                        <SelectItem key={i.name} value={i.name} className="text-slate-800 hover:bg-slate-100">
+                          {i.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 

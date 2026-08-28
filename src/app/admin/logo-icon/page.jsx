@@ -1,5 +1,14 @@
-import AdminLogoFaviconPage from '../setting/logo-icon/page';
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function AdminLogoIconAliasPage() {
-  return <AdminLogoFaviconPage />;
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace('/admin/setting/general');
+  }, [router]);
+
+  return null;
 }

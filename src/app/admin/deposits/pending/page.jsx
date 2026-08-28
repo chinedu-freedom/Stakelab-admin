@@ -14,7 +14,8 @@ export default function AdminDepositsFilteredPage({
   const [deposits, setDeposits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchUser, setSearchUser] = useState('');
-  const [dateRange, setDateRange] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   const fetchDeposits = async () => {
     try {
@@ -43,12 +44,24 @@ export default function AdminDepositsFilteredPage({
       const q = searchUser.toLowerCase();
       const userName = d.user?.full_name || '';
       const userHandle = d.user?.username || '';
+      const userEmail = d.user?.email || '';
       const trx = d.payment_id || d.id || '';
-      return (
+      const matches =
         userName.toLowerCase().includes(q) ||
         userHandle.toLowerCase().includes(q) ||
-        trx.toLowerCase().includes(q)
-      );
+        userEmail.toLowerCase().includes(q) ||
+        trx.toLowerCase().includes(q);
+      if (!matches) return false;
+    }
+    if (startDate) {
+      const itemDate = new Date(d.created_at);
+      const start = new Date(startDate);
+      if (itemDate < start) return false;
+    }
+    if (endDate) {
+      const itemDate = new Date(d.created_at);
+      const end = new Date(endDate + 'T23:59:59');
+      if (itemDate > end) return false;
     }
     return true;
   });
@@ -78,18 +91,34 @@ export default function AdminDepositsFilteredPage({
               </button>
             </div>
 
-            {/* Search Box 2: Start Date - End Date */}
-            <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm focus-within:ring-1 focus-within:ring-indigo-500">
+            {/* Search Box 2: Interactive Date Pickers */}
+            <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg px-3 h-10 shadow-sm focus-within:ring-1 focus-within:ring-indigo-500">
+              <span className="text-[11px] font-semibold text-slate-400">Date:</span>
               <input
-                type="text"
-                value={dateRange}
-                onChange={(e) => setDateRange(e.target.value)}
-                placeholder="Start Date – End Date"
-                className="w-44 h-10 bg-transparent border-0 outline-none px-3.5 text-[11px] text-slate-800 font-sans"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                onClick={(e) => {
+                  try {
+                    if (e.target.showPicker) e.target.showPicker();
+                  } catch (err) {}
+                }}
+                className="bg-transparent border-0 outline-none text-xs text-slate-700 font-sans cursor-pointer"
+                title="Start Date"
               />
-              <button className="h-10 bg-[#5b5bf5] hover:bg-indigo-600 text-white px-3 flex items-center justify-center shrink-0 cursor-pointer">
-                <Search className="w-4 h-4 text-white" />
-              </button>
+              <span className="text-slate-400 font-bold text-xs">–</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                onClick={(e) => {
+                  try {
+                    if (e.target.showPicker) e.target.showPicker();
+                  } catch (err) {}
+                }}
+                className="bg-transparent border-0 outline-none text-xs text-slate-700 font-sans cursor-pointer"
+                title="End Date"
+              />
             </div>
           </div>
         </div>

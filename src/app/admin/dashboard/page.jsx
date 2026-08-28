@@ -81,7 +81,6 @@ export default function AdminDashboardPage() {
     'Last Month',
     'Last 6 Months',
     'This Year',
-    'Custom Range',
   ];
 
   useEffect(() => {
@@ -474,12 +473,12 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Revenue & Staking Trend Chart */}
           <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+              <div className="space-y-1">
                 <h3 className="font-bold text-slate-800 text-base font-sans">Weekly Activity & Staking Trends</h3>
-                <p className="text-xs text-slate-400 font-sans mt-0.5">Live volume split between Staking Investments and Direct Wallet Deposits.</p>
+                <p className="text-xs text-slate-400 font-sans">Live volume split between Staking Investments and Direct Wallet Deposits.</p>
               </div>
-              <div className="flex items-center gap-4 text-xs font-semibold">
+              <div className="flex items-center gap-4 text-xs font-semibold pt-1 sm:pt-0">
                 <span className="flex items-center gap-1.5 text-indigo-600">
                   <span className="w-2.5 h-2.5 rounded bg-[#5b5bf5]" /> Staking
                 </span>

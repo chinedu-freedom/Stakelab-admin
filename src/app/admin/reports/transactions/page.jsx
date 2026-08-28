@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
 import Pagination from '../../../../components/Pagination';
-import { ChevronDown } from 'lucide-react';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../../components/ui/select';
 import api from '../../../../lib/api';
 
 export default function AdminTransactionLogsPage({ userId = null }) {
@@ -52,6 +52,41 @@ export default function AdminTransactionLogsPage({ userId = null }) {
       if (!actType.toLowerCase().includes(remark.toLowerCase())) return false;
     }
 
+    if (selectedDateFilter !== 'All') {
+      const itemDate = new Date(t.created_at);
+      const now = new Date();
+      if (selectedDateFilter === 'Today') {
+        if (itemDate.toDateString() !== now.toDateString()) return false;
+      } else if (selectedDateFilter === 'Yesterday') {
+        const yest = new Date(now);
+        yest.setDate(yest.getDate() - 1);
+        if (itemDate.toDateString() !== yest.toDateString()) return false;
+      } else if (selectedDateFilter === 'Last 7 Days') {
+        const days7 = new Date(now);
+        days7.setDate(days7.getDate() - 7);
+        if (itemDate < days7) return false;
+      } else if (selectedDateFilter === 'Last 15 Days') {
+        const days15 = new Date(now);
+        days15.setDate(days15.getDate() - 15);
+        if (itemDate < days15) return false;
+      } else if (selectedDateFilter === 'Last 30 Days') {
+        const days30 = new Date(now);
+        days30.setDate(days30.getDate() - 30);
+        if (itemDate < days30) return false;
+      } else if (selectedDateFilter === 'This Month') {
+        if (itemDate.getMonth() !== now.getMonth() || itemDate.getFullYear() !== now.getFullYear()) return false;
+      } else if (selectedDateFilter === 'Last Month') {
+        const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        if (itemDate.getMonth() !== lastMonthDate.getMonth() || itemDate.getFullYear() !== lastMonthDate.getFullYear()) return false;
+      } else if (selectedDateFilter === 'Last 6 Months') {
+        const months6 = new Date(now);
+        months6.setMonth(months6.getMonth() - 6);
+        if (itemDate < months6) return false;
+      } else if (selectedDateFilter === 'This Year') {
+        if (itemDate.getFullYear() !== now.getFullYear()) return false;
+      }
+    }
+
     return true;
   });
 
@@ -85,18 +120,16 @@ export default function AdminTransactionLogsPage({ userId = null }) {
               <label className="block text-[11px] font-semibold text-slate-500 mb-1 font-sans">
                 Type
               </label>
-              <div className="relative">
-                <select
-                  value={type}
-                  onChange={(e) => setType(e.target.value)}
-                  className="w-full h-10 bg-white border border-slate-200 rounded-lg px-3.5 pr-8 text-xs text-slate-800 appearance-none focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer font-sans"
-                >
-                  <option value="All">All</option>
-                  <option value="Plus">Plus (+)</option>
-                  <option value="Minus">Minus (-)</option>
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
+              <Select value={type} onValueChange={setType}>
+                <SelectTrigger className="h-10 bg-white border-slate-200 text-slate-800 rounded-lg text-xs font-sans font-normal">
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent searchable={false} className="bg-white border-slate-200 text-slate-800 shadow-lg">
+                  <SelectItem value="All" className="text-slate-800 hover:bg-slate-100">All</SelectItem>
+                  <SelectItem value="Plus" className="text-slate-800 hover:bg-slate-100">Plus (+)</SelectItem>
+                  <SelectItem value="Minus" className="text-slate-800 hover:bg-slate-100">Minus (-)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Remark Dropdown */}
@@ -104,49 +137,44 @@ export default function AdminTransactionLogsPage({ userId = null }) {
               <label className="block text-[11px] font-semibold text-slate-500 mb-1 font-sans">
                 Remark
               </label>
-              <div className="relative">
-                <select
-                  value={remark}
-                  onChange={(e) => setRemark(e.target.value)}
-                  className="w-full h-10 bg-white border border-slate-200 rounded-lg px-3.5 pr-8 text-xs text-slate-800 appearance-none focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer font-sans"
-                >
-                  <option value="All">All</option>
-                  <option value="Balance add">Balance add</option>
-                  <option value="Balance subtract">Balance subtract</option>
-                  <option value="Deposit">Deposit</option>
-                  <option value="Withdrawal">Withdrawal</option>
-                  <option value="Staking">Staking</option>
-                  <option value="Profit Claim">Profit Claim</option>
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
+              <Select value={remark} onValueChange={setRemark}>
+                <SelectTrigger className="h-10 bg-white border-slate-200 text-slate-800 rounded-lg text-xs font-sans font-normal">
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent searchable={false} className="bg-white border-slate-200 text-slate-800 shadow-lg">
+                  <SelectItem value="All" className="text-slate-800 hover:bg-slate-100">All</SelectItem>
+                  <SelectItem value="Balance add" className="text-slate-800 hover:bg-slate-100">Balance add</SelectItem>
+                  <SelectItem value="Balance subtract" className="text-slate-800 hover:bg-slate-100">Balance subtract</SelectItem>
+                  <SelectItem value="Deposit" className="text-slate-800 hover:bg-slate-100">Deposit</SelectItem>
+                  <SelectItem value="Withdrawal" className="text-slate-800 hover:bg-slate-100">Withdrawal</SelectItem>
+                  <SelectItem value="Staking" className="text-slate-800 hover:bg-slate-100">Staking</SelectItem>
+                  <SelectItem value="Profit Claim" className="text-slate-800 hover:bg-slate-100">Profit Claim</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            {/* Date Range Dropdown Filter (Matching Screenshot 4) */}
+            {/* Date Range Dropdown Filter */}
             <div>
               <label className="block text-[11px] font-semibold text-slate-500 mb-1 font-sans">
                 Date
               </label>
-              <div className="relative">
-                <select
-                  value={selectedDateFilter}
-                  onChange={(e) => setSelectedDateFilter(e.target.value)}
-                  className="w-full h-10 bg-white border border-slate-200 rounded-lg px-3.5 pr-8 text-xs text-slate-800 appearance-none focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer font-sans"
-                >
-                  <option value="All">Start Date - End Date</option>
-                  <option value="Today">Today</option>
-                  <option value="Yesterday">Yesterday</option>
-                  <option value="Last 7 Days">Last 7 Days</option>
-                  <option value="Last 15 Days">Last 15 Days</option>
-                  <option value="Last 30 Days">Last 30 Days</option>
-                  <option value="This Month">This Month</option>
-                  <option value="Last Month">Last Month</option>
-                  <option value="Last 6 Months">Last 6 Months</option>
-                  <option value="This Year">This Year</option>
-                  <option value="Custom Range">Custom Range</option>
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
+              <Select value={selectedDateFilter} onValueChange={setSelectedDateFilter}>
+                <SelectTrigger className="h-10 bg-white border-slate-200 text-slate-800 rounded-lg text-xs font-sans font-normal">
+                  <SelectValue placeholder="Start Date - End Date" />
+                </SelectTrigger>
+                <SelectContent searchable={false} className="bg-white border-slate-200 text-slate-800 shadow-lg">
+                  <SelectItem value="All" className="text-slate-800 hover:bg-slate-100">Start Date - End Date</SelectItem>
+                  <SelectItem value="Today" className="text-slate-800 hover:bg-slate-100">Today</SelectItem>
+                  <SelectItem value="Yesterday" className="text-slate-800 hover:bg-slate-100">Yesterday</SelectItem>
+                  <SelectItem value="Last 7 Days" className="text-slate-800 hover:bg-slate-100">Last 7 Days</SelectItem>
+                  <SelectItem value="Last 15 Days" className="text-slate-800 hover:bg-slate-100">Last 15 Days</SelectItem>
+                  <SelectItem value="Last 30 Days" className="text-slate-800 hover:bg-slate-100">Last 30 Days</SelectItem>
+                  <SelectItem value="This Month" className="text-slate-800 hover:bg-slate-100">This Month</SelectItem>
+                  <SelectItem value="Last Month" className="text-slate-800 hover:bg-slate-100">Last Month</SelectItem>
+                  <SelectItem value="Last 6 Months" className="text-slate-800 hover:bg-slate-100">Last 6 Months</SelectItem>
+                  <SelectItem value="This Year" className="text-slate-800 hover:bg-slate-100">This Year</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AdminSidebarLayout from '../../../components/AdminSidebarLayout';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../components/ui/select';
 import { ClipboardList, Plus, Search, Trash2, Edit2, ExternalLink, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../../lib/api';
@@ -288,16 +289,17 @@ export default function AdminTasksPage() {
 
                   <div>
                     <label className="block text-xs font-semibold text-slate-600 mb-1.5">Category</label>
-                    <select
-                      value={form.task_type}
-                      onChange={(e) => setForm({ ...form, task_type: e.target.value })}
-                      className="w-full h-10 bg-slate-50 border border-slate-200 rounded-lg px-3 text-xs text-slate-800 font-semibold focus:outline-none"
-                    >
-                      <option value="TELEGRAM">Telegram</option>
-                      <option value="YOUTUBE">YouTube</option>
-                      <option value="TWITTER">Twitter / X</option>
-                      <option value="GENERAL">General Task</option>
-                    </select>
+                    <Select value={form.task_type} onValueChange={(val) => setForm({ ...form, task_type: val })}>
+                      <SelectTrigger className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg text-xs font-semibold">
+                        <SelectValue placeholder="Category" />
+                      </SelectTrigger>
+                      <SelectContent searchable={false} className="bg-white border-slate-200 text-slate-800 shadow-lg">
+                        <SelectItem value="TELEGRAM" className="text-slate-800 hover:bg-slate-100">Telegram</SelectItem>
+                        <SelectItem value="YOUTUBE" className="text-slate-800 hover:bg-slate-100">YouTube</SelectItem>
+                        <SelectItem value="TWITTER" className="text-slate-800 hover:bg-slate-100">Twitter / X</SelectItem>
+                        <SelectItem value="GENERAL" className="text-slate-800 hover:bg-slate-100">General Task</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 

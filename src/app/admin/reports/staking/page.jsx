@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
 import Pagination from '../../../../components/Pagination';
-import { ChevronDown } from 'lucide-react';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../../components/ui/select';
 import api from '../../../../lib/api';
 
 export default function AdminStakingHistoryPage() {
@@ -12,6 +12,8 @@ export default function AdminStakingHistoryPage() {
   const [username, setUsername] = useState('');
   const [selectedPlan, setSelectedPlan] = useState('Any');
   const [selectedStatus, setSelectedStatus] = useState('All');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   const fetchStakes = async () => {
     try {
@@ -37,19 +39,32 @@ export default function AdminStakingHistoryPage() {
       const q = username.toLowerCase();
       const uName = s.user?.full_name || '';
       const uHandle = s.user?.username || '';
-      if (!uName.toLowerCase().includes(q) && !uHandle.toLowerCase().includes(q)) {
+      const pName = s.plan?.name || '';
+      if (!uName.toLowerCase().includes(q) && !uHandle.toLowerCase().includes(q) && !pName.toLowerCase().includes(q)) {
         return false;
       }
     }
 
     if (selectedPlan !== 'Any') {
       const planName = s.plan?.name || '';
-      if (planName.toLowerCase() !== selectedPlan.toLowerCase()) return false;
+      if (!planName.toLowerCase().includes(selectedPlan.toLowerCase())) return false;
     }
 
     if (selectedStatus !== 'All') {
-      const statusText = s.status || '';
-      if (statusText.toLowerCase() !== selectedStatus.toLowerCase()) return false;
+      const st = s.status || '';
+      if (st.toUpperCase() !== selectedStatus.toUpperCase()) return false;
+    }
+
+    if (startDate) {
+      const itemDate = new Date(s.created_at);
+      const start = new Date(startDate);
+      if (itemDate < start) return false;
+    }
+
+    if (endDate) {
+      const itemDate = new Date(s.created_at);
+      const end = new Date(endDate + 'T23:59:59');
+      if (itemDate > end) return false;
     }
 
     return true;
@@ -60,16 +75,16 @@ export default function AdminStakingHistoryPage() {
       <div className="space-y-6 max-w-7xl mx-auto">
         {/* Page Header Title */}
         <h1 className="text-xl font-bold text-slate-800 font-sans tracking-wide">
-          Staking Logs
+          Staking History
         </h1>
 
-        {/* Filter Controls (Instant Real-time Filtering, NO Blue Button) */}
+        {/* Filter Bar Controls (NO Blue Filter Button, Instant Real-time Filtering) */}
         <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-sm">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-            {/* Username Input */}
+            {/* Search Username / Plan */}
             <div>
               <label className="block text-[11px] font-semibold text-slate-500 mb-1 font-sans">
-                Username
+                TRX / Username / Plan
               </label>
               <input
                 type="text"
@@ -85,19 +100,17 @@ export default function AdminStakingHistoryPage() {
               <label className="block text-[11px] font-semibold text-slate-500 mb-1 font-sans">
                 Plan
               </label>
-              <div className="relative">
-                <select
-                  value={selectedPlan}
-                  onChange={(e) => setSelectedPlan(e.target.value)}
-                  className="w-full h-10 bg-white border border-slate-200 rounded-lg px-3.5 pr-8 text-xs text-slate-800 appearance-none focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer font-sans"
-                >
-                  <option value="Any">Any</option>
-                  <option value="Silver">Silver</option>
-                  <option value="Golden">Golden</option>
-                  <option value="Platinum">Platinum</option>
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
+              <Select value={selectedPlan} onValueChange={setSelectedPlan}>
+                <SelectTrigger className="h-10 bg-white border-slate-200 text-slate-800 rounded-lg text-xs font-sans font-normal">
+                  <SelectValue placeholder="Any" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-slate-200 text-slate-800 shadow-lg">
+                  <SelectItem value="Any" className="text-slate-800 hover:bg-slate-100">Any</SelectItem>
+                  <SelectItem value="Silver" className="text-slate-800 hover:bg-slate-100">Silver</SelectItem>
+                  <SelectItem value="Golden" className="text-slate-800 hover:bg-slate-100">Golden</SelectItem>
+                  <SelectItem value="Platinum" className="text-slate-800 hover:bg-slate-100">Platinum</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Status Dropdown */}
@@ -105,36 +118,46 @@ export default function AdminStakingHistoryPage() {
               <label className="block text-[11px] font-semibold text-slate-500 mb-1 font-sans">
                 Status
               </label>
-              <div className="relative">
-                <select
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="w-full h-10 bg-white border border-slate-200 rounded-lg px-3.5 pr-8 text-xs text-slate-800 appearance-none focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer font-sans"
-                >
-                  <option value="All">All</option>
-                  <option value="Running">Running</option>
-                  <option value="Completed">Completed</option>
-                  <option value="Mature">Mature</option>
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
+              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <SelectTrigger className="h-10 bg-white border-slate-200 text-slate-800 rounded-lg text-xs font-sans font-normal">
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent searchable={false} className="bg-white border-slate-200 text-slate-800 shadow-lg">
+                  <SelectItem value="All" className="text-slate-800 hover:bg-slate-100">All</SelectItem>
+                  <SelectItem value="Running" className="text-slate-800 hover:bg-slate-100">Running</SelectItem>
+                  <SelectItem value="Completed" className="text-slate-800 hover:bg-slate-100">Completed</SelectItem>
+                  <SelectItem value="Mature" className="text-slate-800 hover:bg-slate-100">Mature</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            {/* Date Input */}
+            {/* Interactive Date Range Pickers */}
             <div>
               <label className="block text-[11px] font-semibold text-slate-500 mb-1 font-sans">
-                Date
+                Date Filter
               </label>
-              <input
-                type="text"
-                placeholder="Start date – End date"
-                className="w-full h-10 bg-white border border-slate-200 rounded-lg px-3.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans"
-              />
+              <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg px-2.5 h-10 shadow-sm focus-within:ring-1 focus-within:ring-indigo-500">
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="bg-transparent border-0 outline-none text-xs text-slate-700 font-sans cursor-pointer w-full"
+                  title="Start Date"
+                />
+                <span className="text-slate-400 font-bold text-xs">–</span>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="bg-transparent border-0 outline-none text-xs text-slate-700 font-sans cursor-pointer w-full"
+                  title="End Date"
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Staking Logs Table Container (Matching Exact Reference Screenshot 1) */}
+        {/* Staking Logs Table Container */}
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">

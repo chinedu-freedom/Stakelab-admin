@@ -29,15 +29,9 @@ import {
 const systemSettingCards = [
   {
     title: 'General Setting',
-    description: 'Configure the fundamental information of the site.',
+    description: 'Configure site title, timezone, currency, logo, and favicon branding.',
     icon: Settings,
     link: '/admin/setting/general',
-  },
-  {
-    title: 'Logo and Favicon',
-    description: 'Upload your logo and favicon here.',
-    icon: Image,
-    link: '/admin/setting/logo-icon',
   },
   {
     title: 'Maintenance Mode',

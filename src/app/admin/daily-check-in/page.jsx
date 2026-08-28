@@ -81,18 +81,18 @@ export default function AdminDailyCheckInPage() {
                   key={item.id}
                   className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4 relative overflow-hidden"
                 >
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3 gap-2 flex-wrap sm:flex-nowrap">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-[#5b5bf5] font-extrabold text-xs">
+                      <div className="px-3.5 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-[#5b5bf5] font-extrabold text-xs whitespace-nowrap shrink-0">
                         Day {item.day_number}
                       </div>
-                      <span className="font-bold text-slate-800 text-xs">
+                      <span className="font-bold text-slate-800 text-xs whitespace-nowrap">
                         Streak Day {item.day_number}
                       </span>
                     </div>
 
                     {item.day_number === 7 && (
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-700 flex items-center gap-1">
+                      <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-700 flex items-center gap-1 shrink-0">
                         <Award className="w-3 h-3" /> MEGA BONUS
                       </span>
                     )}

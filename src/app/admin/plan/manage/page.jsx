@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../../components/ui/select';
 import { Undo2, Plus, X, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../../../lib/api';
@@ -137,14 +138,17 @@ export default function AdminCreatePlanPage() {
                 <label className="block text-xs font-semibold text-slate-700 font-sans mb-2">
                   Plan Tier <span className="text-red-500">*</span>
                 </label>
-                <select
-                  value={tier}
-                  onChange={(e) => setTier(e.target.value)}
-                  className="w-full h-11 bg-white border border-slate-200 rounded-lg px-4 text-slate-800 text-xs font-bold font-sans focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all cursor-pointer"
-                >
-                  <option value="Flexible Tier">Flexible Tier</option>
-                  <option value="Dynamic Tier">Dynamic Tier</option>
-                </select>
+                <Select value={tier} onValueChange={setTier}>
+                  <SelectTrigger className="h-11 bg-white border-slate-200 text-slate-800 rounded-lg text-xs font-bold font-sans">
+                    <SelectValue placeholder="Flexible Tier" />
+                  </SelectTrigger>
+                  <SelectContent searchable={false} className="bg-white border-slate-200 text-slate-800 shadow-lg">
+                    <SelectItem value="Flexible Tier" className="text-slate-800 hover:bg-slate-100 font-bold">Flexible Tier</SelectItem>
+                    <SelectItem value="Dynamic Tier" className="text-slate-800 hover:bg-slate-100 font-bold">Dynamic Tier</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
               </div>
             </div>
 

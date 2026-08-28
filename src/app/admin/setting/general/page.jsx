@@ -2,17 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
-import { Upload, ChevronDown, Loader2, Save } from 'lucide-react';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../../components/ui/select';
+import { Upload, Loader2, Save, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../../../lib/api';
 
 export default function AdminGeneralSettingPage() {
   const [logoPreview, setLogoPreview] = useState(null);
+  const [faviconPreview, setFaviconPreview] = useState(null);
   const [siteTitle, setSiteTitle] = useState('EverStake');
   const [currency] = useState('USDT');
   const [currencySymbol] = useState('$');
   const [timezone, setTimezone] = useState('UTC');
   const [registrationBonus, setRegistrationBonus] = useState('10.00');
+  const [appDownloadUrl, setAppDownloadUrl] = useState('https://everstake.io/everstake-app.apk');
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -27,6 +30,19 @@ export default function AdminGeneralSettingPage() {
         if (s.timezone) setTimezone(s.timezone);
         if (s.registrationBonus !== undefined) setRegistrationBonus(String(s.registrationBonus));
         if (s.logoUrl) setLogoPreview(s.logoUrl);
+        if (s.faviconUrl) setFaviconPreview(s.faviconUrl);
+        if (s.appDownloadUrl) setAppDownloadUrl(s.appDownloadUrl);
+      }
+      
+      // Also attempt fetching from logo-favicon as backup
+      try {
+        const lfRes = await api.get('/admin/logo-favicon');
+        if (lfRes.data && lfRes.data.success && lfRes.data.settings) {
+          if (lfRes.data.settings.logoUrl) setLogoPreview(lfRes.data.settings.logoUrl);
+          if (lfRes.data.settings.faviconUrl) setFaviconPreview(lfRes.data.settings.faviconUrl);
+        }
+      } catch (e) {
+        // Silent catch for secondary endpoint
       }
     } catch (err) {
       console.error('Failed to load general settings:', err);
@@ -51,6 +67,18 @@ export default function AdminGeneralSettingPage() {
     }
   };
 
+  const handleFaviconChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFaviconPreview(reader.result);
+        toast.success('New favicon file selected.');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!siteTitle.trim()) {
@@ -60,15 +88,29 @@ export default function AdminGeneralSettingPage() {
 
     try {
       setSaving(true);
+      
+      // Update General Setting
       const res = await api.post('/admin/general-setting', {
         siteTitle,
         timezone,
         registrationBonus: parseFloat(registrationBonus || 0),
         logoUrl: logoPreview,
+        faviconUrl: faviconPreview,
+        appDownloadUrl,
       });
 
+      // Also update logo-favicon endpoint to keep data strictly in sync
+      try {
+        await api.post('/admin/logo-favicon', {
+          logoUrl: logoPreview,
+          faviconUrl: faviconPreview,
+        });
+      } catch (e) {
+        // Silent catch
+      }
+
       if (res.data && res.data.success) {
-        toast.success(res.data.message || 'General settings saved successfully!');
+        toast.success(res.data.message || 'General settings, Logo & Favicon saved successfully!');
       }
     } catch (err) {
       toast.error('Failed to save general settings');
@@ -82,7 +124,7 @@ export default function AdminGeneralSettingPage() {
       <div className="space-y-6 max-w-7xl mx-auto font-sans">
         {/* Page Header Title */}
         <h1 className="text-xl font-bold text-slate-800 font-sans tracking-wide">
-          General Setting
+          General Setting & Brand Assets
         </h1>
 
         {loading ? (
@@ -91,121 +133,178 @@ export default function AdminGeneralSettingPage() {
           </div>
         ) : (
           /* Setting Form Container */
-          <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Logo Preview & Upload Section */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-2 font-sans">
-                  Site Logo Preview
-                </label>
-                <div className="flex flex-col sm:flex-row items-center gap-4 p-4 border border-slate-200 rounded-xl bg-slate-50">
-                  <div className="h-16 px-6 bg-white border border-slate-200 rounded-lg flex items-center justify-center shadow-sm">
-                    {logoPreview ? (
-                      <img src={logoPreview} alt="Logo" className="max-h-12 object-contain" />
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded bg-gradient-to-r from-[#ff0044] to-[#fe780b] flex items-center justify-center text-white font-righteous font-bold text-sm shadow-md">
-                          E
+          <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-8">
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Section 1: Logo & Favicon Upload Grid */}
+              <div className="space-y-4">
+                <h2 className="text-sm font-bold text-slate-800 font-sans border-b border-slate-100 pb-2 flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-[#5b5bf5]" /> Site Logo & Favicon Branding
+                </h2>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                  {/* Left Box: Logo */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-2 font-sans">
+                      Site Logo
+                    </label>
+                    <div className="relative border border-slate-200 rounded-xl overflow-hidden bg-slate-50 flex items-center justify-center p-6 min-h-[180px] shadow-sm">
+                      {logoPreview ? (
+                        <img src={logoPreview} alt="Logo" className="max-h-20 object-contain" />
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <div className="w-9 h-9 rounded bg-gradient-to-r from-[#ff0044] to-[#fe780b] flex items-center justify-center text-white font-righteous font-bold text-lg shadow-md">
+                            E
+                          </div>
+                          <span className="text-2xl font-extrabold text-[#091630] font-sans">
+                            Ever<span className="text-[#5b5bf5]">Stake</span>
+                          </span>
                         </div>
-                        <span className="text-xl font-extrabold text-[#091630] font-sans">
-                          Ever<span className="text-[#5b5bf5]">Stake</span>
-                        </span>
-                      </div>
-                    )}
+                      )}
+
+                      <label className="absolute right-4 bottom-4 bg-[#5b5bf5] hover:bg-indigo-600 text-white p-2.5 rounded-full shadow-lg cursor-pointer transition-transform hover:scale-105">
+                        <Upload className="w-4 h-4 text-white" />
+                        <input
+                          type="file"
+                          accept=".png,.jpg,.jpeg,.svg"
+                          onChange={handleLogoChange}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                    <p className="text-[11px] text-slate-500 font-semibold mt-2 font-sans">
+                      Supported Files: <span className="font-bold text-slate-700">.png, .jpg, .jpeg, .svg</span>
+                    </p>
                   </div>
 
-                  <label className="bg-[#5b5bf5] hover:bg-indigo-600 text-white font-bold px-4 py-2.5 rounded-lg text-xs flex items-center gap-2 transition-all cursor-pointer shadow-sm">
-                    <Upload className="w-4 h-4 text-white" /> Change Logo
-                    <input
-                      type="file"
-                      accept=".png,.jpg,.jpeg"
-                      onChange={handleLogoChange}
-                      className="hidden"
-                    />
-                  </label>
+                  {/* Right Box: Favicon */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-2 font-sans">
+                      Site Favicon / App Icon
+                    </label>
+                    <div className="relative border border-slate-200 rounded-xl overflow-hidden bg-slate-50 flex items-center justify-center p-6 min-h-[180px] shadow-sm">
+                      {faviconPreview ? (
+                        <img src={faviconPreview} alt="Favicon" className="max-h-16 object-contain" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-[#ff0044] to-[#fe780b] flex items-center justify-center text-white font-righteous font-bold text-xl shadow-lg">
+                          E
+                        </div>
+                      )}
+
+                      <label className="absolute right-4 bottom-4 bg-[#5b5bf5] hover:bg-indigo-600 text-white p-2.5 rounded-full shadow-lg cursor-pointer transition-transform hover:scale-105">
+                        <Upload className="w-4 h-4 text-white" />
+                        <input
+                          type="file"
+                          accept=".png,.jpg,.jpeg,.ico,.svg"
+                          onChange={handleFaviconChange}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                    <p className="text-[11px] text-slate-500 font-semibold mt-2 font-sans">
+                      Supported Files: <span className="font-bold text-slate-700">.png, .jpg, .jpeg, .ico, .svg</span>
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              {/* Inputs Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {/* Site Title * */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5 font-sans">
-                    Site Title <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={siteTitle}
-                    onChange={(e) => setSiteTitle(e.target.value)}
-                    className="w-full h-11 bg-white border border-slate-200 rounded-lg px-3.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans shadow-sm"
-                  />
-                </div>
+              {/* Section 2: General System Configuration Inputs */}
+              <div className="space-y-4 pt-2">
+                <h2 className="text-sm font-bold text-slate-800 font-sans border-b border-slate-100 pb-2">
+                  System & Currency Configuration
+                </h2>
 
-                {/* Currency */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5 font-sans">
-                    Currency
-                  </label>
-                  <input
-                    type="text"
-                    readOnly
-                    value={currency}
-                    className="w-full h-11 bg-slate-100 border border-slate-200 rounded-lg px-3.5 text-xs text-slate-500 font-bold font-sans cursor-not-allowed"
-                  />
-                </div>
-
-                {/* Currency Symbol */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5 font-sans">
-                    Currency Symbol
-                  </label>
-                  <input
-                    type="text"
-                    readOnly
-                    value={currencySymbol}
-                    className="w-full h-11 bg-slate-100 border border-slate-200 rounded-lg px-3.5 text-xs text-slate-500 font-bold font-sans cursor-not-allowed"
-                  />
-                </div>
-
-                {/* Timezone */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5 font-sans">
-                    Timezone
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={timezone}
-                      onChange={(e) => setTimezone(e.target.value)}
-                      className="w-full h-11 bg-white border border-slate-200 rounded-lg px-3.5 pr-8 text-xs text-slate-800 appearance-none focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer font-sans shadow-sm"
-                    >
-                      <option value="UTC">UTC</option>
-                      <option value="Africa/Lagos">Africa/Lagos (GMT+1)</option>
-                      <option value="America/New_York">America/New_York (EST)</option>
-                      <option value="Europe/London">Europe/London (GMT)</option>
-                      <option value="Asia/Dubai">Asia/Dubai (GST)</option>
-                    </select>
-                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  </div>
-                </div>
-
-                {/* Registration Bonus */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5 font-sans">
-                    Registration Bonus (USDT)
-                  </label>
-                  <div className="relative">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {/* Site Title * */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5 font-sans">
+                      Site Title <span className="text-red-500">*</span>
+                    </label>
                     <input
-                      type="number"
-                      step="0.01"
-                      value={registrationBonus}
-                      onChange={(e) => setRegistrationBonus(e.target.value)}
-                      placeholder="0.00"
-                      className="w-full h-11 bg-white border border-slate-200 rounded-lg pl-3.5 pr-14 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans shadow-sm"
+                      type="text"
+                      required
+                      value={siteTitle}
+                      onChange={(e) => setSiteTitle(e.target.value)}
+                      className="w-full h-11 bg-white border border-slate-200 rounded-lg px-3.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans shadow-sm"
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 font-mono">
-                      USDT
-                    </span>
+                  </div>
+
+                  {/* Currency */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5 font-sans">
+                      Currency
+                    </label>
+                    <input
+                      type="text"
+                      readOnly
+                      value={currency}
+                      className="w-full h-11 bg-slate-100 border border-slate-200 rounded-lg px-3.5 text-xs text-slate-500 font-bold font-sans cursor-not-allowed"
+                    />
+                  </div>
+
+                  {/* Currency Symbol */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5 font-sans">
+                      Currency Symbol
+                    </label>
+                    <input
+                      type="text"
+                      readOnly
+                      value={currencySymbol}
+                      className="w-full h-11 bg-slate-100 border border-slate-200 rounded-lg px-3.5 text-xs text-slate-500 font-bold font-sans cursor-not-allowed"
+                    />
+                  </div>
+
+                  {/* Timezone */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5 font-sans">
+                      Timezone
+                    </label>
+                    <Select value={timezone} onValueChange={setTimezone}>
+                      <SelectTrigger className="h-11 bg-white border-slate-200 text-slate-800 rounded-lg text-xs font-sans">
+                        <SelectValue placeholder="UTC" />
+                      </SelectTrigger>
+                      <SelectContent searchable={false} className="bg-white border-slate-200 text-slate-800 shadow-lg">
+                        <SelectItem value="UTC" className="text-slate-800 hover:bg-slate-100">UTC</SelectItem>
+                        <SelectItem value="Africa/Lagos" className="text-slate-800 hover:bg-slate-100">Africa/Lagos (GMT+1)</SelectItem>
+                        <SelectItem value="America/New_York" className="text-slate-800 hover:bg-slate-100">America/New_York (EST)</SelectItem>
+                        <SelectItem value="Europe/London" className="text-slate-800 hover:bg-slate-100">Europe/London (GMT)</SelectItem>
+                        <SelectItem value="Asia/Dubai" className="text-slate-800 hover:bg-slate-100">Asia/Dubai (GST)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Registration Bonus */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5 font-sans">
+                      Registration Bonus (USDT)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={registrationBonus}
+                        onChange={(e) => setRegistrationBonus(e.target.value)}
+                        placeholder="0.00"
+                        className="w-full h-11 bg-white border border-slate-200 rounded-lg pl-3.5 pr-14 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans shadow-sm"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 font-mono">
+                        USDT
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Mobile App Download Link (APK) */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5 font-sans">
+                      Mobile App Link (APK / App Store URL)
+                    </label>
+                    <input
+                      type="url"
+                      value={appDownloadUrl}
+                      onChange={(e) => setAppDownloadUrl(e.target.value)}
+                      placeholder="https://everstake.io/everstake-app.apk"
+                      className="w-full h-11 bg-white border border-slate-200 rounded-lg px-3.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans shadow-sm"
+                    />
                   </div>
                 </div>
               </div>

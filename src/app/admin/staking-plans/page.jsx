@@ -88,7 +88,7 @@ export default function AdminStakingPlansPage() {
     <AdminSidebarLayout>
       <div className="space-y-6 max-w-7xl mx-auto">
         {/* Page Header Bar */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex items-center justify-between gap-4">
           <h1 className="text-xl font-bold text-slate-800 font-sans tracking-wide">
             Plan
           </h1>
@@ -96,7 +96,7 @@ export default function AdminStakingPlansPage() {
           {/* + Add New Button */}
           <Link
             href="/admin/plan/manage"
-            className="border border-indigo-500 text-indigo-600 hover:bg-indigo-50 px-4 py-2 rounded-md text-xs font-bold font-sans transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+            className="border border-indigo-500 text-indigo-600 hover:bg-indigo-50 px-4 py-2 rounded-md text-xs font-bold font-sans transition-all flex items-center gap-1.5 shadow-sm cursor-pointer shrink-0"
           >
             <Plus className="w-4 h-4 text-indigo-600" /> Add New
           </Link>
