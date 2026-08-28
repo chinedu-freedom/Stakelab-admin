@@ -814,7 +814,7 @@ export default function AdminUserDetailPage({ params }) {
         {resetLoginModalOpen && (
           <div
             onClick={() => setResetLoginModalOpen(false)}
-            className="fixed inset-0 min-h-screen w-full bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+            className="fixed inset-0 z-[100] w-full h-full min-h-screen bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
           >
             <div
               onClick={(e) => e.stopPropagation()}
@@ -882,7 +882,7 @@ export default function AdminUserDetailPage({ params }) {
         {resetWithdrawalModalOpen && (
           <div
             onClick={() => setResetWithdrawalModalOpen(false)}
-            className="fixed inset-0 min-h-screen w-full bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+            className="fixed inset-0 z-[100] w-full h-full min-h-screen bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
           >
             <div
               onClick={(e) => e.stopPropagation()}
@@ -968,7 +968,7 @@ export default function AdminUserDetailPage({ params }) {
         {balanceModalOpen && (
           <div
             onClick={() => setBalanceModalOpen(false)}
-            className="fixed inset-0 min-h-screen w-full bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+            className="fixed inset-0 z-[100] w-full h-full min-h-screen bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
           >
             <div
               onClick={(e) => e.stopPropagation()}
@@ -1124,7 +1124,7 @@ export default function AdminUserDetailPage({ params }) {
         {banModalOpen && (
           <div
             onClick={() => setBanModalOpen(false)}
-            className="fixed inset-0 min-h-screen w-full bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+            className="fixed inset-0 z-[100] w-full h-full min-h-screen bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
           >
             <div
               onClick={(e) => e.stopPropagation()}
