@@ -46,7 +46,6 @@ api.interceptors.response.use(
       document.cookie = 'sec-admin-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
 
       if (!isAuthPage) {
-        toast.error('Session expired. Please log in to your admin account.');
         window.location.href = '/admin/login';
       }
     }
