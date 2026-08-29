@@ -417,12 +417,18 @@ export default function AdminSidebarLayout({ children }) {
 
           {/* Right Side: Header Quick Icons & Admin User Profile */}
           <div className="flex items-center space-x-4">
-            {/* Globe Icon - Navigates to EverStake.cx site */}
+            {/* Globe Icon - Navigates to live user site */}
             <button
               type="button"
-              onClick={() => window.open('http://localhost:3000', '_blank')}
-              className="text-slate-300 hover:text-white transition-colors cursor-pointer"
-              title="Visit Site (EverStake.cx)"
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  const isLocal = window.location.hostname.includes('localhost');
+                  const liveUrl = process.env.NEXT_PUBLIC_USER_SITE_URL || (isLocal ? 'http://localhost:3000' : window.location.origin.replace('admin.', ''));
+                  window.open(liveUrl, '_blank');
+                }
+              }}
+              className="text-slate-300 hover:text-white transition-colors cursor-pointer p-1.5 rounded-lg hover:bg-[#14254b]"
+              title="Visit Live Website"
             >
               <Globe className="w-4 h-4" />
             </button>
