@@ -293,20 +293,6 @@ export default function AdminGeneralSettingPage() {
                       </span>
                     </div>
                   </div>
-
-                  {/* Mobile App Download Link (APK) */}
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5 font-sans">
-                      Mobile App Link (APK / App Store URL)
-                    </label>
-                    <input
-                      type="url"
-                      value={appDownloadUrl}
-                      onChange={(e) => setAppDownloadUrl(e.target.value)}
-                      placeholder="https://everstake.io/everstake-app.apk"
-                      className="w-full h-11 bg-white border border-slate-200 rounded-lg px-3.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans shadow-sm"
-                    />
-                  </div>
                 </div>
               </div>
 
