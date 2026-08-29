@@ -76,7 +76,7 @@ export default function AdminCreatePlanPage() {
         <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Info Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Name Input */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 font-sans mb-2">
@@ -132,9 +132,28 @@ export default function AdminCreatePlanPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Staking Tier Select */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 font-sans mb-2">
+                  Staking Tier <span className="text-red-500">*</span>
+                </label>
+                <Select value={tier} onValueChange={setTier}>
+                  <SelectTrigger className="h-11 bg-white border-slate-200 text-slate-800 rounded-lg text-xs font-bold font-sans">
+                    <SelectValue placeholder="Select Tier" />
+                  </SelectTrigger>
+                  <SelectContent searchable={false} className="bg-white border-slate-200 text-slate-800 shadow-lg">
+                    <SelectItem value="Flexible Tier" className="text-slate-800 hover:bg-slate-100 font-bold">Flexible Tier</SelectItem>
+                    <SelectItem value="Dynamic Tier" className="text-slate-800 hover:bg-slate-100 font-bold">Dynamic Tier</SelectItem>
+                    <SelectItem value="Silver Tier" className="text-slate-800 hover:bg-slate-100 font-bold">Silver Tier</SelectItem>
+                    <SelectItem value="Gold Tier" className="text-slate-800 hover:bg-slate-100 font-bold">Gold Tier</SelectItem>
+                    <SelectItem value="VIP Tier" className="text-slate-800 hover:bg-slate-100 font-bold">VIP Tier</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            {/* Min/Max Amount Grid */}
+            {/* Min/Max Amount & Status Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Min Amount */}
               <div>
