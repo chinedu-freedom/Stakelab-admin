@@ -32,9 +32,23 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const message = error.response?.data?.message || 'Admin operation failed';
-    if (error.response?.status === 401 && typeof window !== 'undefined') {
+    const status = error.response?.status;
+    const msg = String(error.response?.data?.message || error.response?.data?.error || '');
+    const isExpired = status === 401 || status === 403 || msg.includes('jwt expired') || msg.includes('Invalid admin token');
+
+    if (isExpired && typeof window !== 'undefined') {
+      const authPages = ['/admin/login', '/admin/forgot-password', '/admin/reset-password'];
+      const isAuthPage = authPages.some((path) => window.location.pathname.startsWith(path));
+
       localStorage.removeItem('stakelab_admin_token');
+      localStorage.removeItem('stakelab_admin');
+      document.cookie = 'stakelab_admin_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'sec-admin-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+
+      if (!isAuthPage) {
+        toast.error('Session expired. Please log in to your admin account.');
+        window.location.href = '/admin/login';
+      }
     }
     return Promise.reject(error);
   }
