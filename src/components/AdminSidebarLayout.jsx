@@ -449,9 +449,9 @@ export default function AdminSidebarLayout({ children }) {
                 )}
               </button>
 
-              {/* Notification Popover Dropdown */}
+              {/* Notification Popover Dropdown (Centered on mobile, right-aligned on desktop) */}
               {notifDropdownOpen && (
-                <div className="absolute right-0 top-full mt-3 w-80 bg-[#0a1835] border border-[#1e3463] rounded-2xl shadow-2xl overflow-hidden z-50 text-xs font-sans animate-in zoom-in-95 duration-200">
+                <div className="fixed sm:absolute left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-auto sm:right-0 top-16 sm:top-full mt-2 sm:mt-3 w-[92vw] max-w-sm sm:w-80 bg-[#0a1835] border border-[#1e3463] rounded-2xl shadow-2xl overflow-hidden z-50 text-xs font-sans animate-in zoom-in-95 duration-200">
                   <div className="p-3.5 bg-[#0f2249] border-b border-[#1e3463] flex items-center justify-between">
                     <h3 className="font-bold text-white font-righteous flex items-center gap-2">
                       <Bell className="w-4 h-4 text-[#5b5bf5]" /> Notifications
