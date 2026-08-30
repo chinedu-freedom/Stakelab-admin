@@ -82,6 +82,7 @@ export default function AdminEditPlanPage({ params }) {
         title: name,
         status: status,
         badge: status,
+        is_active: status === 'ACTIVE',
         min_amount: parseFloat(minAmount),
         max_amount: parseFloat(maxAmount),
         daily_return_percent: parseFloat(dailyInterest),

@@ -36,6 +36,7 @@ export default function AdminCreatePlanPage() {
         title: name,
         badge: status,
         status: status,
+        is_active: status === 'ACTIVE',
         min_amount: parseFloat(minAmount),
         max_amount: parseFloat(maxAmount),
         daily_return_percent: parseFloat(dailyInterest),
