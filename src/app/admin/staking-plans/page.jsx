@@ -46,7 +46,9 @@ export default function AdminStakingPlansPage() {
             duration: `${p.duration_days} Days`,
             days: p.duration_days,
             duration_days: p.duration_days,
+            is_fixed_deposit: p.is_fixed_deposit !== false,
             capital_return: p.capital_return !== false,
+            is_compounding: p.is_compounding !== false,
             status: planStatus,
             segments: [
               { range: `${minAmt.toLocaleString()} USDT – ${(minAmt + step).toLocaleString()} USDT`, rate: `${dailyRate.toFixed(2)}%` },
@@ -142,14 +144,14 @@ export default function AdminStakingPlansPage() {
                     <td className="py-4 px-6">
                       <div className="font-bold text-slate-800">{plan.name}</div>
                       <div className="flex flex-wrap gap-1.5 mt-1 text-[10px] font-bold">
-                        <span className={`px-2 py-0.5 rounded border ${plan.duration_days > 0 ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>
-                          Fixed Deposit: {plan.duration_days > 0 ? 'YES' : 'NO'}
+                        <span className={`px-2 py-0.5 rounded border ${plan.is_fixed_deposit !== false ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>
+                          Fixed Deposit: {plan.is_fixed_deposit !== false ? 'YES' : 'NO'}
                         </span>
                         <span className={`px-2 py-0.5 rounded border ${plan.capital_return !== false ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
                           Capital Return: {plan.capital_return !== false ? 'YES' : 'NO'}
                         </span>
-                        <span className="bg-teal-50 text-teal-700 px-2 py-0.5 rounded border border-teal-200">
-                          Compounding: YES
+                        <span className={`px-2 py-0.5 rounded border ${plan.is_compounding !== false ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>
+                          Compounding: {plan.is_compounding !== false ? 'YES' : 'NO'}
                         </span>
                       </div>
                     </td>
