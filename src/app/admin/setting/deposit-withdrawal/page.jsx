@@ -3,40 +3,35 @@
 import { useEffect, useState } from 'react';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
 import api from '../../../../lib/api';
-import { Bold, Italic, Underline, Strikethrough, Link as LinkIcon, List, Type } from 'lucide-react';
+import { Bold, Italic, Underline, Strikethrough, Link as LinkIcon, List, Type, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminDepositWithdrawalSettingsPage() {
-  const [dailyWithdrawLimit, setDailyWithdrawLimit] = useState('5');
-  const [minDeposit, setMinDeposit] = useState('1.00');
-  const [maxDeposit, setMaxDeposit] = useState('50000.00');
-  const [depositCharge, setDepositCharge] = useState('0.00');
-  const [minPayout, setMinPayout] = useState('2.00');
-  const [maxPayout, setMaxPayout] = useState('1000.00');
-  const [payoutCharge, setPayoutCharge] = useState('1.00');
+  const [dailyWithdrawLimit, setDailyWithdrawLimit] = useState('0');
+  const [minDeposit, setMinDeposit] = useState('0');
+  const [maxDeposit, setMaxDeposit] = useState('0');
+  const [depositCharge, setDepositCharge] = useState('0');
+  const [minPayout, setMinPayout] = useState('0');
+  const [maxPayout, setMaxPayout] = useState('0');
+  const [payoutCharge, setPayoutCharge] = useState('0');
   const [submitting, setSubmitting] = useState(false);
 
-  const [rechargeNotice, setRechargeNotice] = useState(
-    '• All deposits are verified on the blockchain automatically.\n• Please send exact amounts to official generated wallet address.\n• Minimum deposit limit: $1.00.\n• Deposits below min limits cannot be credited.'
-  );
-
-  const [withdrawNotice, setWithdrawNotice] = useState(
-    '• Safely withdraw your funds using our highly secure process and various withdrawal methods.\n• Minimum withdrawal limit: $2.00.\n• Processing time: 1–24 hours.\n• Security PIN verification is required for all payout requests.'
-  );
+  const [rechargeNotice, setRechargeNotice] = useState('');
+  const [withdrawNotice, setWithdrawNotice] = useState('');
 
   useEffect(() => {
     api.get('/public/deposit-withdrawal-settings').then((res) => {
-      if (res.data.success && res.data.settings) {
+      if (res.data?.success && res.data?.settings) {
         const s = res.data.settings;
-        if (s.dailyWithdrawLimit) setDailyWithdrawLimit(s.dailyWithdrawLimit);
-        if (s.minDeposit) setMinDeposit(s.minDeposit);
-        if (s.maxDeposit) setMaxDeposit(s.maxDeposit);
-        if (s.depositCharge) setDepositCharge(s.depositCharge);
-        if (s.minPayout) setMinPayout(s.minPayout);
-        if (s.maxPayout) setMaxPayout(s.maxPayout);
-        if (s.payoutCharge) setPayoutCharge(s.payoutCharge);
-        if (s.rechargeNotice) setRechargeNotice(s.rechargeNotice);
-        if (s.withdrawNotice) setWithdrawNotice(s.withdrawNotice);
+        if (s.dailyWithdrawLimit !== undefined) setDailyWithdrawLimit(String(s.dailyWithdrawLimit));
+        if (s.minDeposit !== undefined) setMinDeposit(String(s.minDeposit));
+        if (s.maxDeposit !== undefined) setMaxDeposit(String(s.maxDeposit));
+        if (s.depositCharge !== undefined) setDepositCharge(String(s.depositCharge));
+        if (s.minPayout !== undefined) setMinPayout(String(s.minPayout));
+        if (s.maxPayout !== undefined) setMaxPayout(String(s.maxPayout));
+        if (s.payoutCharge !== undefined) setPayoutCharge(String(s.payoutCharge));
+        if (s.rechargeNotice !== undefined) setRechargeNotice(s.rechargeNotice);
+        if (s.withdrawNotice !== undefined) setWithdrawNotice(s.withdrawNotice);
       }
     }).catch(() => null);
   }, []);
@@ -282,9 +277,17 @@ export default function AdminDepositWithdrawalSettingsPage() {
             <div className="pt-4">
               <button
                 type="submit"
-                className="w-full bg-[#5b5bf5] hover:bg-indigo-600 text-white font-bold py-3.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-md shadow-indigo-500/20 cursor-pointer"
+                disabled={submitting}
+                className="w-full bg-[#5b5bf5] hover:bg-indigo-600 disabled:opacity-60 text-white font-bold py-3.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-md shadow-indigo-500/20 cursor-pointer disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                Submit
+                {submitting ? (
+                  <>
+                    <span>Submitting</span>
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
+                  </>
+                ) : (
+                  'Submit'
+                )}
               </button>
             </div>
           </form>

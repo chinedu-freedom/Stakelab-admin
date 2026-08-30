@@ -163,7 +163,7 @@ export default function AdminDepositsFilteredPage({
                   filteredDeposits.map((d) => {
                     const gatewayName = d.gateway_code || d.payment_method || 'USDT (TRC20)';
                     const refId = d.payment_id || d.id.substring(0, 10).toUpperCase();
-                    const depDate = d.created_at ? new Date(d.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recently';
+                    const depDate = d.created_at ? new Date(d.created_at).toLocaleString() : 'Recently';
                     const userName = d.user?.full_name || d.user?.username || 'User';
                     const userHandle = d.user?.username ? `@${d.user.username}` : '';
                     const numAmt = parseFloat(d.amount || 0);

@@ -217,8 +217,8 @@ export default function AdminStakingHistoryPage() {
                     const amt = parseFloat(log.amount || 0);
                     const intRate = parseFloat(log.interest_rate || 0);
                     const totalRet = parseFloat(log.total_return || amt * (1 + intRate / 100));
-                    const startDateStr = log.created_at ? new Date(log.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recently';
-                    const endDateStr = log.end_date ? new Date(log.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Pending';
+                    const startDateStr = log.created_at ? new Date(log.created_at).toLocaleString() : 'Recently';
+                    const endDateStr = log.end_date ? new Date(log.end_date).toLocaleString() : 'Pending';
 
                     return (
                       <tr key={log.id} className="hover:bg-slate-50/80 transition-colors">

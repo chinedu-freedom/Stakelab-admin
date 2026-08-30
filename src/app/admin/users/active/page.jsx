@@ -111,7 +111,7 @@ export default function AdminUsersFilteredPage({ title = 'Active Users', filterT
                   filteredUsers.map((u) => {
                     const fullName = u.full_name || u.username || 'User';
                     const usernameStr = u.username ? `@${u.username}` : '@user';
-                    const joinedStr = u.created_at ? new Date(u.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recently';
+                    const joinedStr = u.created_at ? new Date(u.created_at).toLocaleString() : 'Recently';
                     const formattedBalance = `$${parseFloat(u.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
 
                     return (

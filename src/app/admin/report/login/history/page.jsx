@@ -130,7 +130,7 @@ function UserLoginHistoryContent() {
                   filteredLogins.map((u) => {
                     const fullName = u.full_name || u.username || 'User';
                     const usernameStr = u.username ? `@${u.username}` : '@user';
-                    const loginDate = u.created_at ? new Date(u.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recently';
+                    const loginDate = u.created_at ? new Date(u.created_at).toLocaleString() : 'Recently';
 
                     return (
                       <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">

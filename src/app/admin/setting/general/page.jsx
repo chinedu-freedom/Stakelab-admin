@@ -26,20 +26,20 @@ export default function AdminGeneralSettingPage() {
       const res = await api.get('/admin/general-setting');
       if (res.data && res.data.success && res.data.settings) {
         const s = res.data.settings;
-        if (s.siteTitle) setSiteTitle(s.siteTitle);
-        if (s.timezone) setTimezone(s.timezone);
+        if (s.siteTitle !== undefined) setSiteTitle(s.siteTitle);
+        if (s.timezone !== undefined) setTimezone(s.timezone);
         if (s.registrationBonus !== undefined) setRegistrationBonus(String(s.registrationBonus));
-        if (s.logoUrl) setLogoPreview(s.logoUrl);
-        if (s.faviconUrl) setFaviconPreview(s.faviconUrl);
-        if (s.appDownloadUrl) setAppDownloadUrl(s.appDownloadUrl);
+        if (s.logoUrl !== undefined) setLogoPreview(s.logoUrl);
+        if (s.faviconUrl !== undefined) setFaviconPreview(s.faviconUrl);
+        if (s.appDownloadUrl !== undefined) setAppDownloadUrl(s.appDownloadUrl);
       }
       
       // Also attempt fetching from logo-favicon as backup
       try {
         const lfRes = await api.get('/admin/logo-favicon');
         if (lfRes.data && lfRes.data.success && lfRes.data.settings) {
-          if (lfRes.data.settings.logoUrl) setLogoPreview(lfRes.data.settings.logoUrl);
-          if (lfRes.data.settings.faviconUrl) setFaviconPreview(lfRes.data.settings.faviconUrl);
+          if (lfRes.data.settings.logoUrl !== undefined) setLogoPreview(lfRes.data.settings.logoUrl);
+          if (lfRes.data.settings.faviconUrl !== undefined) setFaviconPreview(lfRes.data.settings.faviconUrl);
         }
       } catch (e) {
         // Silent catch for secondary endpoint

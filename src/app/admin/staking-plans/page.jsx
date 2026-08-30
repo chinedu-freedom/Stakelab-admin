@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AdminSidebarLayout from '../../../components/AdminSidebarLayout';
-import { Plus, Edit, EyeOff, CheckCircle2, BarChart2, X, Trash2 } from 'lucide-react';
+import { Plus, Edit, EyeOff, CheckCircle2, BarChart2, X, Trash2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../../lib/api';
 
@@ -124,12 +124,12 @@ export default function AdminStakingPlansPage() {
         </div>
 
         {/* Staking Plans Table Container (Horizontally Scrollable) */}
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[1000px] text-left border-collapse">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full min-w-[850px] text-left border-collapse">
               {/* Vibrant Indigo / Purple Table Header */}
               <thead>
-                <tr className="bg-[#5b5bf5] text-white text-xs font-bold uppercase tracking-wider">
+                <tr className="bg-[#5b5bf5] text-white text-xs font-bold uppercase tracking-wider whitespace-nowrap">
                   <th className="py-3.5 px-6">Name</th>
                   <th className="py-3.5 px-6 text-center">Tier</th>
                   <th className="py-3.5 px-6 text-center">Duration</th>
@@ -138,28 +138,44 @@ export default function AdminStakingPlansPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
-                {plans.map((plan) => (
+                {loading ? (
+                  <tr>
+                    <td colSpan={5} className="py-12 text-center text-slate-500 font-medium">
+                      <div className="flex items-center justify-center gap-2">
+                        <span>Loading Staking Plans</span>
+                        <Loader2 className="w-5 h-5 animate-spin text-[#5b5bf5]" />
+                      </div>
+                    </td>
+                  </tr>
+                ) : plans.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-12 text-center text-slate-400 font-medium">
+                      No staking plans found.
+                    </td>
+                  </tr>
+                ) : (
+                  plans.map((plan) => (
                   <tr key={plan.id} className="hover:bg-slate-50/80 transition-colors">
                     {/* Name Column with Feature Rule Badges */}
                     <td className="py-4 px-6">
                       <div className="font-bold text-slate-800">{plan.name}</div>
                       <div className="flex flex-wrap gap-1.5 mt-1 text-[10px] font-bold">
-                        <span className={`px-2 py-0.5 rounded border ${plan.is_fixed_deposit !== false ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>
+                        <span className={`px-2 py-0.5 rounded border whitespace-nowrap ${plan.is_fixed_deposit !== false ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>
                           Fixed Deposit: {plan.is_fixed_deposit !== false ? 'YES' : 'NO'}
                         </span>
-                        <span className={`px-2 py-0.5 rounded border ${plan.capital_return !== false ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
+                        <span className={`px-2 py-0.5 rounded border whitespace-nowrap ${plan.capital_return !== false ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
                           Capital Return: {plan.capital_return !== false ? 'YES' : 'NO'}
                         </span>
-                        <span className={`px-2 py-0.5 rounded border ${plan.is_compounding !== false ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>
+                        <span className={`px-2 py-0.5 rounded border whitespace-nowrap ${plan.is_compounding !== false ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>
                           Compounding: {plan.is_compounding !== false ? 'YES' : 'NO'}
                         </span>
                       </div>
                     </td>
 
                     {/* Tier Column */}
-                    <td className="py-4 px-6 text-center">
+                    <td className="py-4 px-6 text-center whitespace-nowrap">
                       <span
-                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider inline-block ${
+                        className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider inline-block whitespace-nowrap ${
                           plan.tier === 'Dynamic Tier'
                             ? 'bg-purple-100 text-purple-700 border border-purple-300'
                             : 'bg-blue-100 text-blue-700 border border-blue-300'
@@ -170,14 +186,14 @@ export default function AdminStakingPlansPage() {
                     </td>
 
                     {/* Duration Column */}
-                    <td className="py-4 px-6 text-center font-medium text-slate-600">
+                    <td className="py-4 px-6 text-center font-medium text-slate-600 whitespace-nowrap">
                       {plan.duration}
                     </td>
 
                     {/* Status Column */}
-                    <td className="py-4 px-6 text-center">
+                    <td className="py-4 px-6 text-center whitespace-nowrap">
                       <span
-                        className={`px-3 py-1 rounded-full text-[11px] font-bold inline-block ${
+                        className={`px-3 py-1 rounded-full text-[11px] font-bold inline-block whitespace-nowrap ${
                           plan.status === 'Active'
                             ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
                             : 'bg-slate-100 text-slate-600 border border-slate-300'
@@ -188,7 +204,7 @@ export default function AdminStakingPlansPage() {
                     </td>
 
                     {/* Action Column (Full Suite of Action Buttons) */}
-                    <td className="py-4 px-6 text-right">
+                    <td className="py-4 px-6 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end space-x-2 whitespace-nowrap">
                         {/* Edit Button */}
                         <Link
@@ -228,7 +244,7 @@ export default function AdminStakingPlansPage() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                )))}
               </tbody>
             </table>
           </div>

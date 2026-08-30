@@ -9,10 +9,8 @@ import api from '../../../../lib/api';
 export default function AdminMaintenanceModePage() {
   const [isMaintenanceActive, setIsMaintenanceActive] = useState(false);
   const [imagePreview, setImagePreview] = useState('/images/maintenance.svg');
-  const [headline, setHeadline] = useState('THE SITE IS UNDER MAINTENANCE');
-  const [descriptionText, setDescriptionText] = useState(
-    "We're just tuning up a few things. We apologize for the inconvenience but the platform is currently undergoing planned maintenance.\nThanks for your patience."
-  );
+  const [headline, setHeadline] = useState('');
+  const [descriptionText, setDescriptionText] = useState('');
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -24,9 +22,9 @@ export default function AdminMaintenanceModePage() {
       if (res.data && res.data.success && res.data.settings) {
         const s = res.data.settings;
         setIsMaintenanceActive(Boolean(s.isMaintenance));
-        if (s.headline) setHeadline(s.headline);
-        if (s.descriptionText) setDescriptionText(s.descriptionText);
-        if (s.imageUrl) setImagePreview(s.imageUrl);
+        if (s.headline !== undefined) setHeadline(s.headline);
+        if (s.descriptionText !== undefined) setDescriptionText(s.descriptionText);
+        if (s.imageUrl !== undefined) setImagePreview(s.imageUrl);
       }
     } catch (err) {
       console.error('Failed to load maintenance settings:', err);

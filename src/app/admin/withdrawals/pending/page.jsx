@@ -155,7 +155,7 @@ export default function AdminWithdrawalsFilteredPage({
                   filteredWithdrawals.map((w) => {
                     const gatewayName = `${w.currency || 'USDT'}`;
                     const refId = w.id.substring(0, 10).toUpperCase();
-                    const wDate = w.created_at ? new Date(w.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recently';
+                    const wDate = w.created_at ? new Date(w.created_at).toLocaleString() : 'Recently';
                     const userName = w.user?.full_name || w.user?.username || 'User';
                     const userHandle = w.user?.username ? `@${w.user.username}` : '';
                     const numAmt = parseFloat(w.amount || 0);

@@ -33,8 +33,8 @@ We don't sell, exchange, or in any case move to outside gatherings your data.
       if (res.data && res.data.success && res.data.settings) {
         const s = res.data.settings;
         setIsEnabled(Boolean(s.isEnabled));
-        if (s.shortDescription) setShortDescription(s.shortDescription);
-        if (s.fullDescription) setFullDescription(s.fullDescription);
+        if (s.shortDescription !== undefined) setShortDescription(s.shortDescription);
+        if (s.fullDescription !== undefined) setFullDescription(s.fullDescription);
       }
     } catch (err) {
       console.error('Failed to load cookie settings:', err);

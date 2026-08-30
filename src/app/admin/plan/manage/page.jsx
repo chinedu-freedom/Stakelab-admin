@@ -306,7 +306,7 @@ export default function AdminCreatePlanPage() {
               >
                 {submitting ? (
                   <span className="flex items-center justify-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin" /> Creating Plan
+                    Creating Plan <Loader2 className="w-4 h-4 animate-spin" />
                   </span>
                 ) : (
                   'Create Staking Plan'
