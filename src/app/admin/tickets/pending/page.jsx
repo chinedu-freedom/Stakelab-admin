@@ -96,8 +96,11 @@ export default function AdminTicketsFilteredPage({
                 ) : (
                   filteredTickets.map((t) => {
                     const ticketIdClean = t.ticket_id.replace('#', '');
-                    const userName = t.user?.full_name || t.user?.username || 'User';
-                    const lastReplyDate = t.updated_at ? new Date(t.updated_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recently';
+                    const lastReplyDate = t.messages && t.messages.length > 0 && t.messages[0].created_at
+                      ? new Date(t.messages[0].created_at).toLocaleString()
+                      : t.updated_at
+                      ? new Date(t.updated_at).toLocaleString()
+                      : 'Recently';
 
                     return (
                       <tr key={t.id} className="hover:bg-slate-50/80 transition-colors">
@@ -116,7 +119,7 @@ export default function AdminTicketsFilteredPage({
                         {/* Status Column */}
                         <td className="py-4 px-6 text-center">
                           <span
-                            className={`px-3 py-0.5 rounded-full text-[11px] font-bold border inline-block ${
+                            className={`px-3 py-0.5 rounded-full text-[11px] font-bold border whitespace-nowrap inline-flex items-center justify-center ${
                               t.status === 'OPEN'
                                 ? 'bg-emerald-50 text-emerald-500 border-emerald-300'
                                 : t.status === 'REPLIED'
@@ -131,7 +134,7 @@ export default function AdminTicketsFilteredPage({
                         {/* Priority Column */}
                         <td className="py-4 px-6 text-center">
                           <span
-                            className={`px-3 py-0.5 rounded-full text-[11px] font-bold border inline-block ${
+                            className={`px-3 py-0.5 rounded-full text-[11px] font-bold border whitespace-nowrap inline-flex items-center justify-center ${
                               t.priority === 'High'
                                 ? 'text-red-500 border-red-300 bg-red-50/40'
                                 : t.priority === 'Medium'
