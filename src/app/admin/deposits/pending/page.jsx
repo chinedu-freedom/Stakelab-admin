@@ -79,25 +79,25 @@ export default function AdminDepositsFilteredPage({
             {title}
           </h1>
 
-          {/* Top Search Controls (2 Search Input Groups - Matching Screenshot) */}
-          <div className="flex flex-col sm:flex-row items-center gap-3">
+          {/* Top Search Controls (Full Width on Mobile) */}
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
             {/* Search Box 1: Username / Email */}
-            <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm focus-within:ring-1 focus-within:ring-indigo-500">
+            <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm focus-within:ring-1 focus-within:ring-indigo-500 w-full sm:w-auto">
               <input
                 type="text"
                 value={searchUser}
                 onChange={(e) => setSearchUser(e.target.value)}
                 placeholder="Username / Email"
-                className="w-44 h-10 bg-transparent border-0 outline-none px-3.5 text-xs text-slate-800 font-sans"
+                className="w-full sm:w-48 h-10 bg-transparent border-0 outline-none px-3.5 text-xs text-slate-800 font-sans"
               />
-              <button className="h-10 bg-[#5b5bf5] hover:bg-indigo-600 text-white px-3 flex items-center justify-center shrink-0 cursor-pointer">
+              <button className="h-10 bg-[#5b5bf5] hover:bg-indigo-600 text-white px-3.5 flex items-center justify-center shrink-0 cursor-pointer">
                 <Search className="w-4 h-4 text-white" />
               </button>
             </div>
 
             {/* Search Box 2: Interactive Date Pickers */}
-            <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg px-3 h-10 shadow-sm focus-within:ring-1 focus-within:ring-indigo-500">
-              <span className="text-[11px] font-semibold text-slate-400">Date:</span>
+            <div className="flex items-center justify-between sm:justify-start gap-1.5 bg-white border border-slate-200 rounded-lg px-3 h-10 shadow-sm focus-within:ring-1 focus-within:ring-indigo-500 w-full sm:w-auto">
+              <span className="text-[11px] font-semibold text-slate-400 shrink-0">Date:</span>
               <input
                 type="date"
                 value={startDate}
