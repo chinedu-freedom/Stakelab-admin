@@ -9,13 +9,10 @@ import api from '../../../../lib/api';
 
 export default function AdminStakingHistoryPage() {
   const [stakes, setStakes] = useState([]);
-  const [plansList, setPlansList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState('');
-  const [selectedPlan, setSelectedPlan] = useState('Any');
   const [selectedStatus, setSelectedStatus] = useState('All');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [selectedDateFilter, setSelectedDateFilter] = useState('All');
 
   const fetchStakes = async () => {
     try {
@@ -33,16 +30,6 @@ export default function AdminStakingHistoryPage() {
 
   useEffect(() => {
     fetchStakes();
-
-    // Fetch dynamic active staking plans
-    api
-      .get('/public/staking-plans')
-      .then((res) => {
-        if (res.data && res.data.success) {
-          setPlansList(res.data.plans || []);
-        }
-      })
-      .catch(() => null);
   }, []);
 
   // Real-time Instant Filtering
@@ -63,27 +50,50 @@ export default function AdminStakingHistoryPage() {
       }
     }
 
-    if (selectedPlan !== 'Any') {
-      const planName = s.plan?.name || '';
-      if (!planName.toLowerCase().includes(selectedPlan.toLowerCase())) return false;
-    }
+
 
     if (selectedStatus !== 'All') {
       const st = (s.status || '').toUpperCase();
       if (selectedStatus === 'Active' && !['ACTIVE', 'RUNNING'].includes(st)) return false;
       if (selectedStatus === 'Completed' && !['COMPLETED', 'MATURE'].includes(st)) return false;
+      if (selectedStatus === 'Unavailable' && !['UNAVAILABLE', 'DISABLED', 'INACTIVE'].includes(st)) return false;
+      if (selectedStatus === 'Pending' && !['PENDING'].includes(st)) return false;
+      if (selectedStatus === 'Cancelled' && !['CANCELLED', 'REJECTED'].includes(st)) return false;
     }
 
-    if (startDate) {
+    if (selectedDateFilter !== 'All') {
       const itemDate = new Date(s.created_at);
-      const start = new Date(startDate);
-      if (itemDate < start) return false;
-    }
-
-    if (endDate) {
-      const itemDate = new Date(s.created_at);
-      const end = new Date(endDate + 'T23:59:59');
-      if (itemDate > end) return false;
+      const now = new Date();
+      if (selectedDateFilter === 'Today') {
+        if (itemDate.toDateString() !== now.toDateString()) return false;
+      } else if (selectedDateFilter === 'Yesterday') {
+        const yest = new Date(now);
+        yest.setDate(yest.getDate() - 1);
+        if (itemDate.toDateString() !== yest.toDateString()) return false;
+      } else if (selectedDateFilter === 'Last 7 Days') {
+        const days7 = new Date(now);
+        days7.setDate(days7.getDate() - 7);
+        if (itemDate < days7) return false;
+      } else if (selectedDateFilter === 'Last 15 Days') {
+        const days15 = new Date(now);
+        days15.setDate(days15.getDate() - 15);
+        if (itemDate < days15) return false;
+      } else if (selectedDateFilter === 'Last 30 Days') {
+        const days30 = new Date(now);
+        days30.setDate(days30.getDate() - 30);
+        if (itemDate < days30) return false;
+      } else if (selectedDateFilter === 'This Month') {
+        if (itemDate.getMonth() !== now.getMonth() || itemDate.getFullYear() !== now.getFullYear()) return false;
+      } else if (selectedDateFilter === 'Last Month') {
+        const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        if (itemDate.getMonth() !== lastMonthDate.getMonth() || itemDate.getFullYear() !== lastMonthDate.getFullYear()) return false;
+      } else if (selectedDateFilter === 'Last 6 Months') {
+        const months6 = new Date(now);
+        months6.setMonth(months6.getMonth() - 6);
+        if (itemDate < months6) return false;
+      } else if (selectedDateFilter === 'This Year') {
+        if (itemDate.getFullYear() !== now.getFullYear()) return false;
+      }
     }
 
     return true;
@@ -99,7 +109,7 @@ export default function AdminStakingHistoryPage() {
 
         {/* Filter Bar Controls (Instant Real-time Filtering) */}
         <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-sm">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
             {/* Search Username / Email / Plan */}
             <div>
               <label className="block text-[11px] font-semibold text-slate-500 mb-1 font-sans">
@@ -112,26 +122,6 @@ export default function AdminStakingHistoryPage() {
                 placeholder="Search..."
                 className="w-full h-10 bg-white border border-slate-200 rounded-lg px-3.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans"
               />
-            </div>
-
-            {/* Plan Dropdown */}
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-500 mb-1 font-sans">
-                Plan
-              </label>
-              <Select value={selectedPlan} onValueChange={setSelectedPlan}>
-                <SelectTrigger className="h-10 bg-white border-slate-200 text-slate-800 rounded-lg text-xs font-sans font-normal">
-                  <SelectValue placeholder="Any" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-slate-200 text-slate-800 shadow-lg">
-                  <SelectItem value="Any" className="text-slate-800 hover:bg-slate-100">Any</SelectItem>
-                  {plansList.map((plan) => (
-                    <SelectItem key={plan.id} value={plan.name} className="text-slate-800 hover:bg-slate-100">
-                      {plan.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
 
             {/* Status Dropdown */}
@@ -147,32 +137,35 @@ export default function AdminStakingHistoryPage() {
                   <SelectItem value="All" className="text-slate-800 hover:bg-slate-100">All</SelectItem>
                   <SelectItem value="Active" className="text-slate-800 hover:bg-slate-100">Active</SelectItem>
                   <SelectItem value="Completed" className="text-slate-800 hover:bg-slate-100">Completed</SelectItem>
+                  <SelectItem value="Unavailable" className="text-slate-800 hover:bg-slate-100">Unavailable</SelectItem>
+                  <SelectItem value="Pending" className="text-slate-800 hover:bg-slate-100">Pending</SelectItem>
+                  <SelectItem value="Cancelled" className="text-slate-800 hover:bg-slate-100">Cancelled</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Interactive Date Range Pickers */}
+            {/* Date Dropdown Filter */}
             <div>
               <label className="block text-[11px] font-semibold text-slate-500 mb-1 font-sans">
-                Date Filter
+                Date
               </label>
-              <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg px-2.5 h-10 shadow-sm focus-within:ring-1 focus-within:ring-indigo-500">
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="bg-transparent border-0 outline-none text-xs text-slate-700 font-sans cursor-pointer w-full"
-                  title="Start Date"
-                />
-                <span className="text-slate-400 font-bold text-xs">–</span>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="bg-transparent border-0 outline-none text-xs text-slate-700 font-sans cursor-pointer w-full"
-                  title="End Date"
-                />
-              </div>
+              <Select value={selectedDateFilter} onValueChange={setSelectedDateFilter}>
+                <SelectTrigger className="h-10 bg-white border-slate-200 text-slate-800 rounded-lg text-xs font-sans font-normal">
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent searchable={false} className="bg-white border-slate-200 text-slate-800 shadow-lg">
+                  <SelectItem value="All" className="text-slate-800 hover:bg-slate-100">All</SelectItem>
+                  <SelectItem value="Today" className="text-slate-800 hover:bg-slate-100">Today</SelectItem>
+                  <SelectItem value="Yesterday" className="text-slate-800 hover:bg-slate-100">Yesterday</SelectItem>
+                  <SelectItem value="Last 7 Days" className="text-slate-800 hover:bg-slate-100">Last 7 Days</SelectItem>
+                  <SelectItem value="Last 15 Days" className="text-slate-800 hover:bg-slate-100">Last 15 Days</SelectItem>
+                  <SelectItem value="Last 30 Days" className="text-slate-800 hover:bg-slate-100">Last 30 Days</SelectItem>
+                  <SelectItem value="This Month" className="text-slate-800 hover:bg-slate-100">This Month</SelectItem>
+                  <SelectItem value="Last Month" className="text-slate-800 hover:bg-slate-100">Last Month</SelectItem>
+                  <SelectItem value="Last 6 Months" className="text-slate-800 hover:bg-slate-100">Last 6 Months</SelectItem>
+                  <SelectItem value="This Year" className="text-slate-800 hover:bg-slate-100">This Year</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>

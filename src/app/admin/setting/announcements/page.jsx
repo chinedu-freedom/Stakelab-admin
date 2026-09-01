@@ -5,6 +5,7 @@ import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
 import { Megaphone, Plus, Trash2, Save, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../../../lib/api';
+import RichTextEditor from '../../../../components/RichTextEditor';
 
 export default function AdminAnnouncementsSettingPage() {
   const [announcements, setAnnouncements] = useState([
@@ -163,11 +164,11 @@ export default function AdminAnnouncementsSettingPage() {
 
                   <div>
                     <label className="block text-slate-700 font-bold mb-1">Description / Excerpt</label>
-                    <textarea
-                      rows={3}
+                    <RichTextEditor
                       value={item.desc}
-                      onChange={(e) => handleChange(idx, 'desc', e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-slate-800 focus:outline-none focus:border-[#5b5bf5]"
+                      onChange={(val) => handleChange(idx, 'desc', val)}
+                      placeholder="Write announcement content here..."
+                      minHeight="140px"
                     />
                   </div>
                 </div>

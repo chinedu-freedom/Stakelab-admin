@@ -211,10 +211,10 @@ export default function AdminGeneralSettingPage() {
               {/* Section 2: General System Configuration Inputs */}
               <div className="space-y-4 pt-2">
                 <h2 className="text-sm font-bold text-slate-800 font-sans border-b border-slate-100 pb-2">
-                  System & Currency Configuration
+                  System Configuration
                 </h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   {/* Site Title * */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-600 mb-1.5 font-sans">
@@ -227,51 +227,6 @@ export default function AdminGeneralSettingPage() {
                       onChange={(e) => setSiteTitle(e.target.value)}
                       className="w-full h-11 bg-white border border-slate-200 rounded-lg px-3.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans shadow-sm"
                     />
-                  </div>
-
-                  {/* Currency */}
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5 font-sans">
-                      Currency
-                    </label>
-                    <input
-                      type="text"
-                      readOnly
-                      value={currency}
-                      className="w-full h-11 bg-slate-100 border border-slate-200 rounded-lg px-3.5 text-xs text-slate-500 font-bold font-sans cursor-not-allowed"
-                    />
-                  </div>
-
-                  {/* Currency Symbol */}
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5 font-sans">
-                      Currency Symbol
-                    </label>
-                    <input
-                      type="text"
-                      readOnly
-                      value={currencySymbol}
-                      className="w-full h-11 bg-slate-100 border border-slate-200 rounded-lg px-3.5 text-xs text-slate-500 font-bold font-sans cursor-not-allowed"
-                    />
-                  </div>
-
-                  {/* Timezone */}
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5 font-sans">
-                      Timezone
-                    </label>
-                    <Select value={timezone} onValueChange={setTimezone}>
-                      <SelectTrigger className="h-11 bg-white border-slate-200 text-slate-800 rounded-lg text-xs font-sans">
-                        <SelectValue placeholder="UTC" />
-                      </SelectTrigger>
-                      <SelectContent searchable={false} className="bg-white border-slate-200 text-slate-800 shadow-lg">
-                        <SelectItem value="UTC" className="text-slate-800 hover:bg-slate-100">UTC</SelectItem>
-                        <SelectItem value="Africa/Lagos" className="text-slate-800 hover:bg-slate-100">Africa/Lagos (GMT+1)</SelectItem>
-                        <SelectItem value="America/New_York" className="text-slate-800 hover:bg-slate-100">America/New_York (EST)</SelectItem>
-                        <SelectItem value="Europe/London" className="text-slate-800 hover:bg-slate-100">Europe/London (GMT)</SelectItem>
-                        <SelectItem value="Asia/Dubai" className="text-slate-800 hover:bg-slate-100">Asia/Dubai (GST)</SelectItem>
-                      </SelectContent>
-                    </Select>
                   </div>
 
                   {/* Registration Bonus */}

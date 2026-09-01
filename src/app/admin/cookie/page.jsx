@@ -1,5 +1,5 @@
-import AdminGdprCookiePage from '../setting/cookie/page';
+import { redirect } from 'next/navigation';
 
 export default function AdminCookieAliasPage() {
-  return <AdminGdprCookiePage />;
+  redirect('/admin/setting/cookie');
 }

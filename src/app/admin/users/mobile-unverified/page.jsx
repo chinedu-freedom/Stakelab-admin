@@ -1,5 +1,5 @@
-import AdminUsersFilteredPage from '../active/page';
+import { redirect } from 'next/navigation';
 
-export default function AdminMobileUnverifiedUsersPage() {
-  return <AdminUsersFilteredPage title="Mobile Unverified Users" filterType="mobile-unverified" />;
+export default function AdminMobileUnverifiedUsersRedirectPage() {
+  redirect('/admin/users');
 }

@@ -55,9 +55,6 @@ export default function AdminSidebarLayout({ children }) {
 
   const [counts, setCounts] = useState({
     emailUnverified: '0',
-    mobileUnverified: '0',
-    kycUnverified: '0',
-    kycPending: '0',
     pendingDeposits: '0',
     pendingWithdrawals: '0',
     pendingTickets: '0',
@@ -128,9 +125,6 @@ export default function AdminSidebarLayout({ children }) {
           const s = res.data.stats;
           setCounts({
             emailUnverified: String(s.emailUnverified ?? 0),
-            mobileUnverified: String(s.mobileUnverified ?? 0),
-            kycUnverified: String(s.kycUnverified ?? 0),
-            kycPending: String(s.kycPending ?? 0),
             pendingDeposits: String(s.pendingDeposits ?? 0),
             pendingWithdrawals: String(s.pendingWithdrawals ?? 0),
             pendingTickets: String(s.pendingTickets ?? 0),
@@ -155,9 +149,6 @@ export default function AdminSidebarLayout({ children }) {
         { label: 'Active Users', path: '/admin/users/active' },
         { label: 'Banned Users', path: '/admin/users/banned' },
         { label: 'Email Unverified', path: '/admin/users/email-unverified', countBadge: counts.emailUnverified },
-        { label: 'Mobile Unverified', path: '/admin/users/mobile-unverified', countBadge: counts.mobileUnverified },
-        { label: 'KYC Unverified', path: '/admin/users/kyc-unverified', countBadge: counts.kycUnverified },
-        { label: 'KYC Pending', path: '/admin/users/kyc-pending', countBadge: counts.kycPending },
         { label: 'All Users', path: '/admin/users' },
         { label: 'Send Notification', path: '/admin/users/send-notification' },
       ],

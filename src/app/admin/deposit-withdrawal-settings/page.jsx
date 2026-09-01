@@ -1,5 +1,5 @@
-import AdminDepositWithdrawalSettingsPage from '../setting/deposit-withdrawal/page';
+import { redirect } from 'next/navigation';
 
 export default function AdminDepositWithdrawalSettingsAliasPage() {
-  return <AdminDepositWithdrawalSettingsPage />;
+  redirect('/admin/setting/deposit-withdrawal');
 }

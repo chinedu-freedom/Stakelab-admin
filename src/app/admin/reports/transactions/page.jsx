@@ -13,7 +13,6 @@ export default function AdminTransactionLogsPage({ userId = null }) {
   const [loading, setLoading] = useState(true);
   const [trxUsername, setTrxUsername] = useState('');
   const [type, setType] = useState('All');
-  const [remark, setRemark] = useState('All');
   const [selectedDateFilter, setSelectedDateFilter] = useState('All');
 
   const fetchTransactions = async () => {
@@ -51,15 +50,7 @@ export default function AdminTransactionLogsPage({ userId = null }) {
     if (type === 'Plus' && isMinus) return false;
     if (type === 'Minus' && !isMinus) return false;
 
-    if (remark !== 'All') {
-      const actType = t.type || '';
-      if (remark === 'Balance add' && actType !== 'ADMIN_CREDIT') return false;
-      if (remark === 'Balance subtract' && actType !== 'ADMIN_DEBIT') return false;
-      if (remark === 'Deposit' && actType !== 'DEPOSIT') return false;
-      if (remark === 'Withdrawal' && actType !== 'WITHDRAWAL') return false;
-      if (remark === 'Staking' && actType !== 'STAKE') return false;
-      if (remark === 'Profit Claim' && !['STAKE_PROFIT', 'PROFIT'].includes(actType)) return false;
-    }
+
 
     if (selectedDateFilter !== 'All') {
       const itemDate = new Date(t.created_at);
@@ -109,18 +100,18 @@ export default function AdminTransactionLogsPage({ userId = null }) {
 
         {/* Filter Bar Controls */}
         <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-sm">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-            {/* TRX / Username / Email Search Input */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+            {/* Username / Email Search Input */}
             <div>
               <label className="block text-[11px] font-semibold text-slate-500 mb-1 font-sans">
-                TRX / Username / Email
+                Username / Email
               </label>
               <input
                 type="text"
                 value={trxUsername}
                 onChange={(e) => setTrxUsername(e.target.value)}
                 placeholder="Username / Email"
-                className="w-full h-10 bg-white border border-slate-200 rounded-lg px-3.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans"
+                className="w-full h-10 bg-white border border-slate-200 rounded-lg px-3 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans shadow-sm"
               />
             </div>
 
@@ -141,27 +132,6 @@ export default function AdminTransactionLogsPage({ userId = null }) {
               </Select>
             </div>
 
-            {/* Remark Dropdown */}
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-500 mb-1 font-sans">
-                Remark
-              </label>
-              <Select value={remark} onValueChange={setRemark}>
-                <SelectTrigger className="h-10 bg-white border-slate-200 text-slate-800 rounded-lg text-xs font-sans font-normal">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent searchable={false} className="bg-white border-slate-200 text-slate-800 shadow-lg">
-                  <SelectItem value="All" className="text-slate-800 hover:bg-slate-100">All</SelectItem>
-                  <SelectItem value="Balance add" className="text-slate-800 hover:bg-slate-100">Balance add</SelectItem>
-                  <SelectItem value="Balance subtract" className="text-slate-800 hover:bg-slate-100">Balance subtract</SelectItem>
-                  <SelectItem value="Deposit" className="text-slate-800 hover:bg-slate-100">Deposit</SelectItem>
-                  <SelectItem value="Withdrawal" className="text-slate-800 hover:bg-slate-100">Withdrawal</SelectItem>
-                  <SelectItem value="Staking" className="text-slate-800 hover:bg-slate-100">Staking</SelectItem>
-                  <SelectItem value="Profit Claim" className="text-slate-800 hover:bg-slate-100">Profit Claim</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
             {/* Date Range Dropdown Filter */}
             <div>
               <label className="block text-[11px] font-semibold text-slate-500 mb-1 font-sans">
@@ -169,10 +139,10 @@ export default function AdminTransactionLogsPage({ userId = null }) {
               </label>
               <Select value={selectedDateFilter} onValueChange={setSelectedDateFilter}>
                 <SelectTrigger className="h-10 bg-white border-slate-200 text-slate-800 rounded-lg text-xs font-sans font-normal">
-                  <SelectValue placeholder="Start Date - End Date" />
+                  <SelectValue placeholder="All" />
                 </SelectTrigger>
                 <SelectContent searchable={false} className="bg-white border-slate-200 text-slate-800 shadow-lg">
-                  <SelectItem value="All" className="text-slate-800 hover:bg-slate-100">Start Date - End Date</SelectItem>
+                  <SelectItem value="All" className="text-slate-800 hover:bg-slate-100">All</SelectItem>
                   <SelectItem value="Today" className="text-slate-800 hover:bg-slate-100">Today</SelectItem>
                   <SelectItem value="Yesterday" className="text-slate-800 hover:bg-slate-100">Yesterday</SelectItem>
                   <SelectItem value="Last 7 Days" className="text-slate-800 hover:bg-slate-100">Last 7 Days</SelectItem>

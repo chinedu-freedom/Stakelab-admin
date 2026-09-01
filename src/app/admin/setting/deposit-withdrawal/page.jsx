@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
+import RichTextEditor from '../../../../components/RichTextEditor';
 import api from '../../../../lib/api';
-import { Bold, Italic, Underline, Strikethrough, Link as LinkIcon, List, Type, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminDepositWithdrawalSettingsPage() {
@@ -182,94 +183,30 @@ export default function AdminDepositWithdrawalSettingsPage() {
               </div>
             </div>
 
-            {/* Side-by-Side Rich Text Editors (Matching Reference Screenshot) */}
+            {/* Side-by-Side Rich Text Editors */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
               {/* Left Box: Recharge Notice */}
               <div className="space-y-2">
-                <h3 className="text-sm font-bold text-[#0c1c38] font-sans">
-                  Recharge Notice
-                </h3>
-                <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
-                  {/* Editor Toolbar (Matching Screenshot) */}
-                  <div className="bg-slate-50 border-b border-slate-200 p-2 flex flex-wrap items-center gap-3 text-slate-600 text-xs font-sans">
-                    <span className="font-semibold px-2 py-1 bg-white border border-slate-200 rounded text-slate-700">
-                      Normal
-                    </span>
-                    <button type="button" className="p-1 hover:bg-slate-200 rounded font-bold">
-                      <Bold className="w-3.5 h-3.5" />
-                    </button>
-                    <button type="button" className="p-1 hover:bg-slate-200 rounded italic">
-                      <Italic className="w-3.5 h-3.5" />
-                    </button>
-                    <button type="button" className="p-1 hover:bg-slate-200 rounded underline">
-                      <Underline className="w-3.5 h-3.5" />
-                    </button>
-                    <button type="button" className="p-1 hover:bg-slate-200 rounded line-through">
-                      <Strikethrough className="w-3.5 h-3.5" />
-                    </button>
-                    <button type="button" className="p-1 hover:bg-slate-200 rounded">
-                      <LinkIcon className="w-3.5 h-3.5" />
-                    </button>
-                    <button type="button" className="p-1 hover:bg-slate-200 rounded">
-                      <List className="w-3.5 h-3.5" />
-                    </button>
-                    <button type="button" className="p-1 hover:bg-slate-200 rounded">
-                      <Type className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-
-                  {/* Textarea Content */}
-                  <textarea
-                    rows={6}
-                    value={rechargeNotice}
-                    onChange={(e) => setRechargeNotice(e.target.value)}
-                    className="w-full p-4 text-xs text-slate-700 leading-relaxed font-sans focus:outline-none resize-none"
-                  ></textarea>
-                </div>
+                <label className="block text-xs font-semibold text-slate-700 font-sans">
+                  Recharge Notice <span className="text-red-500">*</span>
+                </label>
+                <RichTextEditor
+                  value={rechargeNotice}
+                  onChange={setRechargeNotice}
+                  placeholder="Recharge notice instructions..."
+                />
               </div>
 
               {/* Right Box: Withdraw Notice */}
               <div className="space-y-2">
-                <h3 className="text-sm font-bold text-[#0c1c38] font-sans">
-                  Withdraw Notice
-                </h3>
-                <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
-                  {/* Editor Toolbar (Matching Screenshot) */}
-                  <div className="bg-slate-50 border-b border-slate-200 p-2 flex flex-wrap items-center gap-3 text-slate-600 text-xs font-sans">
-                    <span className="font-semibold px-2 py-1 bg-white border border-slate-200 rounded text-slate-700">
-                      Normal
-                    </span>
-                    <button type="button" className="p-1 hover:bg-slate-200 rounded font-bold">
-                      <Bold className="w-3.5 h-3.5" />
-                    </button>
-                    <button type="button" className="p-1 hover:bg-slate-200 rounded italic">
-                      <Italic className="w-3.5 h-3.5" />
-                    </button>
-                    <button type="button" className="p-1 hover:bg-slate-200 rounded underline">
-                      <Underline className="w-3.5 h-3.5" />
-                    </button>
-                    <button type="button" className="p-1 hover:bg-slate-200 rounded line-through">
-                      <Strikethrough className="w-3.5 h-3.5" />
-                    </button>
-                    <button type="button" className="p-1 hover:bg-slate-200 rounded">
-                      <LinkIcon className="w-3.5 h-3.5" />
-                    </button>
-                    <button type="button" className="p-1 hover:bg-slate-200 rounded">
-                      <List className="w-3.5 h-3.5" />
-                    </button>
-                    <button type="button" className="p-1 hover:bg-slate-200 rounded">
-                      <Type className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-
-                  {/* Textarea Content */}
-                  <textarea
-                    rows={6}
-                    value={withdrawNotice}
-                    onChange={(e) => setWithdrawNotice(e.target.value)}
-                    className="w-full p-4 text-xs text-slate-700 leading-relaxed font-sans focus:outline-none resize-none"
-                  ></textarea>
-                </div>
+                <label className="block text-xs font-semibold text-slate-700 font-sans">
+                  Withdraw Notice <span className="text-red-500">*</span>
+                </label>
+                <RichTextEditor
+                  value={withdrawNotice}
+                  onChange={setWithdrawNotice}
+                  placeholder="Withdrawal notice instructions..."
+                />
               </div>
             </div>
 

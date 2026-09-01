@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
+import RichTextEditor from '../../../../components/RichTextEditor';
 import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List, Loader2, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../../../lib/api';
@@ -108,61 +109,28 @@ We don't sell, exchange, or in any case move to outside gatherings your data.
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Short Description Area */}
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-2 font-sans">
-                  Short Description <span className="text-red-500">*</span>
+                <label className="block text-xs font-semibold text-slate-600 mb-1.5 font-sans">
+                  Short Description Banner <span className="text-red-500">*</span>
                 </label>
-                <textarea
-                  rows={3}
-                  required
+                <RichTextEditor
                   value={shortDescription}
-                  onChange={(e) => setShortDescription(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-xl p-3.5 text-xs text-slate-700 leading-relaxed focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans"
-                ></textarea>
+                  onChange={setShortDescription}
+                  placeholder="Short cookie policy message..."
+                  minHeight="90px"
+                />
               </div>
 
-              {/* Description Rich Text Editor Area */}
+              {/* Full Description Rich Text Editor Area */}
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-2 font-sans">
-                  Description
+                <label className="block text-xs font-semibold text-slate-600 mb-1.5 font-sans">
+                  Full Policy & Terms Description
                 </label>
-                <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
-                  {/* Rich Text Toolbar */}
-                  <div className="bg-slate-50 border-b border-slate-200 p-2 flex flex-wrap items-center gap-1.5 text-slate-600">
-                    <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-xs font-bold">
-                      <Bold className="w-3.5 h-3.5" />
-                    </button>
-                    <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-xs">
-                      <Italic className="w-3.5 h-3.5" />
-                    </button>
-                    <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-xs">
-                      <Underline className="w-3.5 h-3.5" />
-                    </button>
-                    <div className="h-4 w-px bg-slate-300 mx-1"></div>
-                    <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-xs">
-                      <AlignLeft className="w-3.5 h-3.5" />
-                    </button>
-                    <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-xs">
-                      <AlignCenter className="w-3.5 h-3.5" />
-                    </button>
-                    <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-xs">
-                      <AlignRight className="w-3.5 h-3.5" />
-                    </button>
-                    <div className="h-4 w-px bg-slate-300 mx-1"></div>
-                    <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-xs">
-                      <List className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-
-                  {/* Editor Content Area */}
-                  <div className="p-4 min-h-[360px]">
-                    <textarea
-                      rows={14}
-                      value={fullDescription}
-                      onChange={(e) => setFullDescription(e.target.value)}
-                      className="w-full text-xs text-slate-700 leading-relaxed focus:outline-none font-sans"
-                    ></textarea>
-                  </div>
-                </div>
+                <RichTextEditor
+                  value={fullDescription}
+                  onChange={setFullDescription}
+                  placeholder="Detailed cookie policy and user terms..."
+                  minHeight="320px"
+                />
               </div>
 
               {/* Submit Button */}

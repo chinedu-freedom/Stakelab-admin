@@ -1,5 +1,5 @@
-import AdminUsersFilteredPage from '../active/page';
+import { redirect } from 'next/navigation';
 
-export default function AdminKycUnverifiedUsersPage() {
-  return <AdminUsersFilteredPage title="KYC Unverified Users" filterType="kyc-unverified" />;
+export default function KycUnverifiedRedirectPage() {
+  redirect('/admin/users');
 }

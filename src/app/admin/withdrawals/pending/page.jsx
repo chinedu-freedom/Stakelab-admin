@@ -5,6 +5,7 @@ import Link from 'next/link';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
 import Pagination from '../../../../components/Pagination';
 import { Search, Monitor, Copy, Loader2 } from 'lucide-react';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../../components/ui/select';
 import { toast } from 'sonner';
 import api from '../../../../lib/api';
 
@@ -16,8 +17,7 @@ export default function AdminWithdrawalsFilteredPage({
   const [loading, setLoading] = useState(true);
   const [searchTrx, setSearchTrx] = useState('');
   const [searchUser, setSearchUser] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [selectedDateFilter, setSelectedDateFilter] = useState('All');
 
   const fetchWithdrawals = async () => {
     try {
@@ -60,15 +60,39 @@ export default function AdminWithdrawalsFilteredPage({
       if (!nameStr.includes(q) && !userStr.includes(q) && !emailStr.includes(q)) return false;
     }
 
-    if (startDate) {
+    if (selectedDateFilter !== 'All') {
       const itemDate = new Date(w.created_at);
-      const start = new Date(startDate);
-      if (itemDate < start) return false;
-    }
-    if (endDate) {
-      const itemDate = new Date(w.created_at);
-      const end = new Date(endDate + 'T23:59:59');
-      if (itemDate > end) return false;
+      const now = new Date();
+      if (selectedDateFilter === 'Today') {
+        if (itemDate.toDateString() !== now.toDateString()) return false;
+      } else if (selectedDateFilter === 'Yesterday') {
+        const yest = new Date(now);
+        yest.setDate(yest.getDate() - 1);
+        if (itemDate.toDateString() !== yest.toDateString()) return false;
+      } else if (selectedDateFilter === 'Last 7 Days') {
+        const days7 = new Date(now);
+        days7.setDate(days7.getDate() - 7);
+        if (itemDate < days7) return false;
+      } else if (selectedDateFilter === 'Last 15 Days') {
+        const days15 = new Date(now);
+        days15.setDate(days15.getDate() - 15);
+        if (itemDate < days15) return false;
+      } else if (selectedDateFilter === 'Last 30 Days') {
+        const days30 = new Date(now);
+        days30.setDate(days30.getDate() - 30);
+        if (itemDate < days30) return false;
+      } else if (selectedDateFilter === 'This Month') {
+        if (itemDate.getMonth() !== now.getMonth() || itemDate.getFullYear() !== now.getFullYear()) return false;
+      } else if (selectedDateFilter === 'Last Month') {
+        const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        if (itemDate.getMonth() !== lastMonthDate.getMonth() || itemDate.getFullYear() !== lastMonthDate.getFullYear()) return false;
+      } else if (selectedDateFilter === 'Last 6 Months') {
+        const months6 = new Date(now);
+        months6.setMonth(months6.getMonth() - 6);
+        if (itemDate < months6) return false;
+      } else if (selectedDateFilter === 'This Year') {
+        if (itemDate.getFullYear() !== now.getFullYear()) return false;
+      }
     }
 
     return true;
@@ -98,24 +122,25 @@ export default function AdminWithdrawalsFilteredPage({
               </button>
             </div>
 
-            {/* Interactive Date Pickers */}
-            <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg px-3 h-10 shadow-sm focus-within:ring-1 focus-within:ring-indigo-500">
-              <span className="text-[11px] font-semibold text-slate-400">Date:</span>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="bg-transparent border-0 outline-none text-xs text-slate-700 font-sans cursor-pointer"
-                title="Start Date"
-              />
-              <span className="text-slate-400 font-bold text-xs">–</span>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="bg-transparent border-0 outline-none text-xs text-slate-700 font-sans cursor-pointer"
-                title="End Date"
-              />
+            {/* Standard Date Dropdown Filter */}
+            <div className="w-full sm:w-auto">
+              <Select value={selectedDateFilter} onValueChange={setSelectedDateFilter}>
+                <SelectTrigger className="h-10 bg-white border-slate-200 text-slate-800 rounded-lg text-xs font-sans font-normal w-full sm:w-44">
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent searchable={false} className="bg-white border-slate-200 text-slate-800 shadow-lg">
+                  <SelectItem value="All" className="text-slate-800 hover:bg-slate-100">All</SelectItem>
+                  <SelectItem value="Today" className="text-slate-800 hover:bg-slate-100">Today</SelectItem>
+                  <SelectItem value="Yesterday" className="text-slate-800 hover:bg-slate-100">Yesterday</SelectItem>
+                  <SelectItem value="Last 7 Days" className="text-slate-800 hover:bg-slate-100">Last 7 Days</SelectItem>
+                  <SelectItem value="Last 15 Days" className="text-slate-800 hover:bg-slate-100">Last 15 Days</SelectItem>
+                  <SelectItem value="Last 30 Days" className="text-slate-800 hover:bg-slate-100">Last 30 Days</SelectItem>
+                  <SelectItem value="This Month" className="text-slate-800 hover:bg-slate-100">This Month</SelectItem>
+                  <SelectItem value="Last Month" className="text-slate-800 hover:bg-slate-100">Last Month</SelectItem>
+                  <SelectItem value="Last 6 Months" className="text-slate-800 hover:bg-slate-100">Last 6 Months</SelectItem>
+                  <SelectItem value="This Year" className="text-slate-800 hover:bg-slate-100">This Year</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>

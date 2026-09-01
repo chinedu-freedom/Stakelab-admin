@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
+import RichTextEditor from '../../../../components/RichTextEditor';
 import { Layers, Plus, Trash2, Save, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../../../lib/api';
@@ -155,11 +156,10 @@ export default function AdminHowItWorksSettingPage() {
 
                   <div>
                     <label className="block text-slate-700 font-bold mb-1">Description</label>
-                    <textarea
-                      rows={2}
+                    <RichTextEditor
                       value={step.desc}
-                      onChange={(e) => handleStepChange(idx, 'desc', e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-slate-800 focus:outline-none focus:border-[#5b5bf5]"
+                      onChange={(val) => handleStepChange(idx, 'desc', val)}
+                      placeholder="Step description..."
                     />
                   </div>
                 </div>

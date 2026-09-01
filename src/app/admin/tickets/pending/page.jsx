@@ -95,7 +95,8 @@ export default function AdminTicketsFilteredPage({
                   </tr>
                 ) : (
                   filteredTickets.map((t) => {
-                    const ticketIdClean = t.ticket_id.replace('#', '');
+                    const ticketIdClean = (t.ticket_id || '').replace('#', '');
+                    const userName = t.user ? (t.user.full_name || t.user.username || t.user.email) : 'User';
                     const lastReplyDate = t.messages && t.messages.length > 0 && t.messages[0].created_at
                       ? new Date(t.messages[0].created_at).toLocaleString()
                       : t.updated_at

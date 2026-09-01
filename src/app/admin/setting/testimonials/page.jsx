@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
+import RichTextEditor from '../../../../components/RichTextEditor';
 import { Quote, Plus, Trash2, Save, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../../../lib/api';
@@ -167,11 +168,10 @@ export default function AdminTestimonialsSettingPage() {
 
                   <div>
                     <label className="block text-slate-700 font-bold mb-1">Quote / Review</label>
-                    <textarea
-                      rows={3}
+                    <RichTextEditor
                       value={item.quote}
-                      onChange={(e) => handleChange(idx, 'quote', e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-slate-800 focus:outline-none focus:border-[#5b5bf5]"
+                      onChange={(val) => handleChange(idx, 'quote', val)}
+                      placeholder="User review or testimonial..."
                     />
                   </div>
                 </div>

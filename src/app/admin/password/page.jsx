@@ -1,5 +1,5 @@
-import AdminChangePasswordPage from '../setting/change-password/page';
+import { redirect } from 'next/navigation';
 
 export default function AdminPasswordAliasPage() {
-  return <AdminChangePasswordPage />;
+  redirect('/admin/setting/change-password');
 }

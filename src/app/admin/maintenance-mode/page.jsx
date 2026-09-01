@@ -1,5 +1,5 @@
-import AdminMaintenanceModePage from '../setting/maintenance/page';
+import { redirect } from 'next/navigation';
 
 export default function AdminMaintenanceModeAliasPage() {
-  return <AdminMaintenanceModePage />;
+  redirect('/admin/setting/maintenance');
 }

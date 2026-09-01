@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
+import RichTextEditor from '../../../../components/RichTextEditor';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../../components/ui/select';
 import {
   Plus,
@@ -198,13 +199,10 @@ export default function AdminWhyChooseUsPage() {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Description</label>
-                <textarea
-                  rows={3}
-                  required
+                <RichTextEditor
                   value={desc}
-                  onChange={(e) => setDesc(e.target.value)}
+                  onChange={setDesc}
                   placeholder="Describe why stakeholders choose StakeLab for this feature..."
-                  className="w-full bg-white border border-slate-200 rounded-lg p-3 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
 

@@ -3,13 +3,12 @@
 import { useState } from 'react';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../../components/ui/select';
-import { Mail, Smartphone, Check, Bold, Italic, Underline, Strikethrough, AlignLeft, AlignCenter, AlignRight, List, Link as LinkIcon, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Bold, Italic, Underline, Strikethrough, AlignLeft, AlignCenter, AlignRight, List, Link as LinkIcon, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import api from '../../../../lib/api';
 
 export default function AdminSendNotificationPage() {
-  const [channel, setChannel] = useState('email'); // 'email' | 'sms'
   const [beingSentTo, setBeingSentTo] = useState('All Users');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
@@ -28,14 +27,14 @@ export default function AdminSendNotificationPage() {
     try {
       setSubmitting(true);
       const res = await api.post('/admin/users/send-notification', {
-        channel,
+        channel: 'email',
         target_users: beingSentTo,
         subject,
         message,
       });
 
       if (res.data.success) {
-        toast.success(res.data.message || `Notification batch started via ${channel.toUpperCase()}!`);
+        toast.success(res.data.message || 'Notification batch started via EMAIL!');
         setSubject('');
         setMessage('');
       }
@@ -54,51 +53,6 @@ export default function AdminSendNotificationPage() {
           Notification to Verified Users
         </h1>
 
-        {/* Channel Selection Box Tabs (Matching Reference Screenshot 1 & 2) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 max-w-md gap-4">
-          {/* Option 1: Send Via Email */}
-          <button
-            type="button"
-            onClick={() => setChannel('email')}
-            className={`relative p-5 rounded-xl border transition-all flex flex-col items-center justify-center gap-2 cursor-pointer ${
-              channel === 'email'
-                ? 'bg-white border-[#5b5bf5] ring-2 ring-[#5b5bf5]/20 shadow-md'
-                : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-white hover:border-slate-300'
-            }`}
-          >
-            {channel === 'email' && (
-              <div className="absolute top-0 right-0 bg-[#5b5bf5] text-white p-1 rounded-tr-xl rounded-bl-xl shadow-sm">
-                <Check className="w-3.5 h-3.5" />
-              </div>
-            )}
-            <Mail className={`w-6 h-6 ${channel === 'email' ? 'text-[#5b5bf5]' : 'text-slate-400'}`} />
-            <span className={`text-xs font-bold font-sans ${channel === 'email' ? 'text-slate-800' : 'text-slate-500'}`}>
-              Send Via Email
-            </span>
-          </button>
-
-          {/* Option 2: Send Via SMS */}
-          <button
-            type="button"
-            onClick={() => setChannel('sms')}
-            className={`relative p-5 rounded-xl border transition-all flex flex-col items-center justify-center gap-2 cursor-pointer ${
-              channel === 'sms'
-                ? 'bg-white border-[#5b5bf5] ring-2 ring-[#5b5bf5]/20 shadow-md'
-                : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-white hover:border-slate-300'
-            }`}
-          >
-            {channel === 'sms' && (
-              <div className="absolute top-0 right-0 bg-[#5b5bf5] text-white p-1 rounded-tr-xl rounded-bl-xl shadow-sm">
-                <Check className="w-3.5 h-3.5" />
-              </div>
-            )}
-            <Smartphone className={`w-6 h-6 ${channel === 'sms' ? 'text-[#5b5bf5]' : 'text-slate-400'}`} />
-            <span className={`text-xs font-bold font-sans ${channel === 'sms' ? 'text-slate-800' : 'text-slate-500'}`}>
-              Send Via SMS
-            </span>
-          </button>
-        </div>
-
         {/* Main Notification Form Card */}
         <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -116,9 +70,6 @@ export default function AdminSendNotificationPage() {
                   <SelectItem value="Active Users">Active Users</SelectItem>
                   <SelectItem value="Banned Users">Banned Users</SelectItem>
                   <SelectItem value="Email Unverified">Email Unverified Users</SelectItem>
-                  <SelectItem value="Mobile Unverified">Mobile Unverified Users</SelectItem>
-                  <SelectItem value="KYC Unverified">KYC Unverified Users</SelectItem>
-                  <SelectItem value="KYC Pending">KYC Pending Users</SelectItem>
                 </SelectContent>
               </Select>
             </div>

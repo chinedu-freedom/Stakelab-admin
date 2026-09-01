@@ -1,7 +1,5 @@
-'use client';
-
-import AdminVerificationPasswordPage from '../setting/verification-password/page';
+import { redirect } from 'next/navigation';
 
 export default function AdminVerificationPasswordAliasPage() {
-  return <AdminVerificationPasswordPage />;
+  redirect('/admin/setting/verification-password');
 }

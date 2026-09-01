@@ -1,5 +1,5 @@
-import AdminGeneralSettingPage from '../setting/general/page';
+import { redirect } from 'next/navigation';
 
 export default function AdminGeneralSettingAliasPage() {
-  return <AdminGeneralSettingPage />;
+  redirect('/admin/setting/general');
 }

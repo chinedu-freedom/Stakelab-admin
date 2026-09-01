@@ -51,9 +51,7 @@ export default function AdminUserDetailPage({ params }) {
     transactions: '0',
     stakings: '0',
     emailVerified: true,
-    mobileVerified: true,
     twoFaEnabled: false,
-    kycVerified: true,
     banned: false,
   });
 
@@ -97,9 +95,7 @@ export default function AdminUserDetailPage({ params }) {
           transactions: String((u.transactions || []).length),
           stakings: String((u.stakes || []).length),
           emailVerified: u.email_verified,
-          mobileVerified: true,
           twoFaEnabled: false,
-          kycVerified: u.profile_complete,
           banned: !u.is_active,
         });
       }
@@ -137,8 +133,7 @@ export default function AdminUserDetailPage({ params }) {
   const [showWithdrawalPass, setShowWithdrawalPass] = useState(false);
   const [showAdminPass, setShowAdminPass] = useState(false);
 
-  // KYC Modal State
-  const [kycModalOpen, setKycModalOpen] = useState(false);
+
 
   const handleLoginAsUser = async () => {
     try {
@@ -334,10 +329,7 @@ export default function AdminUserDetailPage({ params }) {
         address: userData.address,
         city: userData.city,
         state: userData.state,
-        zip_code: userData.zipCode,
         email_verified: userData.emailVerified,
-        mobile_verified: userData.mobileVerified,
-        two_factor_enabled: userData.twoFaEnabled,
       });
 
       if (res.data && res.data.success) {
@@ -740,7 +732,7 @@ export default function AdminUserDetailPage({ params }) {
             </div>
 
             {/* Row 5: Verification Toggles Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-2">
+            <div className="grid grid-cols-1 gap-5 pt-2">
               {/* Email Verification */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 font-sans mb-1.5">
@@ -762,70 +754,6 @@ export default function AdminUserDetailPage({ params }) {
                   {userData.emailVerified && (
                     <span className="w-2.5 h-7 rounded bg-[#061127] shadow-inner shrink-0" />
                   )}
-                </button>
-              </div>
-
-              {/* Mobile Verification (Restored per Screenshot 3) */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 font-sans mb-1.5">
-                  Mobile Verification
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setUserData({ ...userData, mobileVerified: !userData.mobileVerified })}
-                  className={`w-full h-11 rounded-lg text-xs font-bold text-white transition-all cursor-pointer shadow-sm relative flex items-center justify-between px-2 overflow-hidden ${
-                    userData.mobileVerified ? 'bg-[#22c55e] hover:bg-[#16a34a]' : 'bg-[#ef4444] hover:bg-[#dc2626]'
-                  }`}
-                >
-                  {!userData.mobileVerified && (
-                    <span className="w-2.5 h-7 rounded bg-[#061127] shadow-inner shrink-0" />
-                  )}
-                  <span className="flex-1 text-center font-bold text-white tracking-wide">
-                    {userData.mobileVerified ? 'Verified' : 'Unverified'}
-                  </span>
-                  {userData.mobileVerified && (
-                    <span className="w-2.5 h-7 rounded bg-[#061127] shadow-inner shrink-0" />
-                  )}
-                </button>
-              </div>
-
-              {/* KYC Button (Matching Screenshot 3) */}
-              <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <label className="block text-xs font-semibold text-slate-700 font-sans">
-                    KYC
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setKycModalOpen(true)}
-                    className="text-[11px] font-bold text-[#5b5bf5] hover:underline cursor-pointer"
-                  >
-                    KYC Data
-                  </button>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const nextStatus =
-                      userData.kycStatus === 'verified'
-                        ? 'unverified'
-                        : userData.kycStatus === 'unverified'
-                        ? 'pending'
-                        : 'verified';
-                    setUserData({ ...userData, kycStatus: nextStatus });
-                    toast.info(`KYC status set to ${nextStatus.toUpperCase()}`);
-                  }}
-                  className={`w-full h-11 rounded-lg text-xs font-bold text-white transition-all cursor-pointer shadow-sm relative flex items-center justify-between px-2 overflow-hidden ${
-                    userData.kycStatus === 'verified'
-                      ? 'bg-[#22c55e] hover:bg-[#16a34a]'
-                      : userData.kycStatus === 'pending'
-                      ? 'bg-[#ffb020] hover:bg-amber-500'
-                      : 'bg-[#ef4444] hover:bg-[#dc2626]'
-                  }`}
-                >
-                  <span className="flex-1 text-center font-bold text-white tracking-wide uppercase">
-                    {userData.kycStatus || 'Unverified'}
-                  </span>
                 </button>
               </div>
             </div>
@@ -1213,102 +1141,7 @@ export default function AdminUserDetailPage({ params }) {
           </div>
         )}
 
-        {/* KYC Document Review Modal */}
-        {kycModalOpen && (
-          <div
-            onClick={() => setKycModalOpen(false)}
-            className="fixed inset-0 min-h-screen w-full bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
-          >
-            <div
-              onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-200 my-auto"
-            >
-              <div className="bg-[#5b5bf5] text-white p-4 px-6 flex justify-between items-center">
-                <h3 className="font-bold text-sm font-sans tracking-wide">
-                  KYC Documents - {userData.username}
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => setKycModalOpen(false)}
-                  className="text-white/80 hover:text-white transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="p-6 space-y-4 text-xs font-sans text-slate-700">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                    <span className="text-slate-400 text-[11px] block">Document Type</span>
-                    <span className="font-bold text-slate-800">National ID Card / Passport</span>
-                  </div>
-                  <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                    <span className="text-slate-400 text-[11px] block">KYC Status</span>
-                    <span
-                      className={`font-bold uppercase ${
-                        userData.kycStatus === 'verified'
-                          ? 'text-emerald-600'
-                          : userData.kycStatus === 'pending'
-                          ? 'text-amber-600'
-                          : 'text-red-600'
-                      }`}
-                    >
-                      {userData.kycStatus || 'Unverified'}
-                    </span>
-                  </div>
-                </div>
 
-                <div className="space-y-2 pt-2">
-                  <span className="font-bold text-slate-800 block">Submitted Verification Attachments</span>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-slate-100 border border-slate-200 rounded-lg p-3 text-center space-y-1">
-                      <div className="text-[10px] font-semibold text-slate-500">ID Front View</div>
-                      <div className="text-indigo-600 font-bold underline text-[11px] cursor-pointer hover:text-indigo-800">
-                        View Attachment 📷
-                      </div>
-                    </div>
-                    <div className="bg-slate-100 border border-slate-200 rounded-lg p-3 text-center space-y-1">
-                      <div className="text-[10px] font-semibold text-slate-500">ID Back View</div>
-                      <div className="text-indigo-600 font-bold underline text-[11px] cursor-pointer hover:text-indigo-800">
-                        View Attachment 📷
-                      </div>
-                    </div>
-                    <div className="bg-slate-100 border border-slate-200 rounded-lg p-3 text-center space-y-1">
-                      <div className="text-[10px] font-semibold text-slate-500">Selfie Holding ID</div>
-                      <div className="text-indigo-600 font-bold underline text-[11px] cursor-pointer hover:text-indigo-800">
-                        View Attachment 📸
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-4 flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setUserData({ ...userData, kycStatus: 'verified' });
-                      setKycModalOpen(false);
-                      toast.success(`KYC Approved for ${userData.username}!`);
-                    }}
-                    className="flex-1 bg-[#22c55e] hover:bg-emerald-600 text-white font-bold py-2.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-sm"
-                  >
-                    Approve KYC
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setUserData({ ...userData, kycStatus: 'unverified' });
-                      setKycModalOpen(false);
-                      toast.error(`KYC Rejected for ${userData.username}.`);
-                    }}
-                    className="flex-1 bg-[#dc2626] hover:bg-red-700 text-white font-bold py-2.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-sm"
-                  >
-                    Reject KYC
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* 6. Delete User Confirmation Modal */}
         {deleteModalOpen && (

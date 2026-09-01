@@ -1,5 +1,5 @@
-import AdminUsersFilteredPage from '../active/page';
+import { redirect } from 'next/navigation';
 
-export default function AdminKycPendingUsersPage() {
-  return <AdminUsersFilteredPage title="KYC Pending Users" filterType="kyc-pending" />;
+export default function KycPendingRedirectPage() {
+  redirect('/admin/users');
 }

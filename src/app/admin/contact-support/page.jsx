@@ -1,5 +1,5 @@
-import AdminContactSupportLinksPage from '../setting/contact-support/page';
+import { redirect } from 'next/navigation';
 
 export default function AdminContactSupportAliasPage() {
-  return <AdminContactSupportLinksPage />;
+  redirect('/admin/setting/contact-support');
 }

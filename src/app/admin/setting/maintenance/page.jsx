@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
-import { Upload, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List, Loader2, Save } from 'lucide-react';
+import { Upload, Loader2, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../../../lib/api';
+import RichTextEditor from '../../../../components/RichTextEditor';
 
 export default function AdminMaintenanceModePage() {
   const [isMaintenanceActive, setIsMaintenanceActive] = useState(false);
@@ -162,56 +163,30 @@ export default function AdminMaintenanceModePage() {
                   </p>
                 </div>
 
-                {/* Right Column: Description Text Editor */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-2 font-sans">
-                    Description
-                  </label>
-                  <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
-                    {/* Rich Text Toolbar */}
-                    <div className="bg-slate-50 border-b border-slate-200 p-2 flex flex-wrap items-center gap-1.5 text-slate-600">
-                      <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-xs font-bold">
-                        <Bold className="w-3.5 h-3.5" />
-                      </button>
-                      <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-xs">
-                        <Italic className="w-3.5 h-3.5" />
-                      </button>
-                      <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-xs">
-                        <Underline className="w-3.5 h-3.5" />
-                      </button>
-                      <div className="h-4 w-px bg-slate-300 mx-1"></div>
-                      <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-xs">
-                        <AlignLeft className="w-3.5 h-3.5" />
-                      </button>
-                      <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-xs">
-                        <AlignCenter className="w-3.5 h-3.5" />
-                      </button>
-                      <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-xs">
-                        <AlignRight className="w-3.5 h-3.5" />
-                      </button>
-                      <div className="h-4 w-px bg-slate-300 mx-1"></div>
-                      <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-xs">
-                        <List className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                {/* Right Column: Headline & Rich Description Text Editor */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5 font-sans">
+                      Headline Title
+                    </label>
+                    <RichTextEditor
+                      value={headline}
+                      onChange={setHeadline}
+                      placeholder="e.g. THE SITE IS UNDER MAINTENANCE"
+                      minHeight="80px"
+                    />
+                  </div>
 
-                    {/* Editor Content Area */}
-                    <div className="p-4 space-y-3 min-h-[220px]">
-                      <input
-                        type="text"
-                        value={headline}
-                        onChange={(e) => setHeadline(e.target.value)}
-                        placeholder="Maintenance Headline..."
-                        className="w-full text-center font-bold text-red-600 text-sm focus:outline-none font-sans"
-                      />
-                      <textarea
-                        rows={6}
-                        value={descriptionText}
-                        onChange={(e) => setDescriptionText(e.target.value)}
-                        placeholder="Maintenance Description..."
-                        className="w-full text-center text-xs text-slate-600 leading-relaxed focus:outline-none font-sans resize-none"
-                      ></textarea>
-                    </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5 font-sans">
+                      Description & Message Content
+                    </label>
+                    <RichTextEditor
+                      value={descriptionText}
+                      onChange={setDescriptionText}
+                      placeholder="Write your maintenance announcement message here..."
+                      minHeight="220px"
+                    />
                   </div>
                 </div>
               </div>
