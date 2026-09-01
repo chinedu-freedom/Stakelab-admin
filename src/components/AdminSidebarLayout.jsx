@@ -37,6 +37,25 @@ import {
   ChevronDown,
 } from 'lucide-react';
 
+let cachedAdminBrandInfo = null;
+
+const renderFormattedBrandName = (name) => {
+  if (!name) return null;
+  const str = String(name);
+  if (str.toLowerCase() === 'everstake') {
+    return (
+      <span className="text-xl font-extrabold text-white font-righteous tracking-wide">
+        Ever<span className="text-[#5b5bf5]">Stake</span>
+      </span>
+    );
+  }
+  return (
+    <span className="text-xl font-extrabold text-white font-righteous tracking-wide">
+      {str}
+    </span>
+  );
+};
+
 export default function AdminSidebarLayout({ children }) {
   const pathname = usePathname();
   const { admin, logout } = useAdminAuth();
@@ -59,6 +78,44 @@ export default function AdminSidebarLayout({ children }) {
     pendingWithdrawals: '0',
     pendingTickets: '0',
   });
+
+  const [brandInfo, setBrandInfo] = useState(() => {
+    return cachedAdminBrandInfo || { logoUrl: null, siteName: 'EverStake', loaded: !!cachedAdminBrandInfo };
+  });
+
+  useEffect(() => {
+    if (cachedAdminBrandInfo) {
+      setBrandInfo(cachedAdminBrandInfo);
+      return;
+    }
+
+    api
+      .get('/public/logo-favicon')
+      .then((res) => {
+        if (res.data && res.data.success && res.data.settings) {
+          const info = {
+            logoUrl: res.data.settings.logoUrl || null,
+            siteName: res.data.settings.siteName || res.data.settings.siteTitle || 'EverStake',
+            loaded: true,
+          };
+          cachedAdminBrandInfo = info;
+          setBrandInfo(info);
+        } else {
+          setBrandInfo((prev) => ({ ...prev, loaded: true }));
+        }
+      })
+      .catch(() => setBrandInfo((prev) => ({ ...prev, loaded: true })));
+
+    const handleLogoUpdate = (e) => {
+      if (e.detail) {
+        const info = { ...brandInfo, logoUrl: e.detail, loaded: true };
+        cachedAdminBrandInfo = info;
+        setBrandInfo(info);
+      }
+    };
+    window.addEventListener('site-logo-updated', handleLogoUpdate);
+    return () => window.removeEventListener('site-logo-updated', handleLogoUpdate);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -244,14 +301,20 @@ export default function AdminSidebarLayout({ children }) {
         }`}
       >
         {/* Top Sidebar Brand Logo - FIXED (Does NOT scroll) */}
-        <div className="h-16 px-6 flex items-center border-b border-[#142343] shrink-0">
-          <Link href="/admin/dashboard" className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded bg-gradient-to-r from-[#ff0044] to-[#fe780b] flex items-center justify-center font-righteous text-white font-bold text-lg shadow-md">
-              E
-            </div>
-            <span className="text-xl font-extrabold text-white font-righteous tracking-wide">
-              Ever<span className="text-[#5b5bf5]">Stake</span>
-            </span>
+        <div className="h-16 px-6 flex items-center border-b border-[#142343] shrink-0 min-h-[64px]">
+          <Link href="/admin/dashboard" className="flex items-center space-x-2.5">
+            {brandInfo.loaded && (
+              <>
+                {brandInfo.logoUrl && (
+                  <img
+                    src={brandInfo.logoUrl}
+                    alt={brandInfo.siteName || 'Logo'}
+                    className="h-9 max-w-[170px] object-contain rounded"
+                  />
+                )}
+                {brandInfo.siteName && renderFormattedBrandName(brandInfo.siteName)}
+              </>
+            )}
           </Link>
         </div>
 

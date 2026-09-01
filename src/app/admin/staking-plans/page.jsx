@@ -30,7 +30,9 @@ export default function AdminStakingPlansPage() {
 
           let planStatus = 'Active';
           const rawSt = (p.status || p.badge || '').toUpperCase();
-          if (rawSt === 'UNAVAILABLE' || rawSt === 'DISABLED' || p.is_active === false) {
+          if (rawSt === 'COMING_SOON' || rawSt === 'COMING SOON') {
+            planStatus = 'Coming Soon';
+          } else if (rawSt === 'UNAVAILABLE' || rawSt === 'DISABLED' || p.is_active === false) {
             planStatus = 'Unavailable';
           } else if (rawSt === 'INACTIVE') {
             planStatus = 'Inactive';

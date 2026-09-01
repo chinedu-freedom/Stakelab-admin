@@ -299,30 +299,17 @@ export default function AdminTasksPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">Category</label>
-                    <Select value={form.task_type} onValueChange={(val) => setForm({ ...form, task_type: val })}>
-                      <SelectTrigger className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg text-xs font-semibold">
-                        <SelectValue placeholder="Category" />
-                      </SelectTrigger>
-                      <SelectContent searchable={false} className="bg-white border-slate-200 text-slate-800 shadow-lg">
-                        <SelectItem value="TELEGRAM" className="text-slate-800 hover:bg-slate-100">Telegram</SelectItem>
-                        <SelectItem value="YOUTUBE" className="text-slate-800 hover:bg-slate-100">YouTube</SelectItem>
-                        <SelectItem value="TWITTER" className="text-slate-800 hover:bg-slate-100">Twitter / X</SelectItem>
-                        <SelectItem value="GENERAL" className="text-slate-800 hover:bg-slate-100">General Task</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">Invites Required *</label>
+                    <input
+                      type="number"
+                      min="1"
+                      required
+                      value={form.invites_required}
+                      onChange={(e) => setForm({ ...form, invites_required: e.target.value })}
+                      placeholder="e.g. 15"
+                      className="w-full h-10 bg-slate-50 border border-slate-200 rounded-lg px-3.5 text-xs text-slate-800 font-bold focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    />
                   </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">Target Action URL</label>
-                  <input
-                    type="url"
-                    value={form.target_url}
-                    onChange={(e) => setForm({ ...form, target_url: e.target.value })}
-                    placeholder="https://..."
-                    className="w-full h-10 bg-slate-50 border border-slate-200 rounded-lg px-3.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  />
                 </div>
 
                 <div className="pt-2 flex items-center justify-end gap-3">

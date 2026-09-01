@@ -10,11 +10,11 @@ import ConfirmModal from '../../../components/ConfirmModal';
 export default function AdminSpinWheelPage() {
   const [settings, setSettings] = useState({
     feature_enabled: true,
-    cost_per_spin: 5,
-    free_spins_per_deposit: 1,
-    daily_referral_target: 2,
-    spins_for_daily_challenge: 1,
-    free_spins_daily: 1,
+    cost_per_spin: 0,
+    free_spins_per_deposit: 0,
+    daily_referral_target: 0,
+    spins_for_daily_challenge: 0,
+    free_spins_daily: 0,
     total_spins_used: 0,
     total_rewards_earned: 0,
     free_spins_used: 0,
@@ -131,26 +131,13 @@ export default function AdminSpinWheelPage() {
     <AdminSidebarLayout>
       <div className="space-y-6 max-w-7xl mx-auto font-sans">
         {/* Page Header Title */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-xl font-bold text-slate-800 font-sans tracking-wide flex items-center gap-2">
-              <Disc className="w-6 h-6 text-[#5b5bf5]" /> Lucky Spin Wheel Manager
-            </h1>
-            <p className="text-xs text-slate-500 mt-1 font-sans">
-              Configure lucky spin wheel rules, cost per spin, free spin bonuses, and 8 prize wheel slots
-            </p>
-          </div>
-
-          <button
-            onClick={() => setSettings({ ...settings, feature_enabled: !settings.feature_enabled })}
-            className={`px-4 py-2.5 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center justify-center cursor-pointer ${
-              settings.feature_enabled
-                ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                : 'bg-red-600 hover:bg-red-700 text-white'
-            }`}
-          >
-            {settings.feature_enabled ? 'Feature Enabled (Active)' : 'Feature Disabled (Inactive)'}
-          </button>
+        <div>
+          <h1 className="text-xl font-bold text-slate-800 font-sans tracking-wide flex items-center gap-2">
+            <Disc className="w-6 h-6 text-[#5b5bf5]" /> Lucky Spin Wheel Manager
+          </h1>
+          <p className="text-xs text-slate-500 mt-1 font-sans">
+            Configure lucky spin wheel rules, cost per spin, free spin bonuses, and 8 prize wheel slots
+          </p>
         </div>
 
         {/* 3 Stats Cards */}

@@ -124,6 +124,9 @@ export default function AdminWithdrawalsFilteredPage({
 
             {/* Standard Date Dropdown Filter */}
             <div className="w-full sm:w-auto">
+              <label className="block text-[11px] font-semibold text-slate-500 mb-1 font-sans">
+                Date
+              </label>
               <Select value={selectedDateFilter} onValueChange={setSelectedDateFilter}>
                 <SelectTrigger className="h-10 bg-white border-slate-200 text-slate-800 rounded-lg text-xs font-sans font-normal w-full sm:w-44">
                   <SelectValue placeholder="All" />

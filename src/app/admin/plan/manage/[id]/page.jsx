@@ -82,7 +82,7 @@ export default function AdminEditPlanPage({ params }) {
         title: name,
         status: status,
         badge: status,
-        is_active: status === 'ACTIVE',
+        is_active: status === 'ACTIVE' || status === 'COMING_SOON',
         min_amount: parseFloat(minAmount),
         max_amount: parseFloat(maxAmount),
         daily_return_percent: parseFloat(dailyInterest),
@@ -259,6 +259,7 @@ export default function AdminEditPlanPage({ params }) {
                     </SelectTrigger>
                     <SelectContent searchable={false} className="bg-white border-slate-200 text-slate-800 shadow-lg">
                       <SelectItem value="ACTIVE" className="text-slate-800 hover:bg-slate-100 font-bold">Active</SelectItem>
+                      <SelectItem value="COMING_SOON" className="text-slate-800 hover:bg-slate-100 font-bold">Coming Soon</SelectItem>
                       <SelectItem value="INACTIVE" className="text-slate-800 hover:bg-slate-100 font-bold">Inactive</SelectItem>
                       <SelectItem value="UNAVAILABLE" className="text-slate-800 hover:bg-slate-100 font-bold">Unavailable</SelectItem>
                     </SelectContent>
