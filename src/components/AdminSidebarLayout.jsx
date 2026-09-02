@@ -63,6 +63,58 @@ export default function AdminSidebarLayout({ children }) {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const [notifications, setNotifications] = useState({ unreadCount: 0, tickets: [], deposits: [], withdrawals: [], signups: [], logins: [], stakes: [] });
+  const [readNotifIds, setReadNotifIds] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return JSON.parse(localStorage.getItem('admin_read_notif_ids') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  });
+
+  const handleMarkNotifRead = (id) => {
+    if (!id) return;
+    setReadNotifIds((prev) => {
+      if (prev.includes(id)) return prev;
+      const next = [...prev, id];
+      try {
+        localStorage.setItem('admin_read_notif_ids', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  };
+
+  const handleMarkAllNotifsRead = () => {
+    const allIds = [
+      ...(notifications.tickets || []).map((t) => t.id),
+      ...(notifications.deposits || []).map((d) => d.id),
+      ...(notifications.withdrawals || []).map((w) => w.id),
+      ...(notifications.signups || []).map((u) => u.id),
+      ...(notifications.logins || []).map((l) => l.id),
+      ...(notifications.stakes || []).map((s) => s.id),
+    ].filter(Boolean);
+
+    setReadNotifIds((prev) => {
+      const next = Array.from(new Set([...prev, ...allIds]));
+      try {
+        localStorage.setItem('admin_read_notif_ids', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  };
+
+  const filterUnread = (items) => (items || []).filter((item) => !readNotifIds.includes(item.id));
+
+  const unreadTickets = filterUnread(notifications.tickets);
+  const unreadDeposits = filterUnread(notifications.deposits);
+  const unreadWithdrawals = filterUnread(notifications.withdrawals);
+  const unreadSignups = filterUnread(notifications.signups);
+  const unreadLogins = filterUnread(notifications.logins);
+  const unreadStakes = filterUnread(notifications.stakes);
+
+  const activeUnreadCount = unreadTickets.length + unreadDeposits.length + unreadWithdrawals.length + unreadSignups.length + unreadLogins.length + unreadStakes.length;
   const profileRef = useRef(null);
   const notifRef = useRef(null);
 
@@ -496,9 +548,9 @@ export default function AdminSidebarLayout({ children }) {
                 title="Notifications"
               >
                 <Bell className="w-4 h-4" />
-                {notifications.unreadCount > 0 && (
+                {activeUnreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-[#ff0044] text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full shadow-md animate-pulse">
-                    {notifications.unreadCount > 9 ? '9+' : notifications.unreadCount}
+                    {activeUnreadCount > 9 ? '9+' : activeUnreadCount}
                   </span>
                 )}
               </button>
@@ -510,25 +562,39 @@ export default function AdminSidebarLayout({ children }) {
                     <h3 className="font-bold text-white font-righteous flex items-center gap-2">
                       <Bell className="w-4 h-4 text-[#5b5bf5]" /> Notifications
                     </h3>
-                    <span className="px-2 py-0.5 rounded-full bg-[#5b5bf5]/20 text-[#5b5bf5] text-[10px] font-bold">
-                      {notifications.unreadCount} Pending
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {activeUnreadCount > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleMarkAllNotifsRead}
+                          className="text-[10px] text-slate-400 hover:text-white font-semibold underline cursor-pointer"
+                        >
+                          Mark all read
+                        </button>
+                      )}
+                      <span className="px-2 py-0.5 rounded-full bg-[#5b5bf5]/20 text-[#5b5bf5] text-[10px] font-bold">
+                        {activeUnreadCount} Pending
+                      </span>
+                    </div>
                   </div>
 
                   <div className="max-h-80 overflow-y-auto divide-y divide-white/5">
                     {/* New Signups */}
-                    {notifications.signups?.length > 0 && (
+                    {unreadSignups.length > 0 && (
                       <div className="p-3">
                         <div className="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-2 flex items-center justify-between">
-                          <span>👤 New Registrations ({notifications.signups.length})</span>
+                          <span>👤 New Registrations ({unreadSignups.length})</span>
                           <Link href="/admin/users" onClick={() => setNotifDropdownOpen(false)} className="text-[#5b5bf5] hover:underline">View All →</Link>
                         </div>
                         <div className="space-y-1.5">
-                          {notifications.signups.map((u) => (
+                          {unreadSignups.map((u) => (
                             <Link
                               key={u.id}
                               href={`/admin/users/detail/${u.id}`}
-                              onClick={() => setNotifDropdownOpen(false)}
+                              onClick={() => {
+                                handleMarkNotifRead(u.id);
+                                setNotifDropdownOpen(false);
+                              }}
                               className="block p-2 rounded-lg bg-[#061127] hover:bg-[#12244a] border border-[#1d335f] transition-all"
                             >
                               <div className="font-bold text-white truncate">@{u.username || u.full_name}</div>
@@ -543,18 +609,21 @@ export default function AdminSidebarLayout({ children }) {
                     )}
 
                     {/* New Staking Investments */}
-                    {notifications.stakes?.length > 0 && (
+                    {unreadStakes.length > 0 && (
                       <div className="p-3">
                         <div className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-2 flex items-center justify-between">
-                          <span>📈 New Investments ({notifications.stakes.length})</span>
+                          <span>📈 New Investments ({unreadStakes.length})</span>
                           <Link href="/admin/staking/history" onClick={() => setNotifDropdownOpen(false)} className="text-[#5b5bf5] hover:underline">View All →</Link>
                         </div>
                         <div className="space-y-1.5">
-                          {notifications.stakes.map((s) => (
+                          {unreadStakes.map((s) => (
                             <Link
                               key={s.id}
                               href="/admin/staking/history"
-                              onClick={() => setNotifDropdownOpen(false)}
+                              onClick={() => {
+                                handleMarkNotifRead(s.id);
+                                setNotifDropdownOpen(false);
+                              }}
                               className="block p-2 rounded-lg bg-[#061127] hover:bg-[#12244a] border border-[#1d335f] transition-all"
                             >
                               <div className="font-bold text-indigo-300">${parseFloat(s.amount).toFixed(2)} in {s.plan?.title || 'Staking'}</div>
@@ -569,17 +638,18 @@ export default function AdminSidebarLayout({ children }) {
                     )}
 
                     {/* Recent User Logins */}
-                    {notifications.logins?.length > 0 && (
+                    {unreadLogins.length > 0 && (
                       <div className="p-3">
                         <div className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-2 flex items-center justify-between">
-                          <span>🔑 User Logins ({notifications.logins.length})</span>
+                          <span>🔑 User Logins ({unreadLogins.length})</span>
                           <Link href="/admin/users" onClick={() => setNotifDropdownOpen(false)} className="text-[#5b5bf5] hover:underline">View All →</Link>
                         </div>
                         <div className="space-y-1.5">
-                          {notifications.logins.map((l) => (
+                          {unreadLogins.map((l) => (
                             <div
                               key={l.id}
-                              className="block p-2 rounded-lg bg-[#061127] border border-[#1d335f]"
+                              onClick={() => handleMarkNotifRead(l.id)}
+                              className="block p-2 rounded-lg bg-[#061127] border border-[#1d335f] cursor-pointer hover:bg-[#12244a]"
                             >
                               <div className="font-bold text-slate-200">@{l.user?.username || 'User'} Logged In</div>
                               <div className="text-[10px] text-slate-400 mt-0.5 flex justify-between">
@@ -593,18 +663,21 @@ export default function AdminSidebarLayout({ children }) {
                     )}
 
                     {/* Pending Tickets */}
-                    {notifications.tickets?.length > 0 && (
+                    {unreadTickets.length > 0 && (
                       <div className="p-3">
                         <div className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-2 flex items-center justify-between">
-                          <span>📩 Support Tickets ({notifications.tickets.length})</span>
+                          <span>📩 Support Tickets ({unreadTickets.length})</span>
                           <Link href="/admin/tickets/pending" onClick={() => setNotifDropdownOpen(false)} className="text-[#5b5bf5] hover:underline">View All →</Link>
                         </div>
                         <div className="space-y-1.5">
-                          {notifications.tickets.map((t) => (
+                          {unreadTickets.map((t) => (
                             <Link
                               key={t.id}
                               href={`/admin/ticket/view/${t.id}`}
-                              onClick={() => setNotifDropdownOpen(false)}
+                              onClick={() => {
+                                handleMarkNotifRead(t.id);
+                                setNotifDropdownOpen(false);
+                              }}
                               className="block p-2 rounded-lg bg-[#061127] hover:bg-[#12244a] border border-[#1d335f] transition-all"
                             >
                               <div className="font-bold text-white truncate">#{t.ticket_id || t.id.substring(0,6)} - {t.subject}</div>
@@ -619,18 +692,21 @@ export default function AdminSidebarLayout({ children }) {
                     )}
 
                     {/* Pending Deposits */}
-                    {notifications.deposits?.length > 0 && (
+                    {unreadDeposits.length > 0 && (
                       <div className="p-3">
                         <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-2 flex items-center justify-between">
-                          <span>📥 Pending Deposits ({notifications.deposits.length})</span>
+                          <span>📥 Pending Deposits ({unreadDeposits.length})</span>
                           <Link href="/admin/deposit/pending" onClick={() => setNotifDropdownOpen(false)} className="text-[#5b5bf5] hover:underline">View All →</Link>
                         </div>
                         <div className="space-y-1.5">
-                          {notifications.deposits.map((d) => (
+                          {unreadDeposits.map((d) => (
                             <Link
                               key={d.id}
                               href="/admin/deposit/pending"
-                              onClick={() => setNotifDropdownOpen(false)}
+                              onClick={() => {
+                                handleMarkNotifRead(d.id);
+                                setNotifDropdownOpen(false);
+                              }}
                               className="block p-2 rounded-lg bg-[#061127] hover:bg-[#12244a] border border-[#1d335f] transition-all"
                             >
                               <div className="font-bold text-emerald-400">+${parseFloat(d.amount).toFixed(2)} USDT</div>
@@ -645,18 +721,21 @@ export default function AdminSidebarLayout({ children }) {
                     )}
 
                     {/* Pending Withdrawals */}
-                    {notifications.withdrawals?.length > 0 && (
+                    {unreadWithdrawals.length > 0 && (
                       <div className="p-3">
                         <div className="text-[10px] font-bold text-sky-400 uppercase tracking-wider mb-2 flex items-center justify-between">
-                          <span>📤 Pending Withdrawals ({notifications.withdrawals.length})</span>
+                          <span>📤 Pending Withdrawals ({unreadWithdrawals.length})</span>
                           <Link href="/admin/withdraw/pending" onClick={() => setNotifDropdownOpen(false)} className="text-[#5b5bf5] hover:underline">View All →</Link>
                         </div>
                         <div className="space-y-1.5">
-                          {notifications.withdrawals.map((w) => (
+                          {unreadWithdrawals.map((w) => (
                             <Link
                               key={w.id}
                               href="/admin/withdraw/pending"
-                              onClick={() => setNotifDropdownOpen(false)}
+                              onClick={() => {
+                                handleMarkNotifRead(w.id);
+                                setNotifDropdownOpen(false);
+                              }}
                               className="block p-2 rounded-lg bg-[#061127] hover:bg-[#12244a] border border-[#1d335f] transition-all"
                             >
                               <div className="font-bold text-sky-400">-${parseFloat(w.amount).toFixed(2)} USDT</div>
@@ -671,9 +750,9 @@ export default function AdminSidebarLayout({ children }) {
                     )}
 
                     {/* Empty Notifications State */}
-                    {notifications.unreadCount === 0 && (
+                    {activeUnreadCount === 0 && (
                       <div className="p-6 text-center text-slate-400 text-xs font-semibold">
-                        🎉 All caught up! No new notifications or pending requests.
+                        🎉 All caught up! No unread notifications or pending requests.
                       </div>
                     )}
                   </div>

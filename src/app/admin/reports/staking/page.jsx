@@ -206,10 +206,10 @@ export default function AdminStakingHistoryPage() {
                   filteredStakes.map((log) => {
                     const uName = log.user?.full_name || log.user?.username || 'User';
                     const uHandle = log.user?.username ? `@${log.user.username}` : '';
-                    const planName = log.plan?.name || 'Staking Plan';
+                    const planName = log.plan?.title || log.plan?.name || 'Staking Plan';
                     const amt = parseFloat(log.amount || 0);
-                    const intRate = parseFloat(log.interest_rate || 0);
-                    const totalRet = parseFloat(log.total_return || amt * (1 + intRate / 100));
+                    const intRate = parseFloat(log.plan?.daily_return_percent || log.daily_profit || log.interest_rate || 0);
+                    const totalRet = parseFloat(log.total_earned || (amt * (1 + intRate / 100)));
                     const startDateStr = log.created_at ? new Date(log.created_at).toLocaleString() : 'Recently';
                     const endDateStr = log.end_date ? new Date(log.end_date).toLocaleString() : 'Pending';
 

@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import AdminSidebarLayout from '../../../../../components/AdminSidebarLayout';
+import RichTextEditor from '../../../../../components/RichTextEditor';
 import { ArrowLeft, Plus, X, Trash2, Reply, Paperclip, Loader2, Eye, Download, FileText, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../../../../lib/api';
@@ -325,14 +326,14 @@ export default function AdminTicketViewPage({ params }) {
               )}
 
               <div>
-                <textarea
-                  id="admin-reply-textarea"
-                  rows={5}
-                  required
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-2">
+                  Message <span className="text-red-500">*</span>
+                </label>
+                <RichTextEditor
                   value={replyMessage}
-                  onChange={(e) => setReplyMessage(e.target.value)}
+                  onChange={setReplyMessage}
                   placeholder={replyTo ? `Write reply to ${replyTo.sender_name}...` : "Enter reply here"}
-                  className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs text-slate-800 font-sans placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  minHeight="180px"
                 />
               </div>
 
@@ -502,7 +503,11 @@ export default function AdminTicketViewPage({ params }) {
                           </div>
                         )}
 
-                        <p className="whitespace-pre-wrap">{msg.message}</p>
+                        {typeof msg.message === 'string' && (msg.message.includes('<p>') || msg.message.includes('<div>') || msg.message.includes('<b>') || msg.message.includes('<i>') || msg.message.includes('<u>') || msg.message.includes('<s>') || msg.message.includes('<ol>') || msg.message.includes('<ul>')) ? (
+                          <div className="whitespace-pre-wrap font-sans text-xs prose-sm prose-invert" dangerouslySetInnerHTML={{ __html: msg.message }} />
+                        ) : (
+                          <p className="whitespace-pre-wrap">{msg.message}</p>
+                        )}
 
                         {/* Inline Attachments Rendering inside Chat Bubble */}
                         {parsedAttachments && parsedAttachments.length > 0 && (

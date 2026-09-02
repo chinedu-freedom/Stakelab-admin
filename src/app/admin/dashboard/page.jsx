@@ -184,8 +184,8 @@ export default function AdminDashboardPage() {
           </Link>
         </div>
 
-        {/* Middle Large Cards Grid (Deposits Summary, Withdrawals Summary, Staking Summary) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Middle Large Cards Grid (Deposits Summary & Withdrawals Summary Full Width) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
           {/* Box 1: Deposits Summary */}
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
             <h2 className="text-base font-bold text-slate-800 font-sans flex items-center justify-between">

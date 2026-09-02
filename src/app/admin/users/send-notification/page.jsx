@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
+import RichTextEditor from '../../../../components/RichTextEditor';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../../components/ui/select';
-import { Bold, Italic, Underline, Strikethrough, AlignLeft, AlignCenter, AlignRight, List, Link as LinkIcon, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import api from '../../../../lib/api';
@@ -31,6 +32,9 @@ export default function AdminSendNotificationPage() {
         target_users: beingSentTo,
         subject,
         message,
+        start_from: parseInt(startFormId || '1'),
+        per_batch: parseInt(perBatch || '100'),
+        cooling_period: parseInt(coolingPeriod || '2'),
       });
 
       if (res.data.success) {
@@ -94,52 +98,12 @@ export default function AdminSendNotificationPage() {
               <label className="block text-xs font-semibold text-slate-700 font-sans mb-1.5">
                 Message <span className="text-red-500">*</span>
               </label>
-              <div className="border border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm focus-within:ring-1 focus-within:ring-indigo-500">
-                {/* Editor Formatting Toolbar */}
-                <div className="bg-slate-50 border-b border-slate-200 p-2 flex flex-wrap items-center gap-1.5 text-slate-600">
-                  <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-slate-700 font-bold" title="Bold">
-                    <Bold className="w-3.5 h-3.5" />
-                  </button>
-                  <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-slate-700" title="Italic">
-                    <Italic className="w-3.5 h-3.5" />
-                  </button>
-                  <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-slate-700" title="Underline">
-                    <Underline className="w-3.5 h-3.5" />
-                  </button>
-                  <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-slate-700" title="Strikethrough">
-                    <Strikethrough className="w-3.5 h-3.5" />
-                  </button>
-                  <div className="h-4 w-px bg-slate-300 mx-1" />
-                  <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-slate-700" title="Align Left">
-                    <AlignLeft className="w-3.5 h-3.5" />
-                  </button>
-                  <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-slate-700" title="Align Center">
-                    <AlignCenter className="w-3.5 h-3.5" />
-                  </button>
-                  <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-slate-700" title="Align Right">
-                    <AlignRight className="w-3.5 h-3.5" />
-                  </button>
-                  <div className="h-4 w-px bg-slate-300 mx-1" />
-                  <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-slate-700" title="Bullet List">
-                    <List className="w-3.5 h-3.5" />
-                  </button>
-                  <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-slate-700" title="Insert Link">
-                    <LinkIcon className="w-3.5 h-3.5" />
-                  </button>
-                  <button type="button" className="p-1.5 hover:bg-slate-200 rounded text-slate-700" title="Insert Image">
-                    <ImageIcon className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-                {/* Main Message Textarea */}
-                <textarea
-                  required
-                  rows={8}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Write your broadcast message content here..."
-                  className="w-full p-4 text-xs text-slate-800 font-sans border-0 outline-none resize-none"
-                />
-              </div>
+              <RichTextEditor
+                value={message}
+                onChange={setMessage}
+                placeholder="Write your broadcast message content here..."
+                minHeight="220px"
+              />
             </div>
 
             {/* Bottom 3 Inputs Grid (Start Form, Per Batch, Cooling Period) */}
