@@ -201,30 +201,68 @@ export default function AdminTransactionLogsPage({ userId = null }) {
                     const rawType = (trx.type || '').toUpperCase();
                     const isPositive = !['WITHDRAWAL', 'ADMIN_DEBIT', 'STAKE', 'DEBIT'].includes(rawType);
                     
-                    let typeLabel = 'Transaction';
+                    let typeLabel = 'TRANSACTION';
                     if (['DEPOSIT', 'ADMIN_CREDIT', 'WELCOME_BONUS', 'DEPOSIT_BONUS'].includes(rawType) || rawType.includes('DEPOSIT') || rawType.includes('CREDIT')) {
-                      typeLabel = 'Deposit';
+                      typeLabel = 'DEPOSIT';
                     } else if (['WITHDRAWAL', 'ADMIN_DEBIT', 'WITHDRAW'].includes(rawType) || rawType.includes('WITHDRAW') || rawType.includes('DEBIT')) {
-                      typeLabel = 'Withdrawal';
+                      typeLabel = 'WITHDRAWAL';
                     } else if (rawType === 'STAKE_PROFIT' || rawType === 'STAKING_YIELD') {
-                      typeLabel = 'Staking Yield';
+                      typeLabel = 'STAKING YIELD';
+                    } else if (rawType === 'STAKE' || rawType === 'STAKE_BUY') {
+                      typeLabel = 'STAKING PURCHASE';
                     } else if (rawType === 'DAILY_CHECKIN') {
-                      typeLabel = 'Daily Checkin';
+                      typeLabel = 'DAILY CHECKIN';
                     } else if (rawType === 'SPIN_WIN' || rawType === 'LUCKY_SPIN') {
-                      typeLabel = 'Lucky Spin';
+                      typeLabel = 'LUCKY SPIN';
                     } else if (rawType === 'TASK_REWARD') {
-                      typeLabel = 'Task Reward';
+                      typeLabel = 'TASK REWARD';
                     } else if (rawType === 'GIFT_BONUS') {
-                      typeLabel = 'Gift Bonus';
+                      typeLabel = 'GIFT BONUS';
                     } else if (rawType === 'REFERRAL_COMMISSION') {
-                      typeLabel = 'Referral Bonus';
+                      typeLabel = 'REFERRAL BONUS';
                     } else {
-                      typeLabel = trx.type || 'Transaction';
+                      typeLabel = rawType || 'TRANSACTION';
                     }
 
                     const rawStatus = (trx.status || 'COMPLETED').toUpperCase();
                     const isCompleted = ['COMPLETED', 'APPROVED', 'SUCCESSFUL', 'SUCCESS'].includes(rawStatus);
                     const isPending = ['PENDING', 'PROCESSING'].includes(rawStatus);
+
+                    let statusText = 'Completed';
+                    let statusColor = 'bg-emerald-50 text-emerald-600 border-emerald-200';
+
+                    if (rawType === 'ADMIN_CREDIT') {
+                      statusText = 'Deposit credited';
+                      statusColor = 'bg-blue-50 text-blue-600 border-blue-200';
+                    } else if (rawType === 'ADMIN_DEBIT') {
+                      statusText = 'Deposit debited';
+                      statusColor = 'bg-red-50 text-red-600 border-red-200';
+                    } else if (rawType === 'DEPOSIT') {
+                      statusText = 'Deposit successful';
+                      statusColor = 'bg-emerald-50 text-emerald-600 border-emerald-200';
+                    } else if (rawType === 'WITHDRAWAL' || rawType === 'WITHDRAW') {
+                      if (isCompleted) {
+                        statusText = 'Withdrawal successful';
+                        statusColor = 'bg-emerald-50 text-emerald-600 border-emerald-200';
+                      } else if (isPending) {
+                        statusText = 'Pending';
+                        statusColor = 'bg-amber-50 text-amber-600 border-amber-200';
+                      } else {
+                        statusText = 'Rejected';
+                        statusColor = 'bg-red-50 text-red-600 border-red-200';
+                      }
+                    } else {
+                      if (isCompleted) {
+                        statusText = 'Completed';
+                        statusColor = 'bg-emerald-50 text-emerald-600 border-emerald-200';
+                      } else if (isPending) {
+                        statusText = 'Pending';
+                        statusColor = 'bg-amber-50 text-amber-600 border-amber-200';
+                      } else {
+                        statusText = 'Rejected';
+                        statusColor = 'bg-red-50 text-red-600 border-red-200';
+                      }
+                    }
 
                     const formattedAmount = `${isPositive ? '+' : '-'} $${parseFloat(trx.amount || 0).toFixed(2)}`;
                     const formattedPostBal = `$${parseFloat(trx.balance_after || 0).toFixed(2)}`;
@@ -277,19 +315,9 @@ export default function AdminTransactionLogsPage({ userId = null }) {
 
                         {/* Status Column */}
                         <td className="py-4 px-6">
-                          {isCompleted ? (
-                            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 uppercase">
-                              Completed
-                            </span>
-                          ) : isPending ? (
-                            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-200 uppercase">
-                              Pending
-                            </span>
-                          ) : (
-                            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-50 text-red-600 border border-red-200 uppercase">
-                              Rejected
-                            </span>
-                          )}
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase inline-block ${statusColor}`}>
+                            {statusText}
+                          </span>
                         </td>
 
                         {/* Details Column */}
