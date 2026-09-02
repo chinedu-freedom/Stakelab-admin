@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
 import Pagination from '../../../../components/Pagination';
