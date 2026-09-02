@@ -1,16 +1,17 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import AdminSidebarLayout from '../../../../../components/AdminSidebarLayout';
 import RichTextEditor from '../../../../../components/RichTextEditor';
 import { ArrowLeft, Plus, X, Trash2, Reply, Paperclip, Loader2, Eye, Download, FileText, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../../../../lib/api';
 
-export default function AdminTicketViewPage({ params }) {
-  const resolvedParams = typeof params?.then === 'function' ? use(params) : (params || {});
-  const ticketId = resolvedParams?.id;
+export default function AdminTicketViewPage() {
+  const routeParams = useParams();
+  const ticketId = routeParams?.id;
 
   const [ticket, setTicket] = useState(null);
   const [messages, setMessages] = useState([]);

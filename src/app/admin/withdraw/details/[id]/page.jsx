@@ -1,15 +1,16 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import AdminSidebarLayout from '../../../../../components/AdminSidebarLayout';
 import { Check, X, Copy, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../../../../lib/api';
 
-export default function AdminWithdrawDetailsPage({ params }) {
-  const resolvedParams = typeof params?.then === 'function' ? use(params) : (params || {});
-  const withdrawId = resolvedParams?.id;
+export default function AdminWithdrawDetailsPage() {
+  const routeParams = useParams();
+  const withdrawId = routeParams?.id;
 
   const [withdrawData, setWithdrawData] = useState(null);
   const [loading, setLoading] = useState(true);

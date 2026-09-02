@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, use } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import AdminSidebarLayout from '../../../../../components/AdminSidebarLayout';
 import { Check, X, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 
-export default function AdminDepositDetailsPage({ params }) {
-  const resolvedParams = typeof params?.then === 'function' ? use(params) : (params || {});
-  const depositId = resolvedParams?.id || '48';
+export default function AdminDepositDetailsPage() {
+  const routeParams = useParams();
+  const depositId = routeParams?.id || '48';
 
   const [depositData, setDepositData] = useState({
     name: 'rosa Nyakatangure',

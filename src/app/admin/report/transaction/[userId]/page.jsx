@@ -1,11 +1,11 @@
 'use client';
 
-import { use } from 'react';
+import { useParams } from 'next/navigation';
 import AdminTransactionLogsPage from '../../../reports/transactions/page';
 
-export default function UserTransactionLogsFilterPage({ params }) {
-  const resolvedParams = typeof params?.then === 'function' ? use(params) : (params || {});
-  const userId = resolvedParams?.userId || null;
+export default function UserTransactionLogsFilterPage() {
+  const routeParams = useParams();
+  const userId = routeParams?.userId || null;
 
   return <AdminTransactionLogsPage userId={userId} />;
 }

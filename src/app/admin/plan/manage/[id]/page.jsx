@@ -1,18 +1,18 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import AdminSidebarLayout from '../../../../../components/AdminSidebarLayout';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../../../components/ui/select';
 import { Undo2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../../../../lib/api';
 
-export default function AdminEditPlanPage({ params }) {
-  const resolvedParams = typeof params?.then === 'function' ? use(params) : (params || {});
+export default function AdminEditPlanPage() {
   const router = useRouter();
-  const planId = resolvedParams?.id;
+  const routeParams = useParams();
+  const planId = routeParams?.id;
 
   const [name, setName] = useState('');
   const [minAmount, setMinAmount] = useState('');

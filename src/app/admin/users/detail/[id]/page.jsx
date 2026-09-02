@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import AdminSidebarLayout from '../../../../../components/AdminSidebarLayout';
 import api from '../../../../../lib/api';
 import {
@@ -28,9 +29,9 @@ import {
 import { toast } from 'sonner';
 import { countries } from '../../../../../lib/countries';
 
-export default function AdminUserDetailPage({ params }) {
-  const resolvedParams = typeof params?.then === 'function' ? use(params) : (params || {});
-  const userId = resolvedParams?.id;
+export default function AdminUserDetailPage() {
+  const routeParams = useParams();
+  const userId = routeParams?.id;
 
   const [userData, setUserData] = useState({
     firstName: 'User',
