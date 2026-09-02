@@ -388,70 +388,6 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          {/* Box 3: Staking & Investment Overview */}
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-            <h2 className="text-base font-bold text-slate-800 font-sans flex items-center justify-between">
-              <span>Staking & Investments</span>
-              <span className="text-xs text-slate-400 font-normal">Live</span>
-            </h2>
-
-            <div className="space-y-3">
-              {/* Total Staked */}
-              <Link
-                href="/admin/reports/staking"
-                className="p-3 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between hover:bg-slate-100/80 transition-all group"
-              >
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center shrink-0">
-                    <Layers className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-slate-800">
-                      ${Number(stats.totalStaked || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                    </div>
-                    <div className="text-[11px] text-slate-400">Total Staked Value</div>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
-              </Link>
-
-              {/* Today's Staking */}
-              <Link
-                href="/admin/reports/staking"
-                className="p-3 rounded-xl border border-emerald-100 bg-emerald-50/40 flex items-center justify-between hover:bg-emerald-100/60 transition-all group"
-              >
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                    <Zap className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-emerald-900">
-                      ${Number(stats.todaysStaking || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                    </div>
-                    <div className="text-[11px] text-emerald-600 font-medium">Today's Staking Investments</div>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform" />
-              </Link>
-
-              {/* Active Staking Plans Count */}
-              <Link
-                href="/admin/reports/staking"
-                className="p-3 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between hover:bg-slate-100/80 transition-all group"
-              >
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
-                    <TrendingUp className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-slate-800">{stats.activeStakingCount || 0}</div>
-                    <div className="text-[11px] text-slate-400">Active Staking Investments</div>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
-          </div>
         </div>
 
         {/* 3. Weekly Staking & Revenue Chart + Quick Actions Row */}
@@ -580,49 +516,8 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* 4. Recent Activity Logs & Recent Registrations Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Activity Logs */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Activity className="w-5 h-5 text-indigo-600" />
-                <h3 className="font-bold text-slate-800 text-base font-sans">Recent Activity Logs</h3>
-              </div>
-              <Link href="/admin/reports/transactions" className="text-xs font-bold text-[#5b5bf5] hover:underline flex items-center gap-0.5">
-                Audit Logs <ArrowUpRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-
-            <div className="space-y-3.5 max-h-[350px] overflow-y-auto pr-1">
-              {(stats.recentActivities || []).length > 0 ? (
-                stats.recentActivities.map((act) => (
-                  <div key={act.id} className="flex items-start gap-3 p-3 bg-slate-50/70 rounded-xl border border-slate-100 hover:bg-slate-100/80 transition-colors">
-                    <div className="mt-0.5">
-                      <Clock className="w-4 h-4 text-slate-400 shrink-0" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-xs font-bold text-slate-800 truncate">
-                          {act.userName}
-                        </p>
-                        <span className="text-[10px] text-slate-400 font-mono">
-                          {act.createdAt ? new Date(act.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recently'}
-                        </span>
-                      </div>
-                      <p className="text-xs font-bold text-indigo-600 mt-0.5">{act.action}</p>
-                      <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                        {act.details}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-12 text-slate-400 text-xs font-medium">No recent actions logged in the system.</div>
-              )}
-            </div>
-          </div>
-
+        {/* 4. Recent Registrations Row */}
+        <div>
           {/* New Registrations */}
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
@@ -662,79 +557,6 @@ export default function AdminDashboardPage() {
                 <div className="text-center py-12 text-slate-400 text-xs font-medium">No recent users registered.</div>
               )}
             </div>
-          </div>
-        </div>
-
-        {/* 5. Live Recent Transactions Section */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-indigo-600" />
-              <div>
-                <h3 className="font-bold text-slate-800 text-base font-sans">Recent System Transactions</h3>
-                <p className="text-xs text-slate-400 font-sans">Latest deposits, withdrawals, staking rewards and account transactions.</p>
-              </div>
-            </div>
-            <Link href="/admin/reports/transactions" className="text-xs font-bold text-[#5b5bf5] hover:underline flex items-center gap-0.5">
-              View All Logs <ArrowUpRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50 border-y border-slate-200 text-slate-500 text-[11px] font-bold uppercase tracking-wider">
-                  <th className="py-3 px-4">User</th>
-                  <th className="py-3 px-4">Type</th>
-                  <th className="py-3 px-4">Amount</th>
-                  <th className="py-3 px-4">Post Balance</th>
-                  <th className="py-3 px-4">Date</th>
-                  <th className="py-3 px-4 text-right">Details</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-xs text-slate-700 font-sans">
-                {loading ? (
-                  <tr>
-                    <td colSpan={6} className="py-10 text-center text-slate-400 font-semibold">
-                      <div className="flex items-center justify-center gap-2">
-                        <span>Loading transactions data</span>
-                        <Loader2 className="w-5 h-5 animate-spin text-[#5b5bf5]" />
-                      </div>
-                    </td>
-                  </tr>
-                ) : (stats.recentTransactions || []).length > 0 ? (
-                  stats.recentTransactions.map((t) => {
-                    const isPositive = !['WITHDRAWAL', 'ADMIN_DEBIT', 'STAKE'].includes(t.type);
-                    return (
-                      <tr key={t.id} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="py-3 px-4 font-bold text-slate-800">{t.userName}</td>
-                        <td className="py-3 px-4">
-                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                            isPositive ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-red-50 text-red-600 border-red-200'
-                          }`}>
-                            {t.type}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 font-bold font-mono">
-                          <span className={isPositive ? 'text-emerald-600' : 'text-red-500'}>
-                            {isPositive ? '+' : '-'}${parseFloat(t.amount || 0).toFixed(2)}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 font-mono font-semibold text-slate-800">${parseFloat(t.balanceAfter || 0).toFixed(2)}</td>
-                        <td className="py-3 px-4 text-slate-400 font-mono text-[11px]">
-                          {t.createdAt ? new Date(t.createdAt).toLocaleString() : 'Recently'}
-                        </td>
-                        <td className="py-3 px-4 text-right text-slate-500 font-medium">{t.description || t.type}</td>
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="py-8 text-center text-slate-400 font-medium">No recent transactions recorded.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
           </div>
         </div>
       </div>

@@ -273,17 +273,16 @@ export default function AdminUserDetailPage({ params }) {
         wallet_type: walletType,
         amount: parseFloat(amount),
         remark,
+        admin_password: adminPassword,
       });
 
       if (res.data && res.data.success) {
         toast.success(res.data.message || `Successfully adjusted user balance!`);
         if (res.data.user) {
-          const updatedUsdt = parseFloat(res.data.user.balance_usdt || res.data.user.balance || 0).toFixed(2);
           setUserData((prev) => ({
             ...prev,
-            mainBalance: `$${updatedUsdt} USD`,
-            walletBalanceUsdt: `$${updatedUsdt} USDT`,
-            stakedBalance: `$${parseFloat(res.data.user.staked_balance || 0).toFixed(2)} USDT`,
+            mainBalance: `$${parseFloat(res.data.user.balance || 0).toFixed(2)}`,
+            walletBalanceUsdt: `$${parseFloat(res.data.user.staked_balance || 0).toFixed(2)}`,
           }));
         }
         setBalanceModalOpen(false);
@@ -959,8 +958,8 @@ export default function AdminUserDetailPage({ params }) {
                   >
                     <span>
                       {walletType === 'Staked Balance'
-                        ? 'Staked Balance (Active Staking Portfolio)'
-                        : 'Main Balance (Available Wallet Balance)'}
+                        ? `Staked Balance / Profits Wallet (${userData.walletBalanceUsdt || '$0.00'})`
+                        : `Main Balance / Staking Wallet (${userData.mainBalance || '$0.00'})`}
                     </span>
                     <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${walletDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
@@ -979,7 +978,7 @@ export default function AdminUserDetailPage({ params }) {
                             : 'hover:bg-indigo-50 text-slate-700'
                         }`}
                       >
-                        <span>Main Balance (Available Wallet Balance)</span>
+                        <span>Main Balance / Staking Wallet ({userData.mainBalance || '$0.00'})</span>
                       </button>
                       <button
                         type="button"
@@ -993,7 +992,7 @@ export default function AdminUserDetailPage({ params }) {
                             : 'hover:bg-indigo-50 text-slate-700'
                         }`}
                       >
-                        <span>Staked Balance (Active Staking Portfolio)</span>
+                        <span>Staked Balance / Profits Wallet ({userData.walletBalanceUsdt || '$0.00'})</span>
                       </button>
                     </div>
                   )}

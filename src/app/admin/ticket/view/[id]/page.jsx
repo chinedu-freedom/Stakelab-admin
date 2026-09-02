@@ -299,258 +299,264 @@ export default function AdminTicketViewPage({ params }) {
             </div>
           )}
 
-          {/* Reply Form */}
-          <form onSubmit={handleReplySubmit} className="space-y-4">
-            {/* Active Replying Target Banner */}
-            {replyTo && (
-              <div className="bg-indigo-50 border-l-4 border-[#5b5bf5] p-3 rounded-lg flex items-center justify-between text-xs text-slate-700 shadow-sm">
-                <div>
-                  <span className="font-bold text-[#5b5bf5] text-[11px] uppercase tracking-wider block">
-                    ↵ Replying to {replyTo.sender_name}
-                  </span>
-                  <span className="text-slate-600 italic line-clamp-1">
-                    "{replyTo.text}"
-                  </span>
+          {/* Reply Form (Shown ONLY when ticket is OPEN) */}
+          {!isClosed && (
+            <form onSubmit={handleReplySubmit} className="space-y-4">
+              {/* Active Replying Target Banner */}
+              {replyTo && (
+                <div className="bg-indigo-50 border-l-4 border-[#5b5bf5] p-3 rounded-lg flex items-center justify-between text-xs text-slate-700 shadow-sm">
+                  <div>
+                    <span className="font-bold text-[#5b5bf5] text-[11px] uppercase tracking-wider block">
+                      ↵ Replying to {replyTo.sender_name}
+                    </span>
+                    <span className="text-slate-600 italic line-clamp-1">
+                      "{replyTo.text}"
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setReplyTo(null)}
+                    className="text-slate-400 hover:text-slate-700 p-1 rounded font-bold transition-all"
+                    title="Cancel reply"
+                  >
+                    ✕
+                  </button>
                 </div>
+              )}
+
+              <div>
+                <textarea
+                  id="admin-reply-textarea"
+                  rows={5}
+                  required
+                  value={replyMessage}
+                  onChange={(e) => setReplyMessage(e.target.value)}
+                  placeholder={replyTo ? `Write reply to ${replyTo.sender_name}...` : "Enter reply here"}
+                  className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs text-slate-800 font-sans placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              {/* Dynamic Attachment Inputs with Live Thumbnail Preview */}
+              {attachments.length > 0 && (
+                <div className="space-y-3">
+                  {attachments.map((att) => (
+                    <div key={att.id} className="flex items-center gap-3">
+                      {/* Live Thumbnail Preview if Image */}
+                      {att.url && att.type?.startsWith('image/') && (
+                        <img
+                          src={att.url}
+                          alt="Preview"
+                          className="w-9 h-9 object-cover rounded border border-slate-200 shrink-0"
+                        />
+                      )}
+
+                      <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white max-w-md w-full shadow-sm">
+                        <label className="bg-slate-100 border-r border-slate-200 px-4 py-2 text-xs font-bold text-slate-700 cursor-pointer hover:bg-slate-200 shrink-0">
+                          Choose file
+                          <input
+                            type="file"
+                            className="hidden"
+                            onChange={(e) => handleFileChange(att.id, e.target.files[0])}
+                          />
+                        </label>
+                        <span className="px-3 text-xs text-slate-500 truncate">
+                          {att.name || (att.file ? att.file.name : 'No file chosen')}
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveAttachment(att.id)}
+                        className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-all shrink-0 cursor-pointer"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add Attachment Button & Notice */}
+              <div>
                 <button
                   type="button"
-                  onClick={() => setReplyTo(null)}
-                  className="text-slate-400 hover:text-slate-700 p-1 rounded font-bold transition-all"
-                  title="Cancel reply"
+                  onClick={handleAddAttachment}
+                  className="bg-[#091630] hover:bg-slate-800 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
                 >
-                  ✕
+                  <Plus className="w-4 h-4 text-white" /> Add Attachment
+                </button>
+                <p className="text-[11px] text-[#5b5bf5] font-semibold mt-2">
+                  Max 5 files can be uploaded | Maximum upload size is 256MB | Allowed File Extensions: .jpg, .jpeg, .png, .pdf, .doc, .docx
+                </p>
+              </div>
+
+              {/* Submit Reply Button */}
+              <div className="flex justify-end pt-2">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="bg-[#5b5bf5] hover:bg-indigo-600 text-white font-bold px-6 py-2.5 rounded-lg text-xs transition-all shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" /> Submitting
+                    </>
+                  ) : (
+                    <>
+                      <Reply className="w-4 h-4" /> Reply
+                    </>
+                  )}
                 </button>
               </div>
-            )}
+            </form>
+          )}
 
-            <div>
-              <textarea
-                id="admin-reply-textarea"
-                rows={5}
-                required
-                value={replyMessage}
-                onChange={(e) => setReplyMessage(e.target.value)}
-                placeholder={replyTo ? `Write reply to ${replyTo.sender_name}...` : "Enter reply here"}
-                className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs text-slate-800 font-sans placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              />
-            </div>
+          {/* Integrated Chat Stream Box (Visible if Open OR if View Chat is Toggled) */}
+          {(!isClosed || showChatHistory) && (
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-6 space-y-4 max-h-[500px] overflow-y-auto font-sans">
+              {messages.length === 0 ? (
+                <div className="py-8 text-center text-slate-400 text-xs font-semibold">No messages in this ticket thread yet.</div>
+              ) : (
+                messages.map((msg) => {
+                  const isAdminMsg = msg.sender_type === 'ADMIN';
+                  const formattedDate = msg.created_at
+                    ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) +
+                      ' · ' +
+                      new Date(msg.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+                    : '';
 
-            {/* Dynamic Attachment Inputs with Live Thumbnail Preview */}
-            {attachments.length > 0 && (
-              <div className="space-y-3">
-                {attachments.map((att) => (
-                  <div key={att.id} className="flex items-center gap-3">
-                    {/* Live Thumbnail Preview if Image */}
-                    {att.url && att.type?.startsWith('image/') && (
-                      <img
-                        src={att.url}
-                        alt="Preview"
-                        className="w-9 h-9 object-cover rounded border border-slate-200 shrink-0"
-                      />
-                    )}
-
-                    <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white max-w-md w-full shadow-sm">
-                      <label className="bg-slate-100 border-r border-slate-200 px-4 py-2 text-xs font-bold text-slate-700 cursor-pointer hover:bg-slate-200 shrink-0">
-                        Choose file
-                        <input
-                          type="file"
-                          className="hidden"
-                          onChange={(e) => handleFileChange(att.id, e.target.files[0])}
-                        />
-                      </label>
-                      <span className="px-3 text-xs text-slate-500 truncate">
-                        {att.name || (att.file ? att.file.name : 'No file chosen')}
-                      </span>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveAttachment(att.id)}
-                      className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-all shrink-0 cursor-pointer"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Add Attachment Button & Notice */}
-            <div>
-              <button
-                type="button"
-                onClick={handleAddAttachment}
-                className="bg-[#091630] hover:bg-slate-800 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-              >
-                <Plus className="w-4 h-4 text-white" /> Add Attachment
-              </button>
-              <p className="text-[11px] text-[#5b5bf5] font-semibold mt-2">
-                Max 5 files can be uploaded | Maximum upload size is 256MB | Allowed File Extensions: .jpg, .jpeg, .png, .pdf, .doc, .docx
-              </p>
-            </div>
-
-            {/* Submit Reply Button */}
-            <div className="flex justify-end pt-2">
-              <button
-                type="submit"
-                disabled={submitting}
-                className="bg-[#5b5bf5] hover:bg-indigo-600 text-white font-bold px-6 py-2.5 rounded-lg text-xs transition-all shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-50"
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> Submitting
-                  </>
-                ) : (
-                  <>
-                    <Reply className="w-4 h-4" /> Reply
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-
-          {/* Integrated Chat Stream Box (Left vs Right Chat Bubbles) */}
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-6 space-y-4 max-h-[500px] overflow-y-auto font-sans">
-            {messages.length === 0 ? (
-              <div className="py-8 text-center text-slate-400 text-xs font-semibold">No messages in this ticket thread yet.</div>
-            ) : (
-              messages.map((msg) => {
-                const isAdminMsg = msg.sender_type === 'ADMIN';
-                const formattedDate = msg.created_at
-                  ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) +
-                    ' · ' +
-                    new Date(msg.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
-                  : '';
-
-                let parsedAttachments = [];
-                if (msg.attachments) {
-                  try {
-                    parsedAttachments = typeof msg.attachments === 'string' ? JSON.parse(msg.attachments) : msg.attachments;
-                  } catch (e) {
-                    console.error('Failed to parse message attachments:', e);
+                  let parsedAttachments = [];
+                  if (msg.attachments) {
+                    try {
+                      parsedAttachments = typeof msg.attachments === 'string' ? JSON.parse(msg.attachments) : msg.attachments;
+                    } catch (e) {
+                      console.error('Failed to parse message attachments:', e);
+                    }
                   }
-                }
 
-                return (
-                  <div
-                    key={msg.id}
-                    className={`flex flex-col ${isAdminMsg ? 'items-end' : 'items-start'} space-y-1`}
-                  >
-                    {/* Sender Label & Action */}
-                    <div className="flex items-center gap-2 px-1 text-[11px] text-slate-500">
-                      <span className="font-bold text-slate-800 font-sans">{msg.sender_name}</span>
-                      {isAdminMsg ? (
-                        <span className="text-[9px] bg-indigo-100 text-[#5b5bf5] border border-indigo-200 px-1.5 py-0.2 rounded uppercase font-bold">
-                          Support
-                        </span>
-                      ) : (
-                        <span className="text-[9px] bg-slate-200 text-slate-700 px-1.5 py-0.2 rounded uppercase font-bold">
-                          User
-                        </span>
-                      )}
-                      <span>· {formattedDate}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleSelectReplyTarget(msg)}
-                        className="text-[#5b5bf5] hover:text-indigo-800 font-bold ml-1 flex items-center gap-0.5 transition-colors cursor-pointer"
-                        title="Reply to this message"
-                      >
-                        <Reply className="w-3 h-3" />
-                        <span className="text-[10px]">Reply</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteMessage(msg.id)}
-                        className="text-slate-400 hover:text-red-600 font-bold ml-1 flex items-center gap-0.5 transition-colors cursor-pointer p-0.5"
-                        title="Delete message"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
-                    {/* Chat Bubble */}
+                  return (
                     <div
-                      className={`relative rounded-2xl p-4 text-xs font-sans leading-relaxed max-w-[85%] sm:max-w-[75%] shadow-sm transition-all ${
-                        replyTo?.id === msg.id ? 'ring-2 ring-indigo-500' : ''
-                      } ${
-                        isAdminMsg
-                          ? 'bg-[#5b5bf5] text-white rounded-tr-none shadow-indigo-500/10'
-                          : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none'
-                      }`}
+                      key={msg.id}
+                      className={`flex flex-col ${isAdminMsg ? 'items-end' : 'items-start'} space-y-1`}
                     >
-                      {/* Quoted Parent Reply (if replying to an earlier message) */}
-                      {msg.reply_to_name && (
-                        <div
-                          className={`mb-2.5 p-2.5 rounded-xl border-l-4 text-[11px] space-y-0.5 ${
-                            isAdminMsg
-                              ? 'bg-black/20 border-white/70 text-slate-100'
-                              : 'bg-indigo-50 border-[#5b5bf5] text-slate-700'
-                          }`}
+                      {/* Sender Label & Action */}
+                      <div className="flex items-center gap-2 px-1 text-[11px] text-slate-500">
+                        <span className="font-bold text-slate-800 font-sans">{msg.sender_name}</span>
+                        {isAdminMsg ? (
+                          <span className="text-[9px] bg-indigo-100 text-[#5b5bf5] border border-indigo-200 px-1.5 py-0.2 rounded uppercase font-bold">
+                            Support
+                          </span>
+                        ) : (
+                          <span className="text-[9px] bg-slate-200 text-slate-700 px-1.5 py-0.2 rounded uppercase font-bold">
+                            User
+                          </span>
+                        )}
+                        <span>· {formattedDate}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleSelectReplyTarget(msg)}
+                          className="text-[#5b5bf5] hover:underline font-bold ml-1 flex items-center gap-0.5 transition-colors cursor-pointer"
+                          title="Reply to this message"
                         >
-                          <div className="font-bold text-[10px] uppercase tracking-wider opacity-90">
-                            ↵ Replying to {msg.reply_to_name}
+                          <Reply className="w-3 h-3" />
+                          <span className="text-[10px]">Reply</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteMessage(msg.id)}
+                          className="text-slate-400 hover:text-red-500 font-bold ml-1 flex items-center gap-0.5 transition-colors cursor-pointer p-0.5"
+                          title="Delete message"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+
+                      {/* Chat Bubble */}
+                      <div
+                        className={`relative rounded-2xl p-4 text-xs font-sans leading-relaxed max-w-[85%] sm:max-w-[75%] shadow-sm transition-all ${
+                          replyTo?.id === msg.id ? 'ring-2 ring-[#5b5bf5]' : ''
+                        } ${
+                          isAdminMsg
+                            ? 'bg-[#5b5bf5] text-white rounded-tr-none'
+                            : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-sm'
+                        }`}
+                      >
+                        {/* Quoted Parent Reply (if replying to an earlier message) */}
+                        {msg.reply_to_name && (
+                          <div
+                            className={`mb-2.5 p-2.5 rounded-xl border-l-4 text-[11px] space-y-0.5 ${
+                              isAdminMsg
+                                ? 'bg-black/20 border-white/60 text-slate-100'
+                                : 'bg-slate-100 border-[#5b5bf5] text-slate-700'
+                            }`}
+                          >
+                            <span
+                              className={`font-bold tracking-wide uppercase text-[10px] block ${
+                                isAdminMsg ? 'text-indigo-200' : 'text-[#5b5bf5]'
+                              }`}
+                            >
+                              ↵ Replying to {msg.reply_to_name}
+                            </span>
+                            <span className="italic line-clamp-2">{msg.reply_to_text}</span>
                           </div>
-                          <div className="italic truncate text-[10.5px]">
-                            "{msg.reply_to_text}"
-                          </div>
-                        </div>
-                      )}
+                        )}
 
-                      <div className="whitespace-pre-line font-sans">{msg.message}</div>
+                        <p className="whitespace-pre-wrap">{msg.message}</p>
 
-                      {/* Render Attachments inside message bubble */}
-                      {parsedAttachments && parsedAttachments.length > 0 && (
-                        <div className="mt-3 pt-3 border-t border-white/20 flex flex-wrap gap-2">
-                          {parsedAttachments.map((att, attIdx) => {
-                            const isImg = isImageAttachment(att);
-                            const attUrl = typeof att === 'string' ? att : att.url;
-                            const attName = typeof att === 'string' ? `Attachment #${attIdx + 1}` : (att.name || `Attachment #${attIdx + 1}`);
+                        {/* Inline Attachments Rendering inside Chat Bubble */}
+                        {parsedAttachments && parsedAttachments.length > 0 && (
+                          <div className="mt-3 pt-2.5 border-t border-slate-200/40 flex flex-wrap gap-2">
+                            {parsedAttachments.map((att, attIdx) => {
+                              const attUrl = typeof att === 'string' ? att : att.url;
+                              const attName = typeof att === 'object' && att.name ? att.name : `Attachment ${attIdx + 1}`;
+                              const isImg = isImageAttachment(att);
 
-                            if (isImg) {
-                              return (
-                                <div
-                                  key={attIdx}
-                                  onClick={() => setActiveAttachment({ url: attUrl, name: attName, isImg: true })}
-                                  className="group relative w-24 h-24 sm:w-28 sm:h-28 rounded-lg overflow-hidden border border-slate-200 cursor-pointer bg-slate-100 hover:opacity-90 transition-all shrink-0"
-                                >
-                                  <img
-                                    src={attUrl}
-                                    alt={attName}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                                  />
-                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white">
-                                    <Eye className="w-5 h-5 drop-shadow" />
+                              if (isImg) {
+                                return (
+                                  <div
+                                    key={attIdx}
+                                    onClick={() => setActiveAttachment({ url: attUrl, name: attName, isImg: true })}
+                                    className="group relative cursor-pointer overflow-hidden rounded-xl border border-slate-200/50 max-w-[160px] max-h-[120px] shadow-sm hover:opacity-95 transition-all bg-black/5"
+                                  >
+                                    <img
+                                      src={attUrl}
+                                      alt={attName}
+                                      className="w-full h-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-105"
+                                    />
+                                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1">
+                                      <Eye className="w-4 h-4" /> View
+                                    </div>
                                   </div>
-                                </div>
-                              );
-                            }
+                                );
+                              }
 
-                            return (
-                              <button
-                                key={attIdx}
-                                type="button"
-                                onClick={() => setActiveAttachment({ url: attUrl, name: attName, isImg: false })}
-                                className={`flex items-center gap-2 border px-3 py-2 rounded-lg text-xs transition-all max-w-full cursor-pointer ${
-                                  isAdminMsg
-                                    ? 'bg-black/20 border-white/30 text-white hover:bg-black/30'
-                                    : 'bg-slate-100 border-slate-200 text-slate-800 hover:bg-slate-200'
-                                }`}
-                              >
-                                <Paperclip className="w-3.5 h-3.5 shrink-0" />
-                                <span className="truncate max-w-[140px] font-mono text-[11px]">{attName}</span>
-                                <Eye className="w-3.5 h-3.5 shrink-0 text-indigo-500 ml-1" />
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
+                              return (
+                                <button
+                                  key={attIdx}
+                                  type="button"
+                                  onClick={() => setActiveAttachment({ url: attUrl, name: attName, isImg: false })}
+                                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-all max-w-full cursor-pointer ${
+                                    isAdminMsg
+                                      ? 'bg-black/20 hover:bg-black/30 text-white border border-white/20'
+                                      : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
+                                  }`}
+                                >
+                                  <Paperclip className="w-3.5 h-3.5 shrink-0" />
+                                  <span className="truncate max-w-[140px] font-mono text-[11px]">{attName}</span>
+                                  <Eye className="w-3.5 h-3.5 shrink-0 text-indigo-500 ml-1" />
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
+                  );
+                })
+              )}
+            </div>
+          )}
         </div>
 
         {/* Attachment Lightbox Modal */}
