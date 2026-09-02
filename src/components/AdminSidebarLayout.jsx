@@ -62,7 +62,7 @@ export default function AdminSidebarLayout({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
-  const [notifications, setNotifications] = useState({ unreadCount: 0, tickets: [], deposits: [], withdrawals: [] });
+  const [notifications, setNotifications] = useState({ unreadCount: 0, tickets: [], deposits: [], withdrawals: [], signups: [], logins: [], stakes: [] });
   const profileRef = useRef(null);
   const notifRef = useRef(null);
 
@@ -516,11 +516,87 @@ export default function AdminSidebarLayout({ children }) {
                   </div>
 
                   <div className="max-h-80 overflow-y-auto divide-y divide-white/5">
+                    {/* New Signups */}
+                    {notifications.signups?.length > 0 && (
+                      <div className="p-3">
+                        <div className="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                          <span>👤 New Registrations ({notifications.signups.length})</span>
+                          <Link href="/admin/users" onClick={() => setNotifDropdownOpen(false)} className="text-[#5b5bf5] hover:underline">View All →</Link>
+                        </div>
+                        <div className="space-y-1.5">
+                          {notifications.signups.map((u) => (
+                            <Link
+                              key={u.id}
+                              href={`/admin/users/detail/${u.id}`}
+                              onClick={() => setNotifDropdownOpen(false)}
+                              className="block p-2 rounded-lg bg-[#061127] hover:bg-[#12244a] border border-[#1d335f] transition-all"
+                            >
+                              <div className="font-bold text-white truncate">@{u.username || u.full_name}</div>
+                              <div className="text-[10px] text-slate-400 mt-0.5 flex justify-between">
+                                <span className="truncate">{u.email}</span>
+                                <span className="text-purple-400 font-semibold">NEW USER</span>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* New Staking Investments */}
+                    {notifications.stakes?.length > 0 && (
+                      <div className="p-3">
+                        <div className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                          <span>📈 New Investments ({notifications.stakes.length})</span>
+                          <Link href="/admin/staking/history" onClick={() => setNotifDropdownOpen(false)} className="text-[#5b5bf5] hover:underline">View All →</Link>
+                        </div>
+                        <div className="space-y-1.5">
+                          {notifications.stakes.map((s) => (
+                            <Link
+                              key={s.id}
+                              href="/admin/staking/history"
+                              onClick={() => setNotifDropdownOpen(false)}
+                              className="block p-2 rounded-lg bg-[#061127] hover:bg-[#12244a] border border-[#1d335f] transition-all"
+                            >
+                              <div className="font-bold text-indigo-300">${parseFloat(s.amount).toFixed(2)} in {s.plan?.title || 'Staking'}</div>
+                              <div className="text-[10px] text-slate-400 mt-0.5 flex justify-between">
+                                <span>@{s.user?.username || 'User'}</span>
+                                <span className="text-indigo-400 font-semibold">STAKED</span>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Recent User Logins */}
+                    {notifications.logins?.length > 0 && (
+                      <div className="p-3">
+                        <div className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                          <span>🔑 User Logins ({notifications.logins.length})</span>
+                          <Link href="/admin/users" onClick={() => setNotifDropdownOpen(false)} className="text-[#5b5bf5] hover:underline">View All →</Link>
+                        </div>
+                        <div className="space-y-1.5">
+                          {notifications.logins.map((l) => (
+                            <div
+                              key={l.id}
+                              className="block p-2 rounded-lg bg-[#061127] border border-[#1d335f]"
+                            >
+                              <div className="font-bold text-slate-200">@{l.user?.username || 'User'} Logged In</div>
+                              <div className="text-[10px] text-slate-400 mt-0.5 flex justify-between">
+                                <span>IP: {l.ip_address || '127.0.0.1'}</span>
+                                <span className="text-blue-400 font-semibold">LOGIN</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Pending Tickets */}
                     {notifications.tickets?.length > 0 && (
                       <div className="p-3">
                         <div className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-2 flex items-center justify-between">
-                          <span>📩 Pending Support Tickets ({notifications.tickets.length})</span>
+                          <span>📩 Support Tickets ({notifications.tickets.length})</span>
                           <Link href="/admin/tickets/pending" onClick={() => setNotifDropdownOpen(false)} className="text-[#5b5bf5] hover:underline">View All →</Link>
                         </div>
                         <div className="space-y-1.5">
@@ -531,10 +607,10 @@ export default function AdminSidebarLayout({ children }) {
                               onClick={() => setNotifDropdownOpen(false)}
                               className="block p-2 rounded-lg bg-[#061127] hover:bg-[#12244a] border border-[#1d335f] transition-all"
                             >
-                              <div className="font-bold text-white truncate">#{t.ticket_code} - {t.subject}</div>
+                              <div className="font-bold text-white truncate">#{t.ticket_id || t.id.substring(0,6)} - {t.subject}</div>
                               <div className="text-[10px] text-slate-400 mt-0.5 flex justify-between">
                                 <span>@{t.user?.username || 'User'}</span>
-                                <span className="text-amber-400 font-semibold">PENDING</span>
+                                <span className="text-amber-400 font-semibold">{t.status}</span>
                               </div>
                             </Link>
                           ))}
@@ -597,7 +673,7 @@ export default function AdminSidebarLayout({ children }) {
                     {/* Empty Notifications State */}
                     {notifications.unreadCount === 0 && (
                       <div className="p-6 text-center text-slate-400 text-xs font-semibold">
-                        🎉 All caught up! No pending tickets or requests.
+                        🎉 All caught up! No new notifications or pending requests.
                       </div>
                     )}
                   </div>
