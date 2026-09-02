@@ -166,17 +166,19 @@ export default function AdminTransactionLogsPage({ userId = null }) {
               <thead>
                 <tr className="bg-[#5b5bf5] text-white text-xs font-bold uppercase tracking-wider">
                   <th className="py-3.5 px-6">User</th>
-                  <th className="py-3.5 px-6">TRX</th>
+                  <th className="py-3.5 px-6">TRX ID</th>
+                  <th className="py-3.5 px-6">Type</th>
                   <th className="py-3.5 px-6">Transacted</th>
                   <th className="py-3.5 px-6">Amount</th>
                   <th className="py-3.5 px-6">Post Balance</th>
+                  <th className="py-3.5 px-6">Status</th>
                   <th className="py-3.5 px-6 text-right">Details</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs text-slate-700 font-sans">
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-slate-400 font-semibold">
+                    <td colSpan={8} className="py-12 text-center text-slate-400 font-semibold">
                       <div className="flex items-center justify-center gap-2">
                         <span>Loading transactions data</span>
                         <Loader2 className="w-5 h-5 animate-spin text-[#5b5bf5]" />
@@ -185,7 +187,7 @@ export default function AdminTransactionLogsPage({ userId = null }) {
                   </tr>
                 ) : filteredTransactions.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-slate-400 font-semibold">
+                    <td colSpan={8} className="py-12 text-center text-slate-400 font-semibold">
                       Data not found
                     </td>
                   </tr>
@@ -195,7 +197,35 @@ export default function AdminTransactionLogsPage({ userId = null }) {
                     const userHandle = trx.user?.username ? `@${trx.user.username}` : '';
                     const refCode = trx.reference_id || trx.id.substring(0, 10).toUpperCase();
                     const txDate = trx.created_at ? new Date(trx.created_at).toLocaleString() : 'Recently';
-                    const isPositive = !['WITHDRAWAL', 'ADMIN_DEBIT', 'STAKE'].includes(trx.type);
+                    
+                    const rawType = (trx.type || '').toUpperCase();
+                    const isPositive = !['WITHDRAWAL', 'ADMIN_DEBIT', 'STAKE', 'DEBIT'].includes(rawType);
+                    
+                    let typeLabel = 'Transaction';
+                    if (['DEPOSIT', 'ADMIN_CREDIT', 'WELCOME_BONUS', 'DEPOSIT_BONUS'].includes(rawType) || rawType.includes('DEPOSIT') || rawType.includes('CREDIT')) {
+                      typeLabel = 'Deposit';
+                    } else if (['WITHDRAWAL', 'ADMIN_DEBIT', 'WITHDRAW'].includes(rawType) || rawType.includes('WITHDRAW') || rawType.includes('DEBIT')) {
+                      typeLabel = 'Withdrawal';
+                    } else if (rawType === 'STAKE_PROFIT' || rawType === 'STAKING_YIELD') {
+                      typeLabel = 'Staking Yield';
+                    } else if (rawType === 'DAILY_CHECKIN') {
+                      typeLabel = 'Daily Checkin';
+                    } else if (rawType === 'SPIN_WIN' || rawType === 'LUCKY_SPIN') {
+                      typeLabel = 'Lucky Spin';
+                    } else if (rawType === 'TASK_REWARD') {
+                      typeLabel = 'Task Reward';
+                    } else if (rawType === 'GIFT_BONUS') {
+                      typeLabel = 'Gift Bonus';
+                    } else if (rawType === 'REFERRAL_COMMISSION') {
+                      typeLabel = 'Referral Bonus';
+                    } else {
+                      typeLabel = trx.type || 'Transaction';
+                    }
+
+                    const rawStatus = (trx.status || 'COMPLETED').toUpperCase();
+                    const isCompleted = ['COMPLETED', 'APPROVED', 'SUCCESSFUL', 'SUCCESS'].includes(rawStatus);
+                    const isPending = ['PENDING', 'PROCESSING'].includes(rawStatus);
+
                     const formattedAmount = `${isPositive ? '+' : '-'} $${parseFloat(trx.amount || 0).toFixed(2)}`;
                     const formattedPostBal = `$${parseFloat(trx.balance_after || 0).toFixed(2)}`;
 
@@ -215,6 +245,19 @@ export default function AdminTransactionLogsPage({ userId = null }) {
                           {refCode}
                         </td>
 
+                        {/* Type Column */}
+                        <td className="py-4 px-6">
+                          <span
+                            className={`text-[10px] font-bold tracking-wider px-2.5 py-1 rounded-full uppercase border whitespace-nowrap inline-flex items-center justify-center ${
+                              !isPositive
+                                ? 'bg-red-50 text-red-600 border-red-200'
+                                : 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                            }`}
+                          >
+                            {typeLabel}
+                          </span>
+                        </td>
+
                         {/* Transacted Column */}
                         <td className="py-4 px-6">
                           <div className="font-medium text-slate-800">{txDate}</div>
@@ -232,9 +275,26 @@ export default function AdminTransactionLogsPage({ userId = null }) {
                           {formattedPostBal}
                         </td>
 
+                        {/* Status Column */}
+                        <td className="py-4 px-6">
+                          {isCompleted ? (
+                            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 uppercase">
+                              Completed
+                            </span>
+                          ) : isPending ? (
+                            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-200 uppercase">
+                              Pending
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-50 text-red-600 border border-red-200 uppercase">
+                              Rejected
+                            </span>
+                          )}
+                        </td>
+
                         {/* Details Column */}
                         <td className="py-4 px-6 text-right text-slate-500 font-medium">
-                          {trx.description || trx.type}
+                          {trx.description || typeLabel}
                         </td>
                       </tr>
                     );
