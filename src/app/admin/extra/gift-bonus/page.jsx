@@ -1,73 +1,65 @@
-'use client';
-
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
 import Pagination from '../../../../components/Pagination';
-import { Gift, Plus, Copy, Trash2, X } from 'lucide-react';
+import { Gift, Plus, Copy, Trash2, X, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-
-const mockGiftCodes = [
-  {
-    id: '1',
-    code: 'STAKE2026BONUS',
-    amount: '$25.00 USDT',
-    maxClaims: 50,
-    claimed: 34,
-    status: 'Active',
-    createdDate: '2026-08-20 10:00 AM',
-  },
-  {
-    id: '2',
-    code: 'WELCOME50USDT',
-    amount: '$50.00 USDT',
-    maxClaims: 100,
-    claimed: 100,
-    status: 'Exhausted',
-    createdDate: '2026-08-15 04:30 PM',
-  },
-  {
-    id: '3',
-    code: 'VIPGIFT100',
-    amount: '$100.00 USDT',
-    maxClaims: 10,
-    claimed: 4,
-    status: 'Active',
-    createdDate: '2026-08-01 09:15 AM',
-  },
-];
+import api from '../../../../lib/api';
 
 export default function AdminGiftBonusPage() {
-  const [giftCodes, setGiftCodes] = useState(mockGiftCodes);
+  const [giftCodes, setGiftCodes] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [code, setCode] = useState('');
   const [amount, setAmount] = useState('');
   const [maxClaims, setMaxClaims] = useState('50');
+
+  const fetchGiftCodes = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/admin/gift-codes');
+      if (res.data && res.data.success) {
+        setGiftCodes(res.data.codes || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch gift codes:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGiftCodes();
+  }, []);
 
   const handleGenerateCode = () => {
     const randomCode = 'STAKE' + Math.random().toString(36).substring(2, 8).toUpperCase();
     setCode(randomCode);
   };
 
-  const handleCreateGift = (e) => {
+  const handleCreateGift = async (e) => {
     e.preventDefault();
     if (!code || !amount) {
       toast.error('Please fill in gift code and bonus amount.');
       return;
     }
-    const newGift = {
-      id: String(Date.now()),
-      code: code.toUpperCase(),
-      amount: `$${parseFloat(amount).toFixed(2)} USDT`,
-      maxClaims: parseInt(maxClaims) || 1,
-      claimed: 0,
-      status: 'Active',
-      createdDate: new Date().toISOString().replace('T', ' ').substring(0, 19),
-    };
-    setGiftCodes([newGift, ...giftCodes]);
-    toast.success(`Gift code ${newGift.code} generated successfully!`);
-    setModalOpen(false);
-    setCode('');
-    setAmount('');
+
+    try {
+      const res = await api.post('/admin/gift-codes', {
+        code: code.toUpperCase(),
+        amount: parseFloat(amount),
+        max_uses: parseInt(maxClaims) || 1,
+      });
+
+      if (res.data && res.data.success) {
+        toast.success(`Gift code ${code.toUpperCase()} created successfully!`);
+        setModalOpen(false);
+        setCode('');
+        setAmount('');
+        fetchGiftCodes();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to create gift code');
+    }
   };
 
   const handleCopyCode = (giftCode) => {
@@ -75,9 +67,16 @@ export default function AdminGiftBonusPage() {
     toast.success(`Gift code ${giftCode} copied!`);
   };
 
-  const handleDeleteGift = (id) => {
-    setGiftCodes(giftCodes.filter((g) => g.id !== id));
-    toast.success('Gift code deleted.');
+  const handleDeleteGift = async (id) => {
+    try {
+      const res = await api.delete(`/admin/gift-codes/${id}`);
+      if (res.data && res.data.success) {
+        toast.success('Gift code deleted.');
+        fetchGiftCodes();
+      }
+    } catch (err) {
+      toast.error('Failed to delete gift code');
+    }
   };
 
   return (
@@ -115,49 +114,72 @@ export default function AdminGiftBonusPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs text-slate-700 font-sans">
-                {giftCodes.map((g) => (
-                  <tr key={g.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-4 px-6 font-mono font-bold text-slate-900">
-                      <div className="flex items-center gap-2">
-                        <span>{g.code}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleCopyCode(g.code)}
-                          className="p-1 text-slate-400 hover:text-slate-600 rounded"
-                          title="Copy Code"
-                        >
-                          <Copy className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                    <td className="py-4 px-6 font-bold text-emerald-600 font-righteous">{g.amount}</td>
-                    <td className="py-4 px-6 font-medium text-slate-700">
-                      {g.claimed} / {g.maxClaims} users
-                    </td>
-                    <td className="py-4 px-6 text-slate-500 font-medium">{g.createdDate}</td>
-                    <td className="py-4 px-6 text-center">
-                      <span
-                        className={`px-3 py-1 rounded-full text-[11px] font-bold border inline-block ${
-                          g.status === 'Active'
-                            ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
-                            : 'bg-red-50 text-red-600 border-red-200'
-                        }`}
-                      >
-                        {g.status}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6 text-right">
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteGift(g.id)}
-                        className="border border-red-500 text-red-600 hover:bg-red-50 p-1.5 rounded transition-all cursor-pointer"
-                        title="Delete Code"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} className="py-12 text-center text-slate-400">
+                      <Loader2 className="w-5 h-5 animate-spin mx-auto text-[#5b5bf5]" />
+                      <span className="text-xs font-semibold block mt-2">Loading gift codes...</span>
                     </td>
                   </tr>
-                ))}
+                ) : giftCodes.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-12 text-center text-slate-400 text-xs font-semibold">
+                      No Gift Codes Created Yet.
+                    </td>
+                  </tr>
+                ) : (
+                  giftCodes.map((g) => {
+                    const amtStr = typeof g.amount === 'number' ? `$${g.amount.toFixed(2)} USDT` : (g.amount || '$0.00 USDT');
+                    const usedCount = g.used_count ?? g.claimed ?? 0;
+                    const maxUses = g.max_uses ?? g.maxClaims ?? 1;
+                    const st = g.status || (usedCount >= maxUses ? 'Exhausted' : 'ACTIVE');
+                    const createdDateStr = g.created_at ? new Date(g.created_at).toLocaleString() : (g.createdDate || 'N/A');
+
+                    return (
+                      <tr key={g.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="py-4 px-6 font-mono font-bold text-slate-900">
+                          <div className="flex items-center gap-2">
+                            <span>{g.code}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleCopyCode(g.code)}
+                              className="p-1 text-slate-400 hover:text-slate-600 rounded"
+                              title="Copy Code"
+                            >
+                              <Copy className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                        <td className="py-4 px-6 font-bold text-emerald-600 font-righteous">{amtStr}</td>
+                        <td className="py-4 px-6 font-medium text-slate-700">
+                          {usedCount} / {maxUses} users
+                        </td>
+                        <td className="py-4 px-6 text-slate-500 font-medium">{createdDateStr}</td>
+                        <td className="py-4 px-6 text-center">
+                          <span
+                            className={`px-3 py-1 rounded-full text-[11px] font-bold border inline-block ${
+                              st === 'ACTIVE' || st === 'Active'
+                                ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                                : 'bg-red-50 text-red-600 border-red-200'
+                            }`}
+                          >
+                            {st}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteGift(g.id)}
+                            className="border border-red-500 text-red-600 hover:bg-red-50 p-1.5 rounded transition-all cursor-pointer"
+                            title="Delete Code"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
