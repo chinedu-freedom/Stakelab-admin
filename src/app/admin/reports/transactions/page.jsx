@@ -322,7 +322,7 @@ export default function AdminTransactionLogsPage({ userId = null }) {
 
                         {/* Details Column */}
                         <td className="py-4 px-6 text-right text-slate-500 font-medium">
-                          {trx.description || typeLabel}
+                          {(trx.description || typeLabel).replace(/OxaPay\s*/gi, '').trim()}
                         </td>
                       </tr>
                     );
