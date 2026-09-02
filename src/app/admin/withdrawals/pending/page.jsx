@@ -159,6 +159,7 @@ export default function AdminWithdrawalsFilteredPage({
                   <th className="py-3.5 px-6">User</th>
                   <th className="py-3.5 px-6">Wallet Address</th>
                   <th className="py-3.5 px-6">Amount</th>
+                  <th className="py-3.5 px-6">Conversion</th>
                   <th className="py-3.5 px-6 text-center">Status</th>
                   <th className="py-3.5 px-6 text-right">Action</th>
                 </tr>
@@ -166,7 +167,7 @@ export default function AdminWithdrawalsFilteredPage({
               <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-400 font-semibold">
+                    <td colSpan={8} className="py-12 text-center text-slate-400 font-semibold">
                       <div className="flex items-center justify-center gap-2">
                         <span>Loading withdrawals data</span>
                         <Loader2 className="w-5 h-5 animate-spin text-[#5b5bf5]" />
@@ -175,7 +176,7 @@ export default function AdminWithdrawalsFilteredPage({
                   </tr>
                 ) : filteredWithdrawals.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-400 font-semibold">
+                    <td colSpan={8} className="py-12 text-center text-slate-400 font-semibold">
                       No withdrawals found in this category
                     </td>
                   </tr>
@@ -188,7 +189,7 @@ export default function AdminWithdrawalsFilteredPage({
                     const userHandle = w.user?.username ? `@${w.user.username}` : '';
                     const numAmt = parseFloat(w.amount || 0);
                     const numCharge = parseFloat(w.charge || 0);
-                    const numNet = parseFloat(w.net_amount || numAmt - numCharge);
+                    const numNet = parseFloat(w.net_amount || (numAmt > numCharge ? numAmt - numCharge : numAmt));
                     const statusText = w.status ? w.status.charAt(0) + w.status.slice(1).toLowerCase() : 'Pending';
 
                     return (
@@ -234,16 +235,17 @@ export default function AdminWithdrawalsFilteredPage({
 
                         {/* Amount Column */}
                         <td className="py-4 px-6">
-                          <div className="font-semibold text-slate-700">
-                            ${numAmt.toFixed(2)} - <span className="text-red-500 font-bold">${numCharge.toFixed(2)}</span>
-                          </div>
-                          <div className="font-bold text-slate-900 font-righteous">${numNet.toFixed(2)}</div>
+                          <div className="font-extrabold text-slate-900 text-sm">${numAmt.toFixed(2)}</div>
+                          {numCharge > 0 && (
+                            <div className="text-[11px] text-red-500 font-semibold">Fee: -${numCharge.toFixed(2)}</div>
+                          )}
+                          <div className="text-[11px] text-slate-500 font-medium">Payout: ${numNet.toFixed(2)}</div>
                         </td>
 
                         {/* Conversion Column */}
                         <td className="py-4 px-6">
-                          <div className="text-slate-500 font-mono text-[11px]">$1.00 = 1.00 USD</div>
-                          <div className="font-bold text-slate-800 font-mono">{numNet.toFixed(2)} USD</div>
+                          <div className="font-bold text-slate-800 font-mono">${numNet.toFixed(2)} USD</div>
+                          <div className="text-slate-400 font-mono text-[10px]">1.00 USD = 1.00 USD</div>
                         </td>
 
                         {/* Status Column */}
