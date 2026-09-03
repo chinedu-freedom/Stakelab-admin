@@ -140,3 +140,30 @@ input:-webkit-autofill:active {
 [data-sonner-toaster] [data-close-button]:hover {
   opacity: 1;
 }
+
+/* Rich Text Editor & Content Lists Global Support */
+[contenteditable] ul,
+.prose ul,
+.rich-text-content ul {
+  list-style-type: disc !important;
+  padding-left: 1.5rem !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+[contenteditable] ol,
+.prose ol,
+.rich-text-content ol {
+  list-style-type: decimal !important;
+  padding-left: 1.5rem !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+[contenteditable] li,
+.prose li,
+.rich-text-content li {
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+  line-height: 1.6 !important;
+}

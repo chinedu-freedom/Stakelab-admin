@@ -72,13 +72,16 @@ export default function RichTextEditor({
 
   const saveSelection = () => {
     const sel = window.getSelection();
-    if (sel && sel.rangeCount > 0) {
-      savedRangeRef.current = sel.getRangeAt(0).cloneRange();
+    if (sel && sel.rangeCount > 0 && editorRef.current) {
+      const range = sel.getRangeAt(0);
+      if (editorRef.current.contains(range.commonAncestorContainer)) {
+        savedRangeRef.current = range.cloneRange();
+      }
     }
   };
 
   const restoreSelection = () => {
-    if (savedRangeRef.current) {
+    if (savedRangeRef.current && editorRef.current) {
       const sel = window.getSelection();
       if (sel) {
         sel.removeAllRanges();
@@ -94,7 +97,7 @@ export default function RichTextEditor({
     restoreSelection();
 
     try {
-      document.execCommand('styleWithCSS', false, true);
+      document.execCommand('styleWithCSS', false, false);
     } catch (e) {
       // Ignore
     }
@@ -119,6 +122,19 @@ export default function RichTextEditor({
     handleInput();
     saveSelection();
     checkActiveStates();
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      if (e.shiftKey) {
+        document.execCommand('outdent', false, null);
+      } else {
+        document.execCommand('indent', false, null);
+      }
+      handleInput();
+      checkActiveStates();
+    }
   };
 
   const handleInput = () => {
@@ -467,11 +483,12 @@ export default function RichTextEditor({
         onInput={handleInput}
         onKeyUp={checkActiveStates}
         onMouseUp={checkActiveStates}
+        onKeyDown={handleKeyDown}
         onFocus={saveSelection}
         onBlur={saveSelection}
         style={{ minHeight }}
         placeholder={placeholder}
-        className="p-4 outline-none text-xs text-slate-800 leading-relaxed font-sans focus:ring-0 overflow-y-auto"
+        className="p-4 outline-none text-xs text-slate-800 leading-relaxed font-sans focus:ring-0 overflow-y-auto [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-2 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:my-2 [&_li]:my-1 [&_li]:leading-relaxed"
       />
     </div>
   );
