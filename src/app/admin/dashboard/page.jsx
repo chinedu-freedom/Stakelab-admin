@@ -515,50 +515,6 @@ export default function AdminDashboardPage() {
             </div>
           </div>
         </div>
-
-        {/* 4. Recent Registrations Row */}
-        <div>
-          {/* New Registrations */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-emerald-600" />
-                <h3 className="font-bold text-slate-800 text-base font-sans">Recent Registrations</h3>
-              </div>
-              <Link href="/admin/users/active" className="text-xs font-bold text-[#5b5bf5] hover:underline flex items-center gap-0.5">
-                All Users <ArrowUpRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-
-            <div className="space-y-3.5 max-h-[350px] overflow-y-auto pr-1">
-              {loading ? (
-                <div className="py-12 flex items-center justify-center text-slate-400 text-xs font-semibold gap-2">
-                  <span>Loading recent registrations</span>
-                  <Loader2 className="w-5 h-5 animate-spin text-[#5b5bf5]" />
-                </div>
-              ) : (stats.recentUsers || []).length > 0 ? (
-                stats.recentUsers.map((usr) => (
-                  <div key={usr.id} className="flex items-center justify-between p-3.5 bg-slate-50/70 rounded-xl border border-slate-100 hover:bg-slate-100/80 transition-colors">
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-slate-800">
-                        {usr.name}
-                      </p>
-                      <p className="text-[10px] text-slate-400 truncate mt-0.5">{usr.email}</p>
-                      <p className="text-[9px] text-slate-400 mt-1 font-mono">
-                        Joined: {usr.createdAt ? new Date(usr.createdAt).toLocaleDateString() : 'Recently'}
-                      </p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-xs font-bold text-slate-900 font-mono">${(usr.usdBalance || 0).toFixed(2)} USD</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-12 text-slate-400 text-xs font-medium">No recent users registered.</div>
-              )}
-            </div>
-          </div>
-        </div>
       </div>
     </AdminSidebarLayout>
   );
