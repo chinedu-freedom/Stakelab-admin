@@ -10,11 +10,6 @@ import ConfirmModal from '../../../components/ConfirmModal';
 export default function AdminSpinWheelPage() {
   const [settings, setSettings] = useState({
     feature_enabled: true,
-    cost_per_spin: 0,
-    free_spins_per_deposit: 0,
-    daily_referral_target: 0,
-    spins_for_daily_challenge: 0,
-    free_spins_daily: 0,
     total_spins_used: 0,
     total_rewards_earned: 0,
     free_spins_used: 0,
@@ -136,7 +131,7 @@ export default function AdminSpinWheelPage() {
             <Disc className="w-6 h-6 text-[#5b5bf5]" /> Lucky Spin Wheel Manager
           </h1>
           <p className="text-xs text-slate-500 mt-1 font-sans">
-            Configure lucky spin wheel rules, cost per spin, free spin bonuses, and 8 prize wheel slots
+            Manage lucky spin wheel feature settings and 8 prize wheel slots. Free spins are awarded when users invite new registrations.
           </p>
         </div>
 
@@ -169,39 +164,15 @@ export default function AdminSpinWheelPage() {
           {/* Left Column: Spin Config Rules */}
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-5">
             <h2 className="text-sm font-bold text-slate-800 font-sans border-b border-slate-100 pb-3 flex items-center gap-2">
-              <Coins className="w-4 h-4 text-[#5b5bf5]" /> Spin Rules & Rates
+              <Coins className="w-4 h-4 text-[#5b5bf5]" /> Spin Reward Model
             </h2>
 
             <form onSubmit={handleSaveSettings} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Cost Per Spin ($)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={settings.cost_per_spin}
-                  onChange={(e) => setSettings({ ...settings, cost_per_spin: parseFloat(e.target.value) || 0 })}
-                  className="w-full h-10 bg-slate-50 border border-slate-200 rounded-lg px-3.5 text-xs text-slate-800 font-bold focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Daily Free Spins</label>
-                <input
-                  type="number"
-                  value={settings.free_spins_daily}
-                  onChange={(e) => setSettings({ ...settings, free_spins_daily: parseInt(e.target.value) || 0 })}
-                  className="w-full h-10 bg-slate-50 border border-slate-200 rounded-lg px-3.5 text-xs text-slate-800 font-bold focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Free Spins Per Deposit</label>
-                <input
-                  type="number"
-                  value={settings.free_spins_per_deposit}
-                  onChange={(e) => setSettings({ ...settings, free_spins_per_deposit: parseInt(e.target.value) || 0 })}
-                  className="w-full h-10 bg-slate-50 border border-slate-200 rounded-lg px-3.5 text-xs text-slate-800 font-bold focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                />
+              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3.5 space-y-1">
+                <span className="text-xs font-bold text-emerald-800 block">Referral Reward Model</span>
+                <span className="text-[11px] text-emerald-700 leading-relaxed block">
+                  Users earn <b>+1 Free Spin credit</b> every time a new member registers on the platform using their referral link.
+                </span>
               </div>
 
               <div className="pt-2">
