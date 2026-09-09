@@ -198,9 +198,6 @@ export default function AdminEditPlanPage() {
                     <SelectContent searchable={false} className="bg-white border-slate-200 text-slate-800 shadow-lg">
                       <SelectItem value="Flexible Tier" className="text-slate-800 hover:bg-slate-100 font-bold">Flexible Tier</SelectItem>
                       <SelectItem value="Dynamic Tier" className="text-slate-800 hover:bg-slate-100 font-bold">Dynamic Tier</SelectItem>
-                      <SelectItem value="Silver Tier" className="text-slate-800 hover:bg-slate-100 font-bold">Silver Tier</SelectItem>
-                      <SelectItem value="Gold Tier" className="text-slate-800 hover:bg-slate-100 font-bold">Gold Tier</SelectItem>
-                      <SelectItem value="VIP Tier" className="text-slate-800 hover:bg-slate-100 font-bold">VIP Tier</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
