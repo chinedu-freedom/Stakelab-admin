@@ -29,7 +29,7 @@ import {
 const systemSettingCards = [
   {
     title: 'General Setting',
-    description: 'Configure site title, timezone, currency, logo, and favicon branding.',
+    description: 'Configure site title, logo, favicon branding, registration bonus, and mobile app download URL.',
     icon: Settings,
     link: '/admin/setting/general',
   },
