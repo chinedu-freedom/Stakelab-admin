@@ -316,7 +316,7 @@ export default function AdminEditPlanPage() {
                       </button>
                     </div>
                     <p className="text-[11px] text-slate-500 leading-tight font-sans">
-                      {capitalReturn ? 'Capital Return: YES (Principal + Profit returned)' : 'Capital Return: NO (Profit only)'}
+                      {capitalReturn ? 'Capital Return: YES (Principal + Profit returned)' : 'Capital Return: N/A (Profit only)'}
                     </p>
                   </div>
 

@@ -166,7 +166,7 @@ export default function AdminStakingPlansPage() {
                           Fixed Deposit: {plan.is_fixed_deposit !== false ? 'YES' : 'NO'}
                         </span>
                         <span className={`px-2 py-0.5 rounded border whitespace-nowrap ${plan.capital_return !== false ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
-                          Capital Return: {plan.capital_return !== false ? 'YES' : 'NO'}
+                          Capital Return: {plan.capital_return !== false ? 'YES' : 'N/A'}
                         </span>
                         <span className={`px-2 py-0.5 rounded border whitespace-nowrap ${plan.is_compounding !== false ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>
                           Compounding: {plan.is_compounding !== false ? 'YES' : 'NO'}
