@@ -251,22 +251,6 @@ export default function AdminDashboardPage() {
                 <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
               </Link>
 
-              {/* Approved Deposits Count */}
-              <Link
-                href="/admin/deposits/approved"
-                className="p-3 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between hover:bg-slate-100/80 transition-all group"
-              >
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                    <HandCoins className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-slate-800">{stats.approvedDepositsCount || 0}</div>
-                    <div className="text-[11px] text-slate-400">Approved Deposit Count</div>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
-              </Link>
 
               {/* Rejected Deposits */}
               <Link
@@ -352,22 +336,6 @@ export default function AdminDashboardPage() {
                 <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
               </Link>
 
-              {/* Approved Withdrawals Count */}
-              <Link
-                href="/admin/withdrawals/approved"
-                className="p-3 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between hover:bg-slate-100/80 transition-all group"
-              >
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                    <Wallet className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-slate-800">{stats.approvedWithdrawalsCount || 0}</div>
-                    <div className="text-[11px] text-slate-400">Approved Withdraw Count</div>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
-              </Link>
 
               {/* Rejected Withdrawals */}
               <Link
