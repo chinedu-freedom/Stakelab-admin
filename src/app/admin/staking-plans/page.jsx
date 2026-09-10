@@ -171,6 +171,9 @@ export default function AdminStakingPlansPage() {
                         <span className={`px-2 py-0.5 rounded border whitespace-nowrap ${plan.is_compounding !== false ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>
                           Compounding: {plan.is_compounding !== false ? 'YES' : 'NO'}
                         </span>
+                        <span className={`px-2 py-0.5 rounded border whitespace-nowrap ${plan.max_invest_limit ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>
+                          User Limit: {plan.max_invest_limit ? `${plan.max_invest_limit} Max` : 'Unlimited'}
+                        </span>
                       </div>
                     </td>
 

@@ -24,6 +24,7 @@ export default function AdminEditPlanPage() {
   const [isFixedDeposit, setIsFixedDeposit] = useState(true);
   const [capitalReturn, setCapitalReturn] = useState(true);
   const [isCompounding, setIsCompounding] = useState(true);
+  const [maxInvestLimit, setMaxInvestLimit] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -41,6 +42,7 @@ export default function AdminEditPlanPage() {
             setMinAmount(target.min_amount?.toString() || '10');
             setMaxAmount(target.max_amount?.toString() || '5000');
             setDailyInterest(target.daily_return_percent?.toString() || '1.5');
+            setMaxInvestLimit(target.max_invest_limit !== undefined && target.max_invest_limit !== null ? target.max_invest_limit.toString() : '0');
             
             let currentStatus = (target.status || target.badge || 'ACTIVE').toUpperCase();
             if (['STARTER', 'RUNNING', 'ACTIVE'].includes(currentStatus)) {
@@ -91,6 +93,7 @@ export default function AdminEditPlanPage() {
         is_fixed_deposit: isFixedDeposit,
         capital_return: capitalReturn,
         is_compounding: isCompounding,
+        max_invest_limit: maxInvestLimit !== '' ? parseInt(maxInvestLimit) : 0,
       });
       toast.success(`Plan "${name}" updated successfully!`);
       router.push('/admin/staking-plans');
@@ -203,8 +206,8 @@ export default function AdminEditPlanPage() {
                 </div>
               </div>
 
-              {/* Min/Max Amount & Status Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Min/Max Amount, Status & Investment Limit Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Min Amount */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 font-sans mb-2">
@@ -261,6 +264,26 @@ export default function AdminEditPlanPage() {
                       <SelectItem value="UNAVAILABLE" className="text-slate-800 hover:bg-slate-100 font-bold">Unavailable</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                {/* Max Investments Per User */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 font-sans mb-2">
+                    Max Investments / User <span className="text-slate-400 font-normal">(0 = Unlimited)</span>
+                  </label>
+                  <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
+                    <input
+                      type="number"
+                      min="0"
+                      value={maxInvestLimit}
+                      onChange={(e) => setMaxInvestLimit(e.target.value)}
+                      placeholder="0 (Unlimited)"
+                      className="w-full h-11 bg-transparent border-0 outline-none px-4 text-slate-800 text-xs font-sans placeholder-slate-400"
+                    />
+                    <div className="h-11 bg-slate-100 border-l border-slate-200 px-3 text-xs font-bold text-slate-600 flex items-center shrink-0 select-none">
+                      Times
+                    </div>
+                  </div>
                 </div>
               </div>
 
