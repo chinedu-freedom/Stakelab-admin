@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import AdminSidebarLayout from '../../../../components/AdminSidebarLayout';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../../components/ui/select';
-import { Upload, Loader2, Save, Image as ImageIcon } from 'lucide-react';
+import { Upload, Loader2, Save, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../../../lib/api';
 
@@ -162,7 +162,21 @@ export default function AdminGeneralSettingPage() {
                         </div>
                       )}
 
-                      <label className="absolute right-4 bottom-4 bg-[#5b5bf5] hover:bg-indigo-600 text-white p-2.5 rounded-full shadow-lg cursor-pointer transition-transform hover:scale-105">
+                      {logoPreview && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLogoPreview(null);
+                            toast.success('Site logo removed.');
+                          }}
+                          className="absolute left-4 bottom-4 bg-rose-500 hover:bg-rose-600 text-white p-2.5 rounded-full shadow-lg transition-transform hover:scale-105 cursor-pointer"
+                          title="Remove Site Logo"
+                        >
+                          <Trash2 className="w-4 h-4 text-white" />
+                        </button>
+                      )}
+
+                      <label className="absolute right-4 bottom-4 bg-[#5b5bf5] hover:bg-indigo-600 text-white p-2.5 rounded-full shadow-lg cursor-pointer transition-transform hover:scale-105" title="Upload Site Logo">
                         <Upload className="w-4 h-4 text-white" />
                         <input
                           type="file"
@@ -191,7 +205,21 @@ export default function AdminGeneralSettingPage() {
                         </div>
                       )}
 
-                      <label className="absolute right-4 bottom-4 bg-[#5b5bf5] hover:bg-indigo-600 text-white p-2.5 rounded-full shadow-lg cursor-pointer transition-transform hover:scale-105">
+                      {faviconPreview && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFaviconPreview(null);
+                            toast.success('Site favicon removed.');
+                          }}
+                          className="absolute left-4 bottom-4 bg-rose-500 hover:bg-rose-600 text-white p-2.5 rounded-full shadow-lg transition-transform hover:scale-105 cursor-pointer"
+                          title="Remove Favicon"
+                        >
+                          <Trash2 className="w-4 h-4 text-white" />
+                        </button>
+                      )}
+
+                      <label className="absolute right-4 bottom-4 bg-[#5b5bf5] hover:bg-indigo-600 text-white p-2.5 rounded-full shadow-lg cursor-pointer transition-transform hover:scale-105" title="Upload Favicon">
                         <Upload className="w-4 h-4 text-white" />
                         <input
                           type="file"
